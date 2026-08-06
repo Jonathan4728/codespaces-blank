@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Flores Small Engine Repair provides dependable repair and maintenance for lawn mowers, generators, ATVs, pressure washers, trimmers, and more in Abbeville and surrounding areas." />
+  <title>Flores Small Engine Repair</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#home" aria-label="Flores Small Engine Repair home">
+        <span class="brand-mark">FSER</span>
+        <span class="brand-text">
+          <strong>Flores</strong>
+          <small>Small Engine Repair</small>
+        </span>
+      </a>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">☰</button>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#quote">Get a Quote</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Abbeville, Louisiana • Mobile & Drop-Off Service</p>
+          <h1>Dependable repairs that keep your equipment working.</h1>
+          <p class="hero-text">
+            Lawn mowers, generators, pressure washers, trimmers, ATVs, side-by-sides,
+            and other small-engine equipment.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#quote">Request a Quote</a>
+            <a class="button button-secondary" href="tel:+10000000000">Call Now</a>
+          </div>
+          <div class="trust-row">
+            <span>30-day labor warranty</span>
+            <span>Honest pricing</span>
+            <span>Local service</span>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-card-top">
+            <span class="status-dot"></span>
+            <span>Now accepting repair requests</span>
+          </div>
+          <h2>Common repairs</h2>
+          <ul>
+            <li>No-start diagnostics</li>
+            <li>Carburetor cleaning</li>
+            <li>Belts, bearings, and starters</li>
+            <li>Oil changes and tune-ups</li>
+            <li>Mobile service and pickup</li>
+          </ul>
+          <a href="#quote">Tell us what your equipment is doing →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="container">
+        <div class="section-heading">
+          <p class="eyebrow">What we repair</p>
+          <h2>Service for the equipment you rely on</h2>
+          <p>From routine maintenance to troubleshooting, every job starts with a clear explanation and upfront quote.</p>
+        </div>
+
+        <div class="service-grid">
+          <article class="service-card">
+            <span class="service-number">01</span>
+            <h3>Lawn Equipment</h3>
+            <p>Push mowers, riding mowers, zero-turns, trimmers, blowers, and chainsaws.</p>
+          </article>
+          <article class="service-card">
+            <span class="service-number">02</span>
+            <h3>Generators</h3>
+            <p>No-start repairs, carburetor service, tune-ups, oil changes, and testing.</p>
+          </article>
+          <article class="service-card">
+            <span class="service-number">03</span>
+            <h3>ATVs & Side-by-Sides</h3>
+            <p>Basic repair, maintenance, batteries, winches, bearings, and fuel-system work.</p>
+          </article>
+          <article class="service-card">
+            <span class="service-number">04</span>
+            <h3>Pressure Washers</h3>
+            <p>Engine troubleshooting, carburetors, recoil starters, tune-ups, and maintenance.</p>
+          </article>
+          <article class="service-card">
+            <span class="service-number">05</span>
+            <h3>Mobile Service</h3>
+            <p>On-site service when practical, with travel charges confirmed before the visit.</p>
+          </article>
+          <article class="service-card">
+            <span class="service-number">06</span>
+            <h3>Pickup & Delivery</h3>
+            <p>Convenient equipment transport may be available in Abbeville and surrounding areas.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-dark" id="about">
+      <div class="container about-grid">
+        <div>
+          <p class="eyebrow">Local and straightforward</p>
+          <h2>Repairs explained in plain language</h2>
+        </div>
+        <div class="about-copy">
+          <p>
+            Flores Small Engine Repair is a local, growing repair business focused on honest work,
+            fair pricing, and treating customers' equipment like our own.
+          </p>
+          <p>
+            Before major work begins, you receive a quote. Labor is backed by a 30-day warranty,
+            and manufacturer warranties apply to eligible parts when available.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="quote">
+      <div class="container quote-grid">
+        <div class="quote-intro">
+          <p class="eyebrow">Request service</p>
+          <h2>Tell us about your equipment</h2>
+          <p>
+            Fill this out and the details will open in your email app. Replace the email address in
+            <strong>script.js</strong> before publishing.
+          </p>
+          <div class="price-note">
+            <strong>Helpful details:</strong>
+            <span>Brand, model number, symptoms, and whether you need mobile service.</span>
+          </div>
+        </div>
+
+        <form class="quote-form" id="quoteForm">
+          <div class="field-row">
+            <label>
+              Name
+              <input type="text" name="name" required />
+            </label>
+            <label>
+              Phone
+              <input type="tel" name="phone" required />
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label>
+              Email
+              <input type="email" name="email" />
+            </label>
+            <label>
+              Service type
+              <select name="service">
+                <option>Drop-off repair</option>
+                <option>Mobile service</option>
+                <option>Pickup and delivery</option>
+                <option>Not sure</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label>
+              Equipment type
+              <input type="text" name="equipment" placeholder="Example: Generac portable generator" required />
+            </label>
+            <label>
+              Brand / model
+              <input type="text" name="model" placeholder="Enter what you can find" />
+            </label>
+          </div>
+
+          <label>
+            What is the equipment doing?
+            <textarea name="problem" rows="6" placeholder="Describe the problem, noises, leaks, or recent repairs." required></textarea>
+          </label>
+
+          <button class="button button-primary form-button" type="submit">Send Repair Request</button>
+          <p class="form-message" id="formMessage" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="contact-strip" id="contact">
+      <div class="container contact-grid">
+        <div>
+          <p class="eyebrow">Contact</p>
+          <h2>Ready to get your equipment running?</h2>
+        </div>
+        <div class="contact-actions">
+          <a href="tel:+10000000000">Phone: Add your number</a>
+          <a href="mailto:your@email.com">Email: your@email.com</a>
+          <span>Serving Abbeville and surrounding areas</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <p>© <span id="year"></span> Flores Small Engine Repair. All rights reserved.</p>
+      <a href="#home">Back to top ↑</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
