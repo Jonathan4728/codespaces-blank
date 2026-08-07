@@ -124,6 +124,102 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   // ========================================
+  // WEB3FORMS - OWNER EMAIL NOTIFICATIONS
+  // ========================================
+
+  const WEB3FORMS_ACCESS_KEY =
+    "b73caad4-d07d-4823-9c29-9aa93cd5476b";
+
+
+  async function sendOwnerNotification(request) {
+
+    try {
+
+      const response =
+        await fetch(
+          "https://api.web3forms.com/submit",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              "Accept":
+                "application/json"
+            },
+            body:
+              JSON.stringify({
+
+                access_key:
+                  WEB3FORMS_ACCESS_KEY,
+
+                subject:
+                  `New Repair Request - ${request.equipment || "Equipment"}`,
+
+                from_name:
+                  "Flores Small Engine Repair Website",
+
+                name:
+                  request.name,
+
+                phone:
+                  request.phone,
+
+                email:
+                  request.email || "Not provided",
+
+                equipment:
+                  request.equipment,
+
+                model:
+                  request.model || "Not provided",
+
+                service_type:
+                  request.serviceType || "Not selected",
+
+                location:
+                  request.location || "Not provided",
+
+                message:
+                  request.problem
+
+              })
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (!response.ok || !result.success) {
+
+        console.error(
+          "Email notification failed:",
+          result
+        );
+
+        return false;
+
+      }
+
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        "Email notification error:",
+        error
+      );
+
+      return false;
+
+    }
+
+  }
+
+
+  // ========================================
   // REPAIR REQUEST FORM
   // ========================================
 
@@ -324,10 +420,21 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
 
           }
 
-        } else if (formMessage) {
+        } else {
 
-          formMessage.textContent =
-            "Request saved. Opening your text message...";
+          // Send owner notification only after Supabase saves successfully.
+          // Do not block the customer's text flow if email notification fails.
+          await sendOwnerNotification(
+            request
+          );
+
+
+          if (formMessage) {
+
+            formMessage.textContent =
+              "Request saved. Opening your text message...";
+
+          }
 
         }
 
@@ -398,10 +505,21 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
 
           }
 
-        } else if (formMessage) {
+        } else {
 
-          formMessage.textContent =
-            "Request saved. Opening your email app...";
+          // Send owner notification only after Supabase saves successfully.
+          // Do not block the customer's email flow if notification fails.
+          await sendOwnerNotification(
+            request
+          );
+
+
+          if (formMessage) {
+
+            formMessage.textContent =
+              "Request saved. Opening your email app...";
+
+          }
 
         }
 
