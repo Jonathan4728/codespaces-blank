@@ -2226,13 +2226,77 @@ $("logoutButton")
    NAVIGATION
 =================================================== */
 
+const loadedViews =
+  new Set(["dashboardView"]);
+
+
+async function loadViewData(viewId) {
+
+  if (loadedViews.has(viewId)) {
+    return;
+  }
+
+
+  if (viewId === "requestsView") {
+
+    $("requestTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          Loading requests...
+        </p>`;
+
+    await loadServiceRequests();
+
+  }
+
+
+  if (viewId === "customersView") {
+
+    await loadCustomers();
+
+  }
+
+
+  if (viewId === "jobsView") {
+
+    await loadJobs();
+
+  }
+
+
+  if (viewId === "estimatesView") {
+
+    await loadEstimates();
+
+  }
+
+
+  if (viewId === "invoicesView") {
+
+    await loadInvoices();
+
+  }
+
+
+  if (viewId === "paymentsView") {
+
+    await loadPayments();
+
+  }
+
+
+  loadedViews.add(viewId);
+
+}
+
+
 document
   .querySelectorAll(".nav-tab")
   .forEach(button => {
 
     button.addEventListener(
       "click",
-      () => {
+      async () => {
 
         document
           .querySelectorAll(".nav-tab")
@@ -2251,11 +2315,20 @@ document
         button.classList.add("active");
 
 
+        const viewId =
+          button.dataset.view;
+
+
         $(
-          button.dataset.view
+          viewId
         )
           .classList
           .add("active");
+
+
+        await loadViewData(
+          viewId
+        );
 
       }
     );
@@ -2267,6 +2340,43 @@ document
 /* ==================================================
    SERVICE REQUESTS / LEADS
 =================================================== */
+
+async function loadRequestCount() {
+
+  const {
+    count,
+    error
+  } =
+    await db
+      .from("service_requests")
+      .select(
+        "id",
+        {
+          count: "exact",
+          head: true
+        }
+      )
+      .eq(
+        "status",
+        "New"
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  $("requestCount")
+    .textContent =
+      count || 0;
+
+}
+
 
 async function loadServiceRequests() {
 
@@ -2500,6 +2610,8 @@ async function archiveRequest(id) {
 
 
   await loadServiceRequests();
+
+  loadedViews.add("requestsView");
 
 }
 
@@ -2783,10 +2895,16 @@ async function convertRequest(id) {
   }
 
 
-  await loadCustomers();
-  await loadServiceRequests();
-  await loadJobs();
-  await loadServiceRequests();
+  await Promise.all([
+    loadCustomers(),
+    loadJobs(),
+    loadServiceRequests()
+  ]);
+
+
+  loadedViews.add("customersView");
+  loadedViews.add("jobsView");
+  loadedViews.add("requestsView");
 
 
   alert(
@@ -7690,11 +7808,22 @@ async function startAdmin() {
   addLine("invoice");
 
 
-  await loadCustomers();
-  await loadJobs();
-  await loadEstimates();
-  await loadInvoices();
-  await loadPayments();
+  /* Load only what the dashboard needs.
+     Requests and estimates load when their tabs are opened. */
+
+  await Promise.all([
+    loadCustomers(),
+    loadJobs(),
+    loadInvoices(),
+    loadPayments(),
+    loadRequestCount()
+  ]);
+
+
+  loadedViews.add("customersView");
+  loadedViews.add("jobsView");
+  loadedViews.add("invoicesView");
+  loadedViews.add("paymentsView");
 
 }
 
