@@ -1,51 +1,100 @@
 document.addEventListener("DOMContentLoaded", function () {
 
   // ========================================
+  // SUPABASE - PUBLIC REPAIR REQUESTS
+  // ========================================
+
+  const SUPABASE_URL =
+    "https://ykqbjqiujnqljwwyxrre.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_CmCfIvZJJwMNV0QzQwrEsw_W0X8XOvj";
+
+  const supabaseClient =
+    window.supabase
+      ? window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        )
+      : null;
+
+
+  // ========================================
   // MOBILE HAMBURGER MENU
   // ========================================
 
-  const menuButton = document.querySelector(".menu-toggle");
-  const navLinks = document.querySelector(".nav-links");
+  const menuButton =
+    document.querySelector(".menu-toggle");
+
+  const navLinks =
+    document.querySelector(".nav-links");
+
 
   if (menuButton && navLinks) {
 
-    menuButton.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
+    menuButton.addEventListener(
+      "click",
+      function (event) {
 
-      navLinks.classList.toggle("open");
+        event.preventDefault();
+        event.stopPropagation();
 
-      const isOpen = navLinks.classList.contains("open");
+        navLinks.classList.toggle("open");
 
-      menuButton.setAttribute(
-        "aria-expanded",
-        isOpen ? "true" : "false"
-      );
-    });
+        const isOpen =
+          navLinks.classList.contains("open");
+
+        menuButton.setAttribute(
+          "aria-expanded",
+          isOpen ? "true" : "false"
+        );
+
+      }
+    );
 
 
-    navLinks.querySelectorAll("a").forEach(function (link) {
+    navLinks
+      .querySelectorAll("a")
+      .forEach(function (link) {
 
-      link.addEventListener("click", function () {
-        navLinks.classList.remove("open");
-        menuButton.setAttribute("aria-expanded", "false");
+        link.addEventListener(
+          "click",
+          function () {
+
+            navLinks.classList.remove("open");
+
+            menuButton.setAttribute(
+              "aria-expanded",
+              "false"
+            );
+
+          }
+        );
+
       });
 
-    });
 
+    document.addEventListener(
+      "click",
+      function (event) {
 
-    document.addEventListener("click", function (event) {
+        if (
+          navLinks.classList.contains("open") &&
+          !navLinks.contains(event.target) &&
+          !menuButton.contains(event.target)
+        ) {
 
-      if (
-        navLinks.classList.contains("open") &&
-        !navLinks.contains(event.target) &&
-        !menuButton.contains(event.target)
-      ) {
-        navLinks.classList.remove("open");
-        menuButton.setAttribute("aria-expanded", "false");
+          navLinks.classList.remove("open");
+
+          menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+        }
+
       }
-
-    });
+    );
 
   }
 
@@ -54,38 +103,75 @@ document.addEventListener("DOMContentLoaded", function () {
   // COPYRIGHT YEAR
   // ========================================
 
-  const year = document.getElementById("year");
+  const year =
+    document.getElementById("year");
 
   if (year) {
-    year.textContent = new Date().getFullYear();
+    year.textContent =
+      new Date().getFullYear();
   }
+
+
+  // ========================================
+  // BUSINESS INFORMATION
+  // ========================================
+
+  const businessPhone =
+    "13373268324";
+
+  const businessEmail =
+    "floressenginerepair@gmail.com";
 
 
   // ========================================
   // REPAIR REQUEST FORM
   // ========================================
 
-  const businessPhone = "13373268324";
-  const businessEmail = "floressenginerepair@gmail.com";
+  const quoteForm =
+    document.getElementById("quoteForm");
 
-  const quoteForm = document.getElementById("quoteForm");
-  const textRequest = document.getElementById("textRequest");
-  const emailRequest = document.getElementById("emailRequest");
-  const formMessage = document.getElementById("formMessage");
+  const textRequest =
+    document.getElementById("textRequest");
+
+  const emailRequest =
+    document.getElementById("emailRequest");
+
+  const formMessage =
+    document.getElementById("formMessage");
 
 
   function getRepairRequest() {
 
-    const data = new FormData(quoteForm);
+    const data =
+      new FormData(quoteForm);
+
 
     return {
-      name: data.get("name"),
-      phone: data.get("phone"),
-      equipment: data.get("equipment"),
-      model: data.get("model"),
-      serviceType: data.get("serviceType"),
-      location: data.get("location"),
-      problem: data.get("problem")
+
+      name:
+        data.get("name") || "",
+
+      phone:
+        data.get("phone") || "",
+
+      email:
+        data.get("email") || "",
+
+      equipment:
+        data.get("equipment") || "",
+
+      model:
+        data.get("model") || "",
+
+      serviceType:
+        data.get("serviceType") || "",
+
+      location:
+        data.get("location") || "",
+
+      problem:
+        data.get("problem") || ""
+
     };
 
   }
@@ -119,66 +205,227 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
   }
 
 
-  // ========================================
-  // TEXT BUTTON
-  // ========================================
+  async function saveWebsiteRequest(request) {
 
-  if (quoteForm && textRequest) {
+    if (!supabaseClient) {
 
-    textRequest.addEventListener("click", function () {
-
-      if (!quoteForm.reportValidity()) {
-        return;
-      }
-
-      const request = getRepairRequest();
-
-      const message = encodeURIComponent(
-        buildMessage(request)
+      console.error(
+        "Supabase library did not load."
       );
 
-      if (formMessage) {
-        formMessage.textContent = "Opening your text message...";
-      }
+      return {
+        ok: false,
+        error:
+          "Request system did not load."
+      };
 
-      window.location.href =
-        `sms:${businessPhone}?body=${message}`;
+    }
 
-    });
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("service_requests")
+        .insert({
+
+          name:
+            request.name,
+
+          phone:
+            request.phone,
+
+          email:
+            request.email,
+
+          equipment:
+            request.equipment,
+
+          model:
+            request.model,
+
+          service_type:
+            request.serviceType,
+
+          location:
+            request.location,
+
+          problem:
+            request.problem
+
+        });
+
+
+    if (error) {
+
+      console.error(error);
+
+      return {
+        ok: false,
+        error:
+          error.message
+      };
+
+    }
+
+
+    return {
+      ok: true
+    };
 
   }
 
 
   // ========================================
-  // EMAIL BUTTON
+  // TEXT REPAIR REQUEST
   // ========================================
 
-  if (quoteForm && emailRequest) {
+  if (
+    quoteForm &&
+    textRequest
+  ) {
 
-    emailRequest.addEventListener("click", function () {
+    textRequest.addEventListener(
+      "click",
+      async function () {
 
-      if (!quoteForm.reportValidity()) {
-        return;
+        if (!quoteForm.reportValidity()) {
+          return;
+        }
+
+
+        textRequest.disabled = true;
+
+
+        if (formMessage) {
+
+          formMessage.textContent =
+            "Saving your request...";
+
+        }
+
+
+        const request =
+          getRepairRequest();
+
+
+        const saved =
+          await saveWebsiteRequest(
+            request
+          );
+
+
+        if (!saved.ok) {
+
+          if (formMessage) {
+
+            formMessage.textContent =
+              "We couldn't save the request online, but you can still send the text.";
+
+          }
+
+        } else if (formMessage) {
+
+          formMessage.textContent =
+            "Request saved. Opening your text message...";
+
+        }
+
+
+        const message =
+          encodeURIComponent(
+            buildMessage(request)
+          );
+
+
+        textRequest.disabled = false;
+
+
+        window.location.href =
+          `sms:${businessPhone}?body=${message}`;
+
       }
+    );
 
-      const request = getRepairRequest();
+  }
 
-      const subject = encodeURIComponent(
-        `Repair Request - ${request.equipment}`
-      );
 
-      const body = encodeURIComponent(
-        buildMessage(request)
-      );
+  // ========================================
+  // EMAIL REPAIR REQUEST
+  // ========================================
 
-      if (formMessage) {
-        formMessage.textContent = "Opening your email app...";
+  if (
+    quoteForm &&
+    emailRequest
+  ) {
+
+    emailRequest.addEventListener(
+      "click",
+      async function () {
+
+        if (!quoteForm.reportValidity()) {
+          return;
+        }
+
+
+        emailRequest.disabled = true;
+
+
+        if (formMessage) {
+
+          formMessage.textContent =
+            "Saving your request...";
+
+        }
+
+
+        const request =
+          getRepairRequest();
+
+
+        const saved =
+          await saveWebsiteRequest(
+            request
+          );
+
+
+        if (!saved.ok) {
+
+          if (formMessage) {
+
+            formMessage.textContent =
+              "We couldn't save the request online, but you can still send the email.";
+
+          }
+
+        } else if (formMessage) {
+
+          formMessage.textContent =
+            "Request saved. Opening your email app...";
+
+        }
+
+
+        const subject =
+          encodeURIComponent(
+            `Repair Request - ${request.equipment}`
+          );
+
+
+        const body =
+          encodeURIComponent(
+            buildMessage(request)
+          );
+
+
+        emailRequest.disabled = false;
+
+
+        window.location.href =
+          `mailto:${businessEmail}?subject=${subject}&body=${body}`;
+
       }
-
-      window.location.href =
-        `mailto:${businessEmail}?subject=${subject}&body=${body}`;
-
-    });
+    );
 
   }
 
@@ -188,52 +435,92 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
   // ========================================
 
   const galleryPhotos =
-    document.querySelectorAll(".simple-gallery img");
+    document.querySelectorAll(
+      ".simple-gallery img"
+    );
 
   const photoViewer =
-    document.getElementById("photoViewer");
+    document.getElementById(
+      "photoViewer"
+    );
 
   const largePhoto =
-    document.getElementById("largePhoto");
+    document.getElementById(
+      "largePhoto"
+    );
 
   const closePhoto =
-    document.getElementById("closePhoto");
+    document.getElementById(
+      "closePhoto"
+    );
 
 
-  galleryPhotos.forEach(function (photo) {
+  galleryPhotos.forEach(
+    function (photo) {
 
-    photo.addEventListener("click", function () {
+      photo.addEventListener(
+        "click",
+        function () {
 
-      if (!photoViewer || !largePhoto) {
-        return;
+          if (
+            !photoViewer ||
+            !largePhoto
+          ) {
+            return;
+          }
+
+          largePhoto.src =
+            photo.src;
+
+          photoViewer
+            .classList
+            .add("open");
+
+        }
+      );
+
+    }
+  );
+
+
+  if (
+    closePhoto &&
+    photoViewer
+  ) {
+
+    closePhoto.addEventListener(
+      "click",
+      function () {
+
+        photoViewer
+          .classList
+          .remove("open");
+
       }
-
-      largePhoto.src = photo.src;
-      photoViewer.classList.add("open");
-
-    });
-
-  });
-
-
-  if (closePhoto && photoViewer) {
-
-    closePhoto.addEventListener("click", function () {
-      photoViewer.classList.remove("open");
-    });
+    );
 
   }
 
 
   if (photoViewer) {
 
-    photoViewer.addEventListener("click", function (event) {
+    photoViewer.addEventListener(
+      "click",
+      function (event) {
 
-      if (event.target === photoViewer) {
-        photoViewer.classList.remove("open");
+        if (
+          event.target ===
+          photoViewer
+        ) {
+
+          photoViewer
+            .classList
+            .remove("open");
+
+        }
+
       }
-
-    });
+    );
 
   }
 

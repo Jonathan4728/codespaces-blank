@@ -1,0 +1,7708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Flores Small Engine Repair | Admin</title>
+
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --red: #df1f26;
+      --dark-red: #a91419;
+      --black: #070707;
+      --panel: #111;
+      --panel2: #181818;
+      --border: #303030;
+      --text: #fff;
+      --muted: #999;
+      --green: #65d982;
+    }
+
+    body {
+      margin: 0;
+      background: var(--black);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+    }
+
+
+    /* ==============================
+       HEADER
+    ============================== */
+
+    .admin-header {
+      position: sticky;
+      top: 0;
+      z-index: 5000;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      gap: 20px;
+
+      padding: 14px 22px;
+
+      background: #090909;
+      border-bottom: 2px solid var(--red);
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .admin-brand img {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+    }
+
+    .admin-brand strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    .admin-brand span {
+      display: block;
+      margin-top: 4px;
+      color: var(--red);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .logout-button {
+      border: 0;
+      border-radius: 5px;
+      padding: 11px 16px;
+
+      background: var(--red);
+      color: white;
+
+      font-weight: bold;
+    }
+
+
+    /* ==============================
+       LAYOUT
+    ============================== */
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+
+      min-height: calc(100vh - 85px);
+    }
+
+    .sidebar {
+      padding: 18px 12px;
+
+      background: #0d0d0d;
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar button {
+      display: block;
+      width: 100%;
+
+      margin-bottom: 8px;
+      padding: 13px 14px;
+
+      border: 0;
+      border-radius: 5px;
+
+      background: transparent;
+      color: #ddd;
+
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .sidebar button:hover,
+    .sidebar button.active {
+      background: var(--red);
+      color: white;
+    }
+
+    .main-content {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .page-title {
+      margin: 0 0 22px;
+      font-size: 30px;
+    }
+
+
+    /* ==============================
+       STATS
+    ============================== */
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      padding: 20px;
+
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--red);
+      border-radius: 8px;
+    }
+
+    .stat-card span {
+      display: block;
+
+      color: var(--muted);
+
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .stat-card strong {
+      display: block;
+
+      margin-top: 8px;
+
+      font-size: 30px;
+    }
+
+
+    /* ==============================
+       PANELS
+    ============================== */
+
+    .panel {
+      margin-bottom: 24px;
+      padding: 22px;
+
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .panel h2 {
+      margin: 0 0 18px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+    }
+
+
+    /* ==============================
+       FORMS
+    ============================== */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+
+      gap: 14px;
+    }
+
+    .form-grid.three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+
+      color: #ddd;
+
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+
+      margin-top: 6px;
+      padding: 12px;
+
+      border: 1px solid #444;
+      border-radius: 5px;
+
+      background: #080808;
+      color: white;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--red);
+
+      box-shadow:
+        0 0 0 3px rgba(223,31,38,.13);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      margin-top: 16px;
+    }
+
+    .action-button,
+    .secondary-button,
+    .danger-button,
+    .small-button {
+      border: 0;
+      border-radius: 5px;
+
+      padding: 12px 17px;
+
+      font-weight: bold;
+    }
+
+    .action-button {
+      background: var(--red);
+      color: white;
+    }
+
+    .action-button:hover {
+      background: var(--dark-red);
+    }
+
+    .secondary-button {
+      background: #303030;
+      color: white;
+    }
+
+    .danger-button {
+      background: #631216;
+      color: white;
+    }
+
+    .small-button {
+      padding: 7px 10px;
+
+      background: #292929;
+      color: white;
+
+      font-size: 12px;
+    }
+
+    .small-button.red {
+      background: var(--red);
+    }
+
+    .message {
+      min-height: 18px;
+
+      margin-top: 12px;
+
+      font-size: 14px;
+    }
+
+    .success {
+      color: var(--green);
+    }
+
+    .error {
+      color: #ff7373;
+    }
+
+
+    /* ==============================
+       SEARCH
+    ============================== */
+
+    .search-box {
+      width: 100%;
+      max-width: 350px;
+
+      margin: 0;
+    }
+
+
+    /* ==============================
+       TABLES
+    ============================== */
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px;
+
+      border-bottom: 1px solid #2c2c2c;
+
+      text-align: left;
+      white-space: nowrap;
+
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--red);
+
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tbody tr:hover {
+      background: #181818;
+    }
+
+    .clickable-row {
+      cursor: pointer;
+    }
+
+    .status {
+      display: inline-block;
+
+      padding: 5px 9px;
+
+      border-radius: 20px;
+
+      background: #292929;
+
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .money-positive {
+      color: var(--green);
+    }
+
+    .money-due {
+      color: #ff7b7b;
+    }
+
+    .empty {
+      padding: 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+
+    /* ==============================
+       LINE ITEMS
+    ============================== */
+
+    .line-items {
+      display: grid;
+      gap: 10px;
+
+      margin: 15px 0;
+    }
+
+    .line-item {
+      display: grid;
+
+      grid-template-columns:
+        1.1fr 1.6fr .5fr .7fr .7fr 42px;
+
+      gap: 8px;
+      align-items: end;
+
+      padding: 12px;
+
+      background: #090909;
+
+      border: 1px solid #292929;
+      border-radius: 6px;
+    }
+
+    .line-item input {
+      margin-top: 4px;
+    }
+
+    .remove-line {
+      height: 43px;
+
+      border: 0;
+      border-radius: 4px;
+
+      background: #631216;
+      color: white;
+
+      font-weight: bold;
+    }
+
+    .totals-box {
+      width: min(100%, 430px);
+
+      margin: 20px 0 0 auto;
+      padding: 18px;
+
+      background: #090909;
+
+      border: 1px solid #303030;
+      border-radius: 6px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+
+      gap: 20px;
+
+      padding: 7px 0;
+    }
+
+    .total-row.grand {
+      margin-top: 5px;
+      padding-top: 12px;
+
+      border-top: 1px solid #444;
+
+      color: var(--red);
+
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+
+    /* ==============================
+       MODALS
+    ============================== */
+
+    .modal {
+      display: none;
+
+      position: fixed;
+      inset: 0;
+
+      z-index: 99999;
+
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      background: rgba(0,0,0,.9);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 1000px;
+      max-height: 92vh;
+
+      overflow-y: auto;
+
+      padding: 25px;
+
+      background: #111;
+
+      border: 1px solid #444;
+      border-top: 4px solid var(--red);
+      border-radius: 9px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      gap: 15px;
+
+      margin-bottom: 20px;
+    }
+
+    .modal-head h2 {
+      margin: 0;
+    }
+
+    .close-modal {
+      border: 0;
+      background: transparent;
+      color: white;
+
+      font-size: 32px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .detail-box {
+      padding: 12px;
+
+      background: #090909;
+
+      border: 1px solid #303030;
+      border-radius: 5px;
+    }
+
+    .detail-box span {
+      display: block;
+
+      color: var(--muted);
+
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .detail-box strong {
+      display: block;
+
+      margin-top: 5px;
+    }
+
+
+    /* ==============================
+       PRINT INVOICE
+    ============================== */
+
+    #printArea {
+      display: none;
+    }
+
+    .invoice-print {
+      width: 800px;
+
+      margin: auto;
+      padding: 40px;
+
+      background: white;
+      color: #111;
+
+      font-family: Arial, sans-serif;
+    }
+
+    .invoice-print-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      gap: 20px;
+
+      padding-bottom: 20px;
+
+      border-bottom: 3px solid #df1f26;
+    }
+
+    .invoice-print-header img {
+      width: 135px;
+    }
+
+    .invoice-print-title {
+      text-align: right;
+    }
+
+    .invoice-print-title h1 {
+      margin: 0;
+
+      color: #df1f26;
+
+      font-size: 36px;
+    }
+
+    .invoice-print table {
+      margin-top: 25px;
+    }
+
+    .invoice-print th {
+      background: #111;
+      color: white;
+    }
+
+    .invoice-print td,
+    .invoice-print th {
+      border: 1px solid #ddd;
+    }
+
+    .print-total {
+      margin-top: 25px;
+      text-align: right;
+    }
+
+    @media print {
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #printArea,
+      #printArea * {
+        visibility: visible !important;
+      }
+
+      #printArea {
+        display: block !important;
+
+        position: absolute;
+        left: 0;
+        top: 0;
+
+        width: 100%;
+      }
+
+      .invoice-print {
+        width: 100%;
+        padding: 20px;
+      }
+
+    }
+
+
+    /* ==============================
+       MOBILE
+    ============================== */
+
+    @media (max-width: 1000px) {
+
+      .line-item {
+        grid-template-columns:
+          repeat(2,1fr);
+      }
+
+      .remove-line {
+        width: 100%;
+      }
+
+    }
+
+    @media (max-width: 900px) {
+
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: flex;
+
+        gap: 7px;
+
+        overflow-x: auto;
+
+        border-right: 0;
+        border-bottom: 1px solid #303030;
+      }
+
+      .sidebar button {
+        min-width: max-content;
+        margin-bottom: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2,1fr);
+      }
+
+    }
+
+    @media (max-width: 600px) {
+
+      .admin-header {
+        padding: 12px;
+      }
+
+      .admin-brand img {
+        width: 42px;
+        height: 42px;
+      }
+
+      .admin-brand strong {
+        font-size: 15px;
+      }
+
+      .main-content {
+        padding: 18px 12px;
+      }
+
+      .stats-grid,
+      .form-grid,
+      .form-grid.three,
+      .detail-grid,
+      .line-item {
+        grid-template-columns: 1fr;
+      }
+
+      .full-width {
+        grid-column: auto;
+      }
+
+      .panel-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        max-width: none;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<header class="admin-header">
+
+  <div class="admin-brand">
+
+    <img
+      src="logo.png"
+      alt="Flores Small Engine Repair"
+    >
+
+    <div>
+      <strong>Flores Admin</strong>
+      <span>Repair Management</span>
+    </div>
+
+  </div>
+
+
+  <button
+    id="logoutButton"
+    class="logout-button"
+  >
+    Log Out
+  </button>
+
+</header>
+
+
+<div class="admin-layout">
+
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <button
+      class="nav-tab active"
+      data-view="dashboardView"
+    >
+      Dashboard
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="requestsView"
+    >
+      Requests
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="customersView"
+    >
+      Customers
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="jobsView"
+    >
+      Repair Jobs
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="estimatesView"
+    >
+      Estimates
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="invoicesView"
+    >
+      Invoices
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="paymentsView"
+    >
+      Payments
+    </button>
+
+  </aside>
+
+
+  <main class="main-content">
+
+
+    <!-- ==================================================
+         DASHBOARD
+    =================================================== -->
+
+    <section
+      id="dashboardView"
+      class="view active"
+    >
+
+      <h1 class="page-title">
+        Dashboard
+      </h1>
+
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <span>Customers</span>
+          <strong id="customerCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>New Requests</span>
+          <strong id="requestCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Open Jobs</span>
+          <strong id="openJobCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Invoices</span>
+          <strong id="invoiceCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Balance Due</span>
+          <strong id="balanceDue">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Made This Month</span>
+          <strong id="monthRevenue">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Made This Year</span>
+          <strong id="yearRevenue">$0.00</strong>
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Recent Repair Jobs</h2>
+
+        <div
+          id="recentJobs"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Recent Invoices</h2>
+
+        <div
+          id="recentInvoices"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Monthly Revenue</h2>
+
+        <p style="color:#999; margin-top:-8px;">
+          Based on payments actually received.
+        </p>
+
+        <div
+          id="monthlyRevenueTable"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Yearly Revenue</h2>
+
+        <p style="color:#999; margin-top:-8px;">
+          Based on payments actually received.
+        </p>
+
+        <div
+          id="yearlyRevenueTable"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         REQUESTS / LEADS
+    =================================================== -->
+
+    <section
+      id="requestsView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Service Requests
+      </h1>
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <div>
+            <h2 style="margin-bottom:6px;">
+              New Repair Requests
+            </h2>
+
+            <p style="margin:0;color:#999;">
+              Website requests stay here until you convert or archive them.
+            </p>
+          </div>
+
+          <select
+            id="requestStatusFilter"
+            class="search-box"
+          >
+            <option value="New">New</option>
+            <option value="All">All</option>
+            <option value="Converted">Converted</option>
+            <option value="Archived">Archived</option>
+          </select>
+
+        </div>
+
+        <div
+          id="requestTableWrapper"
+          class="table-wrap"
+        >
+          <p class="empty">
+            Loading...
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         CUSTOMERS
+    =================================================== -->
+
+    <section
+      id="customersView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Customers
+      </h1>
+
+
+      <div class="panel">
+
+        <h2>Add Customer</h2>
+
+        <form id="customerForm">
+
+          <div class="form-grid">
+
+            <label>
+              First Name
+              <input
+                id="customerFirstName"
+                required
+              >
+            </label>
+
+            <label>
+              Last Name
+              <input id="customerLastName">
+            </label>
+
+            <label>
+              Phone
+              <input
+                id="customerPhone"
+                type="tel"
+              >
+            </label>
+
+            <label>
+              Email
+              <input
+                id="customerEmail"
+                type="email"
+              >
+            </label>
+
+            <label class="full-width">
+              Address
+              <input id="customerAddress">
+            </label>
+
+            <label>
+              City
+              <input id="customerCity">
+            </label>
+
+            <label>
+              State
+              <input
+                id="customerState"
+                value="LA"
+              >
+            </label>
+
+            <label>
+              ZIP
+              <input id="customerZip">
+            </label>
+
+            <label class="full-width">
+              Notes
+              <textarea id="customerNotes"></textarea>
+            </label>
+
+          </div>
+
+
+          <button
+            class="action-button"
+            type="submit"
+          >
+            Save Customer
+          </button>
+
+
+          <p
+            id="customerMessage"
+            class="message"
+          ></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <h2>Customer List</h2>
+
+          <input
+            id="customerSearch"
+            class="search-box"
+            placeholder="Search customers..."
+          >
+
+        </div>
+
+        <div
+          id="customerTableWrapper"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         REPAIR JOBS
+    =================================================== -->
+
+    <section
+      id="jobsView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Repair Jobs
+      </h1>
+
+
+      <div class="panel">
+
+        <h2>Create Repair Job</h2>
+
+        <form id="jobForm">
+
+          <div class="form-grid">
+
+            <label>
+              Customer
+
+              <select
+                id="jobCustomer"
+                required
+              ></select>
+
+            </label>
+
+
+            <label>
+              Equipment Type
+
+              <input
+                id="equipmentType"
+                required
+                placeholder="Zero-turn mower"
+              >
+
+            </label>
+
+
+            <label>
+              Brand
+              <input id="equipmentBrand">
+            </label>
+
+
+            <label>
+              Model
+              <input id="equipmentModel">
+            </label>
+
+
+            <label>
+              Serial Number
+              <input id="equipmentSerial">
+            </label>
+
+
+            <label>
+              Service Type
+
+              <select id="serviceType">
+
+                <option>Drop-Off Repair</option>
+                <option>Mobile Service</option>
+                <option>Pickup / Delivery</option>
+
+              </select>
+
+            </label>
+
+
+            <label class="full-width">
+              Customer Complaint
+
+              <textarea
+                id="jobComplaint"
+                required
+              ></textarea>
+
+            </label>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="action-button"
+          >
+            Create Repair Job
+          </button>
+
+
+          <p
+            id="jobMessage"
+            class="message"
+          ></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Repair Job List</h2>
+
+        <div
+          id="jobTableWrapper"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         ESTIMATES
+    =================================================== -->
+
+    <section
+      id="estimatesView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Estimates
+      </h1>
+
+
+      <div class="panel">
+
+        <h2>Create Estimate</h2>
+
+
+        <form id="estimateForm">
+
+          <div class="form-grid">
+
+            <label>
+              Customer
+
+              <select
+                id="estimateCustomer"
+                required
+              ></select>
+
+            </label>
+
+
+            <label>
+              Repair Job
+
+              <select id="estimateJob"></select>
+
+            </label>
+
+
+            <label>
+              Status
+
+              <select id="estimateStatus">
+
+                <option>Draft</option>
+                <option>Sent</option>
+                <option>Accepted</option>
+                <option>Declined</option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Expiration Date
+
+              <input
+                id="estimateExpiry"
+                type="date"
+              >
+
+            </label>
+
+
+            <label class="full-width">
+              Subject
+
+              <input
+                id="estimateSubject"
+                placeholder="Repair Estimate"
+              >
+
+            </label>
+
+          </div>
+
+
+          <h3>Estimate Items</h3>
+
+
+          <div
+            id="estimateLines"
+            class="line-items"
+          ></div>
+
+
+          <button
+            id="addEstimateLine"
+            type="button"
+            class="secondary-button"
+          >
+            + Add Item
+          </button>
+
+
+          <div class="totals-box">
+
+            <div class="total-row">
+              <span>Subtotal</span>
+              <strong id="estimateSubtotal">$0.00</strong>
+            </div>
+
+            <div class="total-row grand">
+              <span>Total</span>
+              <strong id="estimateTotal">$0.00</strong>
+            </div>
+
+          </div>
+
+
+          <button
+            class="action-button"
+            type="submit"
+          >
+            Save Estimate
+          </button>
+
+
+          <p
+            id="estimateMessage"
+            class="message"
+          ></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <h2>Estimate History</h2>
+
+          <input
+            id="estimateSearch"
+            class="search-box"
+            placeholder="Search estimates..."
+          >
+
+        </div>
+
+        <div
+          id="estimateTableWrapper"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         INVOICES
+    =================================================== -->
+
+    <section
+      id="invoicesView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Invoices
+      </h1>
+
+
+      <div class="panel">
+
+        <h2>Create Invoice</h2>
+
+
+        <form id="invoiceForm">
+
+          <div class="form-grid">
+
+            <label>
+              Customer
+
+              <select
+                id="invoiceCustomer"
+                required
+              ></select>
+
+            </label>
+
+
+            <label>
+              Repair Job
+
+              <select id="invoiceJob"></select>
+
+            </label>
+
+
+            <label>
+              Status
+
+              <select id="invoiceStatus">
+
+                <option>Draft</option>
+                <option>Sent</option>
+                <option>Partially Paid</option>
+                <option>Paid</option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Due Date
+
+              <input
+                id="invoiceDueDate"
+                type="date"
+              >
+
+            </label>
+
+
+            <label>
+              Tax Rate %
+
+              <input
+                id="invoiceTaxRate"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+              >
+
+            </label>
+
+
+            <label class="full-width">
+              Notes
+
+              <textarea
+                id="invoiceNotes"
+                placeholder="Thank you for your business."
+              ></textarea>
+
+            </label>
+
+          </div>
+
+
+          <h3>Invoice Items</h3>
+
+
+          <div
+            id="invoiceLines"
+            class="line-items"
+          ></div>
+
+
+          <button
+            id="addInvoiceLine"
+            type="button"
+            class="secondary-button"
+          >
+            + Add Item
+          </button>
+
+
+          <div class="totals-box">
+
+            <div class="total-row">
+              <span>Subtotal</span>
+              <strong id="invoiceSubtotal">$0.00</strong>
+            </div>
+
+            <div class="total-row">
+              <span>Tax</span>
+              <strong id="invoiceTax">$0.00</strong>
+            </div>
+
+            <div class="total-row grand">
+              <span>Total</span>
+              <strong id="invoiceTotal">$0.00</strong>
+            </div>
+
+          </div>
+
+
+          <button
+            class="action-button"
+            type="submit"
+          >
+            Create Invoice
+          </button>
+
+
+          <p
+            id="invoiceMessage"
+            class="message"
+          ></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <h2>Invoice History</h2>
+
+          <input
+            id="invoiceSearch"
+            class="search-box"
+            placeholder="Search invoices..."
+          >
+
+        </div>
+
+
+        <div
+          id="invoiceTableWrapper"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         PAYMENTS
+    =================================================== -->
+
+    <section
+      id="paymentsView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Payments
+      </h1>
+
+
+      <div class="panel">
+
+        <h2>Record Payment</h2>
+
+
+        <form id="paymentForm">
+
+          <div class="form-grid">
+
+            <label>
+              Invoice
+
+              <select
+                id="paymentInvoice"
+                required
+              ></select>
+
+            </label>
+
+
+            <label>
+              Amount
+
+              <input
+                id="paymentAmount"
+                type="number"
+                step="0.01"
+                required
+              >
+
+            </label>
+
+
+            <label>
+              Payment Method
+
+              <select id="paymentMethod">
+
+                <option>Cash</option>
+                <option>Card</option>
+                <option>Check</option>
+                <option>Cash App</option>
+                <option>Zelle</option>
+                <option>Other</option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Date
+
+              <input
+                id="paymentDate"
+                type="date"
+              >
+
+            </label>
+
+
+            <label>
+              Reference
+
+              <input id="paymentReference">
+            </label>
+
+
+            <label class="full-width">
+              Notes
+
+              <textarea id="paymentNotes"></textarea>
+
+            </label>
+
+          </div>
+
+
+          <button
+            class="action-button"
+            type="submit"
+          >
+            Record Payment
+          </button>
+
+
+          <p
+            id="paymentMessage"
+            class="message"
+          ></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Payment History</h2>
+
+        <div
+          id="paymentTableWrapper"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+</div>
+
+
+<!-- ==================================================
+     JOB EDIT MODAL
+=================================================== -->
+
+<div
+  id="jobModal"
+  class="modal"
+>
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+
+      <h2 id="jobModalTitle">
+        Repair Job
+      </h2>
+
+      <button
+        class="close-modal"
+        onclick="closeModal('jobModal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <input
+      type="hidden"
+      id="editJobId"
+    >
+
+
+    <div class="form-grid">
+
+
+      <label>
+        Status
+
+        <select id="editJobStatus">
+
+          <option>Received</option>
+          <option>Diagnosing</option>
+          <option>Waiting on Approval</option>
+          <option>Waiting on Parts</option>
+          <option>Repairing</option>
+          <option>Ready for Pickup</option>
+          <option>Completed</option>
+
+        </select>
+
+      </label>
+
+
+      <label>
+        Labor Hours
+
+        <input
+          id="editLaborHours"
+          type="number"
+          step="0.25"
+        >
+
+      </label>
+
+
+      <label>
+        Labor Rate
+
+        <input
+          id="editLaborRate"
+          type="number"
+          step="0.01"
+        >
+
+      </label>
+
+
+      <label>
+        Travel Fee
+
+        <input
+          id="editTravelFee"
+          type="number"
+          step="0.01"
+        >
+
+      </label>
+
+
+      <label>
+        Pickup / Delivery Fee
+
+        <input
+          id="editPickupFee"
+          type="number"
+          step="0.01"
+        >
+
+      </label>
+
+
+      <label class="full-width">
+        Diagnosis
+
+        <textarea id="editDiagnosis"></textarea>
+
+      </label>
+
+
+      <label class="full-width">
+        Repair Notes
+
+        <textarea id="editRepairNotes"></textarea>
+
+      </label>
+
+    </div>
+
+
+    <h3>Parts</h3>
+
+
+    <div
+      id="jobPartsList"
+      class="table-wrap"
+    ></div>
+
+
+    <div class="form-grid three">
+
+      <label>
+        Description
+        <input id="newPartDescription">
+      </label>
+
+      <label>
+        Part Number
+        <input id="newPartNumber">
+      </label>
+
+      <label>
+        Qty
+        <input
+          id="newPartQty"
+          type="number"
+          value="1"
+          step="1"
+        >
+      </label>
+
+      <label>
+        Cost Each
+        <input
+          id="newPartCost"
+          type="number"
+          step="0.01"
+        >
+      </label>
+
+      <label>
+        Sell Price Each
+        <input
+          id="newPartSell"
+          type="number"
+          step="0.01"
+        >
+      </label>
+
+    </div>
+
+
+    <div class="button-row">
+
+      <button
+        id="addJobPartButton"
+        class="secondary-button"
+      >
+        Add Part
+      </button>
+
+      <button
+        id="saveJobButton"
+        class="action-button"
+      >
+        Save Job
+      </button>
+
+      <button
+        id="deleteJobButton"
+        class="danger-button"
+        type="button"
+      >
+        Delete Repair Job
+      </button>
+
+    </div>
+
+
+    <p
+      id="editJobMessage"
+      class="message"
+    ></p>
+
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     ESTIMATE DETAIL MODAL
+=================================================== -->
+
+<div
+  id="estimateModal"
+  class="modal"
+>
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+
+      <h2 id="estimateModalTitle"></h2>
+
+      <button
+        class="close-modal"
+        onclick="closeModal('estimateModal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div id="estimateModalContent"></div>
+
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     INVOICE DETAIL MODAL
+=================================================== -->
+
+<div
+  id="invoiceModal"
+  class="modal"
+>
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+
+      <h2 id="invoiceModalTitle"></h2>
+
+      <button
+        class="close-modal"
+        onclick="closeModal('invoiceModal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div id="invoiceModalContent"></div>
+
+  </div>
+
+</div>
+
+
+<!-- PRINT AREA -->
+
+<div id="printArea"></div>
+
+
+<script>
+
+/* ==================================================
+   SUPABASE
+=================================================== */
+
+const SUPABASE_URL =
+  "https://ykqbjqiujnqljwwyxrre.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_CmCfIvZJJwMNV0QzQwrEsw_W0X8XOvj";
+
+
+const db =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+let serviceRequests = [];
+let customers = [];
+let jobs = [];
+let estimates = [];
+let invoices = [];
+let payments = [];
+
+
+/* ==================================================
+   HELPERS
+=================================================== */
+
+const $ =
+  id =>
+    document.getElementById(id);
+
+
+function money(value) {
+
+  return `$${Number(value || 0).toFixed(2)}`;
+
+}
+
+
+function today() {
+
+  return new Date()
+    .toISOString()
+    .slice(0,10);
+
+}
+
+
+function dateDisplay(value) {
+
+  if (!value) {
+    return "";
+  }
+
+  return new Date(
+    value + "T00:00:00"
+  )
+    .toLocaleDateString();
+
+}
+
+
+function customerName(customer) {
+
+  if (!customer) {
+    return "";
+  }
+
+  return `${
+    customer.first_name || ""
+  } ${
+    customer.last_name || ""
+  }`.trim();
+
+}
+
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function makeNumber(prefix) {
+
+  const d =
+    new Date();
+
+  const date =
+    d
+      .toISOString()
+      .slice(2,10)
+      .replaceAll("-","");
+
+  const random =
+    Math.floor(
+      1000 +
+      Math.random() * 9000
+    );
+
+  return `${prefix}-${date}-${random}`;
+
+}
+
+
+function closeModal(id) {
+
+  $(id)
+    .classList
+    .remove("open");
+
+}
+
+
+/* ==================================================
+   SECURITY
+=================================================== */
+
+async function protectPage() {
+
+  const {
+    data: { session }
+  } =
+    await db.auth.getSession();
+
+
+  if (!session) {
+
+    location.href =
+      "admin-login.html";
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+$("logoutButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      await db.auth.signOut();
+
+      location.href =
+        "admin-login.html";
+
+    }
+  );
+
+
+/* ==================================================
+   NAVIGATION
+=================================================== */
+
+document
+  .querySelectorAll(".nav-tab")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(".nav-tab")
+          .forEach(x =>
+            x.classList.remove("active")
+          );
+
+
+        document
+          .querySelectorAll(".view")
+          .forEach(x =>
+            x.classList.remove("active")
+          );
+
+
+        button.classList.add("active");
+
+
+        $(
+          button.dataset.view
+        )
+          .classList
+          .add("active");
+
+      }
+    );
+
+  });
+
+
+
+/* ==================================================
+   SERVICE REQUESTS / LEADS
+=================================================== */
+
+async function loadServiceRequests() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("service_requests")
+      .select("*")
+      .order(
+        "created_at",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    $("requestTableWrapper")
+      .innerHTML =
+        `<p class="error">
+          ${escapeHtml(error.message)}
+        </p>`;
+
+    return;
+
+  }
+
+
+  serviceRequests =
+    data || [];
+
+
+  $("requestCount")
+    .textContent =
+      serviceRequests.filter(
+        request =>
+          request.status === "New"
+      ).length;
+
+
+  renderServiceRequests();
+
+}
+
+
+function renderServiceRequests() {
+
+  const filter =
+    $("requestStatusFilter")
+      ?.value || "New";
+
+
+  const list =
+    filter === "All"
+      ? serviceRequests
+      : serviceRequests.filter(
+          request =>
+            request.status === filter
+        );
+
+
+  if (!list.length) {
+
+    $("requestTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          No ${filter.toLowerCase()} requests.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Equipment</th>
+          <th>Service</th>
+          <th>Problem</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  list.forEach(request => {
+
+    const created =
+      request.created_at
+        ? new Date(
+            request.created_at
+          ).toLocaleDateString()
+        : "";
+
+
+    html += `
+
+      <tr>
+
+        <td>
+          ${created}
+        </td>
+
+        <td>
+          ${escapeHtml(request.name)}
+        </td>
+
+        <td>
+          ${escapeHtml(request.phone)}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            [
+              request.equipment,
+              request.model
+            ]
+              .filter(Boolean)
+              .join(" — ")
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(request.service_type)}
+        </td>
+
+        <td style="white-space:normal;min-width:220px;">
+          ${escapeHtml(request.problem)}
+        </td>
+
+        <td>
+          <span class="status">
+            ${escapeHtml(request.status)}
+          </span>
+        </td>
+
+        <td>
+
+          ${
+            request.status === "New"
+              ? `
+                <button
+                  class="small-button red"
+                  onclick="convertRequest(${request.id})"
+                >
+                  Convert
+                </button>
+
+                <button
+                  class="small-button"
+                  onclick="archiveRequest(${request.id})"
+                >
+                  Archive
+                </button>
+              `
+              : ""
+          }
+
+          <button
+            class="small-button"
+            onclick="deleteRequest(${request.id})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("requestTableWrapper")
+    .innerHTML =
+      html;
+
+}
+
+
+$("requestStatusFilter")
+  ?.addEventListener(
+    "change",
+    renderServiceRequests
+  );
+
+
+async function archiveRequest(id) {
+
+  const {
+    error
+  } =
+    await db
+      .from("service_requests")
+      .update({
+        status:
+          "Archived"
+      })
+      .eq(
+        "id",
+        id
+      );
+
+
+  if (error) {
+
+    alert(error.message);
+
+    return;
+
+  }
+
+
+  await loadServiceRequests();
+
+}
+
+
+async function deleteRequest(id) {
+
+  const request =
+    serviceRequests.find(
+      item =>
+        item.id === id
+    );
+
+
+  if (!request) {
+    return;
+  }
+
+
+  if (!confirm(
+    `Delete the request from ${request.name || "this customer"}?\n\nThis cannot be undone.`
+  )) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from("service_requests")
+      .delete()
+      .eq(
+        "id",
+        id
+      );
+
+
+  if (error) {
+
+    alert(error.message);
+
+    return;
+
+  }
+
+
+  await loadServiceRequests();
+
+}
+
+
+async function convertRequest(id) {
+
+  const request =
+    serviceRequests.find(
+      item =>
+        item.id === id
+    );
+
+
+  if (!request) {
+    return;
+  }
+
+
+  if (!confirm(
+    `Convert ${request.name || "this request"} into a customer and repair job?`
+  )) {
+    return;
+  }
+
+
+  const nameParts =
+    String(
+      request.name || ""
+    )
+      .trim()
+      .split(/\s+/);
+
+
+  const firstName =
+    nameParts.shift() ||
+    "Customer";
+
+
+  const lastName =
+    nameParts.join(" ");
+
+
+  /* ------------------------------------------
+     FIND EXISTING CUSTOMER BY PHONE
+  ------------------------------------------ */
+
+  let customer =
+    customers.find(
+      existing =>
+        String(existing.phone || "")
+          .replace(/\D/g, "") ===
+        String(request.phone || "")
+          .replace(/\D/g, "")
+    );
+
+
+  if (!customer) {
+
+    const {
+      data,
+      error
+    } =
+      await db
+        .from("customers")
+        .insert({
+
+          first_name:
+            firstName,
+
+          last_name:
+            lastName,
+
+          phone:
+            request.phone || "",
+
+          email:
+            request.email || "",
+
+          city:
+            request.location || "",
+
+          state:
+            "LA",
+
+          notes:
+            `Created from website request #${request.id}`
+
+        })
+        .select()
+        .single();
+
+
+    if (error) {
+
+      alert(error.message);
+
+      return;
+
+    }
+
+
+    customer =
+      data;
+
+  }
+
+
+  /* ------------------------------------------
+     CREATE EQUIPMENT
+  ------------------------------------------ */
+
+  const {
+    data: equipment,
+    error: equipmentError
+  } =
+    await db
+      .from("equipment")
+      .insert({
+
+        customer_id:
+          customer.id,
+
+        equipment_type:
+          request.equipment ||
+          "Equipment",
+
+        model:
+          request.model || "",
+
+        notes:
+          `Website request #${request.id}`
+
+      })
+      .select()
+      .single();
+
+
+  if (equipmentError) {
+
+    alert(
+      equipmentError.message
+    );
+
+    return;
+
+  }
+
+
+  /* ------------------------------------------
+     CREATE REPAIR JOB
+  ------------------------------------------ */
+
+  const {
+    data: job,
+    error: jobError
+  } =
+    await db
+      .from("repair_jobs")
+      .insert({
+
+        customer_id:
+          customer.id,
+
+        equipment_id:
+          equipment.id,
+
+        job_number:
+          makeNumber("FSER"),
+
+        service_type:
+          request.service_type ||
+          "Drop-Off Repair",
+
+        status:
+          "Received",
+
+        complaint:
+          request.problem || "",
+
+        labor_rate:
+          40
+
+      })
+      .select()
+      .single();
+
+
+  if (jobError) {
+
+    alert(
+      jobError.message
+    );
+
+    return;
+
+  }
+
+
+  /* ------------------------------------------
+     MARK REQUEST CONVERTED
+  ------------------------------------------ */
+
+  const {
+    error: requestError
+  } =
+    await db
+      .from("service_requests")
+      .update({
+
+        status:
+          "Converted",
+
+        customer_id:
+          customer.id,
+
+        repair_job_id:
+          job.id
+
+      })
+      .eq(
+        "id",
+        id
+      );
+
+
+  if (requestError) {
+
+    alert(
+      requestError.message
+    );
+
+    return;
+
+  }
+
+
+  await loadCustomers();
+  await loadServiceRequests();
+  await loadJobs();
+  await loadServiceRequests();
+
+
+  alert(
+    `${request.name || "Request"} was converted to a customer and repair job.`
+  );
+
+}
+
+
+/* ==================================================
+   CUSTOMERS
+=================================================== */
+
+async function loadCustomers() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("customers")
+      .select("*")
+      .order(
+        "first_name",
+        { ascending:true }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+    return;
+
+  }
+
+
+  customers = data || [];
+
+
+  $("customerCount")
+    .textContent =
+      customers.length;
+
+
+  populateCustomerSelects();
+
+  renderCustomers(customers);
+
+}
+
+
+function populateCustomerSelects() {
+
+  const selects = [
+    $("jobCustomer"),
+    $("estimateCustomer"),
+    $("invoiceCustomer")
+  ];
+
+
+  selects.forEach(select => {
+
+    select.innerHTML =
+      `<option value="">
+        Select customer
+      </option>`;
+
+
+    customers.forEach(customer => {
+
+      const option =
+        document.createElement("option");
+
+
+      option.value =
+        customer.id;
+
+
+      option.textContent =
+        customerName(customer);
+
+
+      select.appendChild(option);
+
+    });
+
+  });
+
+}
+
+
+function renderCustomers(list) {
+
+  if (!list.length) {
+
+    $("customerTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          No customers found.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>City</th>
+          <th>Source</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  list.forEach(customer => {
+
+    html += `
+
+      <tr>
+
+        <td>
+          ${escapeHtml(
+            customerName(customer)
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(customer.phone)}
+        </td>
+
+        <td>
+          ${escapeHtml(customer.email)}
+        </td>
+
+        <td>
+          ${escapeHtml(customer.city)}
+        </td>
+
+        <td>
+          ${
+            customer.zoho_customer_id
+              ? "Zoho"
+              : "Flores"
+          }
+        </td>
+
+        <td>
+          <button
+            class="small-button red"
+            onclick="event.stopPropagation(); deleteCustomer(${customer.id})"
+          >
+            Delete
+          </button>
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("customerTableWrapper")
+    .innerHTML =
+      html;
+
+}
+
+
+$("customerSearch")
+  .addEventListener(
+    "input",
+    event => {
+
+      const q =
+        event.target.value
+          .toLowerCase();
+
+
+      renderCustomers(
+
+        customers.filter(
+          customer =>
+
+            [
+              customer.first_name,
+              customer.last_name,
+              customer.phone,
+              customer.email,
+              customer.city
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(q)
+
+        )
+
+      );
+
+    }
+  );
+
+
+$("customerForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const {
+        error
+      } =
+        await db
+          .from("customers")
+          .insert({
+
+            first_name:
+              $("customerFirstName")
+                .value.trim(),
+
+            last_name:
+              $("customerLastName")
+                .value.trim(),
+
+            phone:
+              $("customerPhone")
+                .value.trim(),
+
+            email:
+              $("customerEmail")
+                .value.trim(),
+
+            address:
+              $("customerAddress")
+                .value.trim(),
+
+            city:
+              $("customerCity")
+                .value.trim(),
+
+            state:
+              $("customerState")
+                .value.trim(),
+
+            zip:
+              $("customerZip")
+                .value.trim(),
+
+            notes:
+              $("customerNotes")
+                .value.trim()
+
+          });
+
+
+      if (error) {
+
+        $("customerMessage")
+          .textContent =
+            error.message;
+
+        $("customerMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      $("customerMessage")
+        .textContent =
+          "Customer saved.";
+
+      $("customerMessage")
+        .className =
+          "message success";
+
+
+      event.target.reset();
+
+      $("customerState").value =
+        "LA";
+
+
+      await loadCustomers();
+
+    }
+  );
+
+
+/* ==================================================
+   JOBS
+=================================================== */
+
+async function loadJobs() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("repair_jobs")
+      .select(`
+        *,
+        customers(
+          first_name,
+          last_name
+        ),
+        equipment(
+          equipment_type,
+          brand,
+          model,
+          serial_number
+        )
+      `)
+      .order(
+        "created_at",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+    return;
+
+  }
+
+
+  jobs = data || [];
+
+
+  $("openJobCount")
+    .textContent =
+      jobs.filter(
+        job =>
+          job.status !==
+          "Completed"
+      ).length;
+
+
+  renderJobs();
+
+  renderRecentJobs();
+
+  populateJobSelects();
+
+}
+
+
+function populateJobSelects() {
+
+  const selects = [
+    $("estimateJob"),
+    $("invoiceJob")
+  ];
+
+
+  selects.forEach(select => {
+
+    select.innerHTML =
+      `<option value="">
+        No repair job
+      </option>`;
+
+
+    jobs.forEach(job => {
+
+      const option =
+        document.createElement("option");
+
+
+      option.value =
+        job.id;
+
+
+      option.textContent =
+        `${job.job_number} — ${
+          customerName(
+            job.customers
+          )
+        }`;
+
+
+      select.appendChild(option);
+
+    });
+
+  });
+
+}
+
+
+function jobEquipment(job) {
+
+  if (!job.equipment) {
+    return "";
+  }
+
+
+  return `${
+    job.equipment.brand || ""
+  } ${
+    job.equipment.equipment_type || ""
+  } ${
+    job.equipment.model || ""
+  }`
+    .trim();
+
+}
+
+
+function renderJobs() {
+
+  if (!jobs.length) {
+
+    $("jobTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          No repair jobs.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Equipment</th>
+          <th>Status</th>
+          <th>Labor</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  jobs.forEach(job => {
+
+    const labor =
+      Number(job.labor_hours || 0) *
+      Number(job.labor_rate || 0);
+
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openJob(${job.id})"
+      >
+
+        <td>
+          ${escapeHtml(job.job_number)}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            customerName(
+              job.customers
+            )
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            jobEquipment(job)
+          )}
+        </td>
+
+        <td>
+          <span class="status">
+            ${escapeHtml(job.status)}
+          </span>
+        </td>
+
+        <td>
+          ${money(labor)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("jobTableWrapper")
+    .innerHTML =
+      html;
+
+}
+
+
+function renderRecentJobs() {
+
+  const recent =
+    jobs.slice(0,5);
+
+
+  if (!recent.length) {
+
+    $("recentJobs")
+      .innerHTML =
+        `<p class="empty">
+          No jobs yet.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Customer</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  recent.forEach(job => {
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openJob(${job.id})"
+      >
+
+        <td>${job.job_number}</td>
+
+        <td>
+          ${escapeHtml(
+            customerName(
+              job.customers
+            )
+          )}
+        </td>
+
+        <td>${job.status}</td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("recentJobs")
+    .innerHTML =
+      html;
+
+}
+
+
+$("jobForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const customerId =
+        Number(
+          $("jobCustomer").value
+        );
+
+
+      const {
+        data: equipment,
+        error: equipmentError
+      } =
+        await db
+          .from("equipment")
+          .insert({
+
+            customer_id:
+              customerId,
+
+            equipment_type:
+              $("equipmentType")
+                .value.trim(),
+
+            brand:
+              $("equipmentBrand")
+                .value.trim(),
+
+            model:
+              $("equipmentModel")
+                .value.trim(),
+
+            serial_number:
+              $("equipmentSerial")
+                .value.trim()
+
+          })
+          .select()
+          .single();
+
+
+      if (equipmentError) {
+
+        $("jobMessage")
+          .textContent =
+            equipmentError.message;
+
+        $("jobMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      const {
+        error
+      } =
+        await db
+          .from("repair_jobs")
+          .insert({
+
+            customer_id:
+              customerId,
+
+            equipment_id:
+              equipment.id,
+
+            job_number:
+              makeNumber("FSER"),
+
+            service_type:
+              $("serviceType").value,
+
+            status:
+              "Received",
+
+            complaint:
+              $("jobComplaint")
+                .value.trim(),
+
+            labor_rate:
+              40
+
+          });
+
+
+      if (error) {
+
+        $("jobMessage")
+          .textContent =
+            error.message;
+
+        $("jobMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      $("jobMessage")
+        .textContent =
+          "Repair job created.";
+
+      $("jobMessage")
+        .className =
+          "message success";
+
+
+      event.target.reset();
+
+
+      await loadJobs();
+
+    }
+  );
+
+
+async function openJob(id) {
+
+  const job =
+    jobs.find(
+      x =>
+        x.id === id
+    );
+
+
+  if (!job) {
+    return;
+  }
+
+
+  $("editJobId").value =
+    job.id;
+
+  $("jobModalTitle")
+    .textContent =
+      `${job.job_number} — ${jobEquipment(job)}`;
+
+
+  $("editJobStatus").value =
+    job.status || "Received";
+
+  $("editLaborHours").value =
+    job.labor_hours || 0;
+
+  $("editLaborRate").value =
+    job.labor_rate || 40;
+
+  $("editTravelFee").value =
+    job.travel_fee || 0;
+
+  $("editPickupFee").value =
+    job.pickup_delivery_fee || 0;
+
+  $("editDiagnosis").value =
+    job.diagnosis || "";
+
+  $("editRepairNotes").value =
+    job.repair_notes || "";
+
+
+  $("newPartDescription").value = "";
+  $("newPartNumber").value = "";
+  $("newPartQty").value = 1;
+  $("newPartCost").value = "";
+  $("newPartSell").value = "";
+
+
+  await loadJobParts(id);
+
+
+  $("jobModal")
+    .classList
+    .add("open");
+
+}
+
+
+async function loadJobParts(jobId) {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("job_parts")
+      .select("*")
+      .eq(
+        "repair_job_id",
+        jobId
+      )
+      .order(
+        "created_at",
+        { ascending:true }
+      );
+
+
+  if (error) {
+    return;
+  }
+
+
+  if (!data.length) {
+
+    $("jobPartsList")
+      .innerHTML =
+        `<p class="empty">
+          No parts added.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Part #</th>
+          <th>Qty</th>
+          <th>Cost</th>
+          <th>Sell</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  data.forEach(part => {
+
+    html += `
+
+      <tr>
+
+        <td>
+          ${escapeHtml(
+            part.description
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            part.part_number
+          )}
+        </td>
+
+        <td>
+          ${part.quantity}
+        </td>
+
+        <td>
+          ${money(part.cost_each)}
+        </td>
+
+        <td>
+          ${money(part.sell_price_each)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("jobPartsList")
+    .innerHTML =
+      html;
+
+}
+
+
+$("addJobPartButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const jobId =
+        Number(
+          $("editJobId").value
+        );
+
+
+      if (
+        !jobId ||
+        !$("newPartDescription")
+          .value.trim()
+      ) {
+
+        return;
+
+      }
+
+
+      const {
+        error
+      } =
+        await db
+          .from("job_parts")
+          .insert({
+
+            repair_job_id:
+              jobId,
+
+            description:
+              $("newPartDescription")
+                .value.trim(),
+
+            part_number:
+              $("newPartNumber")
+                .value.trim(),
+
+            quantity:
+              Number(
+                $("newPartQty").value || 1
+              ),
+
+            cost_each:
+              Number(
+                $("newPartCost").value || 0
+              ),
+
+            sell_price_each:
+              Number(
+                $("newPartSell").value || 0
+              )
+
+          });
+
+
+      if (error) {
+
+        $("editJobMessage")
+          .textContent =
+            error.message;
+
+        return;
+
+      }
+
+
+      $("newPartDescription").value = "";
+      $("newPartNumber").value = "";
+      $("newPartQty").value = 1;
+      $("newPartCost").value = "";
+      $("newPartSell").value = "";
+
+
+      await loadJobParts(jobId);
+
+    }
+  );
+
+
+$("saveJobButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const id =
+        Number(
+          $("editJobId").value
+        );
+
+
+      const status =
+        $("editJobStatus").value;
+
+
+      const update = {
+
+        status,
+
+        labor_hours:
+          Number(
+            $("editLaborHours").value || 0
+          ),
+
+        labor_rate:
+          Number(
+            $("editLaborRate").value || 0
+          ),
+
+        travel_fee:
+          Number(
+            $("editTravelFee").value || 0
+          ),
+
+        pickup_delivery_fee:
+          Number(
+            $("editPickupFee").value || 0
+          ),
+
+        diagnosis:
+          $("editDiagnosis")
+            .value.trim(),
+
+        repair_notes:
+          $("editRepairNotes")
+            .value.trim(),
+
+        date_completed:
+          status === "Completed"
+            ? today()
+            : null
+
+      };
+
+
+      const {
+        error
+      } =
+        await db
+          .from("repair_jobs")
+          .update(update)
+          .eq(
+            "id",
+            id
+          );
+
+
+      if (error) {
+
+        $("editJobMessage")
+          .textContent =
+            error.message;
+
+        $("editJobMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      $("editJobMessage")
+        .textContent =
+          "Job updated.";
+
+      $("editJobMessage")
+        .className =
+          "message success";
+
+
+      await loadJobs();
+
+    }
+  );
+
+
+
+/* ==================================================
+   DELETE REPAIR JOB
+=================================================== */
+
+$("deleteJobButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const jobId =
+        Number(
+          $("editJobId").value
+        );
+
+
+      const job =
+        jobs.find(
+          x =>
+            x.id === jobId
+        );
+
+
+      if (
+        !job ||
+        !jobId
+      ) {
+        return;
+      }
+
+
+      const jobName =
+        job.job_number ||
+        `Job #${jobId}`;
+
+
+      /* ------------------------------------------
+         BLOCK DELETE IF QUOTE IS LINKED
+      ------------------------------------------ */
+
+      const {
+        count: estimateCount,
+        error: estimateError
+      } =
+        await db
+          .from("estimates")
+          .select(
+            "id",
+            {
+              count: "exact",
+              head: true
+            }
+          )
+          .eq(
+            "repair_job_id",
+            jobId
+          );
+
+
+      if (estimateError) {
+
+        alert(
+          estimateError.message
+        );
+
+        return;
+
+      }
+
+
+      if (estimateCount > 0) {
+
+        alert(
+          `${jobName} cannot be deleted because it has an estimate/quote linked to it. Delete the linked quote first, then delete the job.`
+        );
+
+        return;
+
+      }
+
+
+      /* ------------------------------------------
+         BLOCK DELETE IF INVOICE IS LINKED
+      ------------------------------------------ */
+
+      const {
+        count: invoiceCount,
+        error: invoiceError
+      } =
+        await db
+          .from("invoices")
+          .select(
+            "id",
+            {
+              count: "exact",
+              head: true
+            }
+          )
+          .eq(
+            "repair_job_id",
+            jobId
+          );
+
+
+      if (invoiceError) {
+
+        alert(
+          invoiceError.message
+        );
+
+        return;
+
+      }
+
+
+      if (invoiceCount > 0) {
+
+        alert(
+          `${jobName} cannot be deleted because it has an invoice linked to it. Delete the linked invoice first, then delete the job.`
+        );
+
+        return;
+
+      }
+
+
+      /* ------------------------------------------
+         CONFIRM
+      ------------------------------------------ */
+
+      const confirmed =
+        confirm(
+          `Delete ${jobName}?\n\nThis will permanently delete the repair job and its saved parts. This cannot be undone.`
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      /* ------------------------------------------
+         DELETE JOB PARTS FIRST
+      ------------------------------------------ */
+
+      const {
+        error: partsError
+      } =
+        await db
+          .from("job_parts")
+          .delete()
+          .eq(
+            "repair_job_id",
+            jobId
+          );
+
+
+      if (partsError) {
+
+        alert(
+          partsError.message
+        );
+
+        return;
+
+      }
+
+
+      /* ------------------------------------------
+         DELETE REPAIR JOB
+      ------------------------------------------ */
+
+      const {
+        error: jobError
+      } =
+        await db
+          .from("repair_jobs")
+          .delete()
+          .eq(
+            "id",
+            jobId
+          );
+
+
+      if (jobError) {
+
+        alert(
+          jobError.message
+        );
+
+        return;
+
+      }
+
+
+      closeModal(
+        "jobModal"
+      );
+
+
+      await loadJobs();
+
+
+      alert(
+        `${jobName} was deleted.`
+      );
+
+    }
+  );
+
+
+
+/* ==================================================
+   LINE ITEM BUILDERS
+=================================================== */
+
+function lineHtml(type) {
+
+  return `
+
+    <div class="line-item">
+
+      <label>
+        Item
+        <input
+          class="${type}-item-name"
+          placeholder="Labor / Part"
+        >
+      </label>
+
+      <label>
+        Description
+        <input
+          class="${type}-item-description"
+        >
+      </label>
+
+      <label>
+        Qty
+        <input
+          class="${type}-item-qty"
+          type="number"
+          step="0.01"
+          value="1"
+        >
+      </label>
+
+      <label>
+        Price
+        <input
+          class="${type}-item-price"
+          type="number"
+          step="0.01"
+          value="0"
+        >
+      </label>
+
+      <label>
+        Total
+        <input
+          class="${type}-item-total"
+          readonly
+          value="0.00"
+        >
+      </label>
+
+      <button
+        type="button"
+        class="remove-line"
+      >
+        ×
+      </button>
+
+    </div>
+  `;
+
+}
+
+
+function addLine(type) {
+
+  const container =
+    $(
+      type === "estimate"
+        ? "estimateLines"
+        : "invoiceLines"
+    );
+
+
+  container
+    .insertAdjacentHTML(
+      "beforeend",
+      lineHtml(type)
+    );
+
+
+  bindLineEvents(type);
+
+  calculateDocument(type);
+
+}
+
+
+function bindLineEvents(type) {
+
+  document
+    .querySelectorAll(
+      `#${type}Lines .line-item`
+    )
+    .forEach(row => {
+
+      row
+        .querySelectorAll("input")
+        .forEach(input => {
+
+          input.oninput =
+            () =>
+              calculateDocument(type);
+
+        });
+
+
+      row
+        .querySelector(".remove-line")
+        .onclick =
+          () => {
+
+            row.remove();
+
+            calculateDocument(type);
+
+          };
+
+    });
+
+}
+
+
+function calculateDocument(type) {
+
+  const rows =
+    document
+      .querySelectorAll(
+        `#${type}Lines .line-item`
+      );
+
+
+  let subtotal = 0;
+
+
+  rows.forEach(row => {
+
+    const qty =
+      Number(
+        row
+          .querySelector(
+            `.${type}-item-qty`
+          )
+          .value || 0
+      );
+
+
+    const price =
+      Number(
+        row
+          .querySelector(
+            `.${type}-item-price`
+          )
+          .value || 0
+      );
+
+
+    const total =
+      qty * price;
+
+
+    row
+      .querySelector(
+        `.${type}-item-total`
+      )
+      .value =
+        total.toFixed(2);
+
+
+    subtotal += total;
+
+  });
+
+
+  if (type === "estimate") {
+
+    $("estimateSubtotal")
+      .textContent =
+        money(subtotal);
+
+    $("estimateTotal")
+      .textContent =
+        money(subtotal);
+
+  } else {
+
+    const taxRate =
+      Number(
+        $("invoiceTaxRate").value || 0
+      );
+
+
+    const tax =
+      subtotal *
+      (taxRate / 100);
+
+
+    $("invoiceSubtotal")
+      .textContent =
+        money(subtotal);
+
+    $("invoiceTax")
+      .textContent =
+        money(tax);
+
+    $("invoiceTotal")
+      .textContent =
+        money(
+          subtotal + tax
+        );
+
+  }
+
+}
+
+
+function readLines(type) {
+
+  const lines = [];
+
+
+  document
+    .querySelectorAll(
+      `#${type}Lines .line-item`
+    )
+    .forEach(row => {
+
+      const name =
+        row
+          .querySelector(
+            `.${type}-item-name`
+          )
+          .value.trim();
+
+
+      if (!name) {
+        return;
+      }
+
+
+      const qty =
+        Number(
+          row
+            .querySelector(
+              `.${type}-item-qty`
+            )
+            .value || 0
+        );
+
+
+      const price =
+        Number(
+          row
+            .querySelector(
+              `.${type}-item-price`
+            )
+            .value || 0
+        );
+
+
+      lines.push({
+
+        item_name:
+          name,
+
+        item_desc:
+          row
+            .querySelector(
+              `.${type}-item-description`
+            )
+            .value.trim(),
+
+        quantity:
+          qty,
+
+        unit_price:
+          price,
+
+        line_total:
+          qty * price
+
+      });
+
+    });
+
+
+  return lines;
+
+}
+
+
+$("addEstimateLine")
+  .addEventListener(
+    "click",
+    () =>
+      addLine("estimate")
+  );
+
+
+$("addInvoiceLine")
+  .addEventListener(
+    "click",
+    () =>
+      addLine("invoice")
+  );
+
+
+$("invoiceTaxRate")
+  .addEventListener(
+    "input",
+    () =>
+      calculateDocument("invoice")
+  );
+
+
+/* ==================================================
+   ESTIMATES
+=================================================== */
+
+async function loadEstimates() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("estimates")
+      .select(`
+        *,
+        customers(
+          first_name,
+          last_name,
+          phone,
+          email,
+          address,
+          city,
+          state,
+          zip
+        )
+      `)
+      .order(
+        "created_at",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+    return;
+
+  }
+
+
+  estimates =
+    data || [];
+
+
+  renderEstimates(
+    estimates
+  );
+
+}
+
+
+function renderEstimates(list) {
+
+  if (!list.length) {
+
+    $("estimateTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          No estimates.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Estimate</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  list.forEach(estimate => {
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openEstimate(${estimate.id})"
+      >
+
+        <td>
+          ${estimate.estimate_number}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            customerName(
+              estimate.customers
+            )
+          )}
+        </td>
+
+        <td>
+          ${
+            dateDisplay(
+              estimate.quote_date
+            )
+          }
+        </td>
+
+        <td>
+          <span class="status">
+            ${estimate.status || ""}
+          </span>
+        </td>
+
+        <td>
+          ${money(estimate.total)}
+        </td>
+
+        <td>
+          <button
+            class="small-button red"
+            onclick="event.stopPropagation(); deleteEstimate(${estimate.id})"
+          >
+            Delete
+          </button>
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("estimateTableWrapper")
+    .innerHTML =
+      html;
+
+}
+
+
+$("estimateSearch")
+  .addEventListener(
+    "input",
+    event => {
+
+      const q =
+        event.target.value
+          .toLowerCase();
+
+
+      renderEstimates(
+
+        estimates.filter(
+          x =>
+            [
+              x.estimate_number,
+              x.status,
+              x.subject,
+              customerName(
+                x.customers
+              )
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(q)
+        )
+
+      );
+
+    }
+  );
+
+
+$("estimateForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const lines =
+        readLines("estimate");
+
+
+      if (!lines.length) {
+
+        $("estimateMessage")
+          .textContent =
+            "Add at least one estimate item.";
+
+        return;
+
+      }
+
+
+      const subtotal =
+        lines.reduce(
+          (sum,line) =>
+            sum +
+            Number(line.line_total),
+          0
+        );
+
+
+      const number =
+        makeNumber("EST");
+
+
+      const {
+        data: estimate,
+        error
+      } =
+        await db
+          .from("estimates")
+          .insert({
+
+            customer_id:
+              Number(
+                $("estimateCustomer")
+                  .value
+              ),
+
+            repair_job_id:
+              $("estimateJob").value
+                ? Number(
+                    $("estimateJob").value
+                  )
+                : null,
+
+            estimate_number:
+              number,
+
+            status:
+              $("estimateStatus").value,
+
+            quote_date:
+              today(),
+
+            expiry_date:
+              $("estimateExpiry").value ||
+              null,
+
+            subject:
+              $("estimateSubject")
+                .value.trim(),
+
+            subtotal,
+            total:
+              subtotal,
+
+            source:
+              "Flores"
+
+          })
+          .select()
+          .single();
+
+
+      if (error) {
+
+        $("estimateMessage")
+          .textContent =
+            error.message;
+
+        return;
+
+      }
+
+
+      const rows =
+        lines.map(line => ({
+
+          estimate_id:
+            estimate.id,
+
+          ...line
+
+        }));
+
+
+      const {
+        error: lineError
+      } =
+        await db
+          .from("estimate_items")
+          .insert(rows);
+
+
+      if (lineError) {
+
+        $("estimateMessage")
+          .textContent =
+            lineError.message;
+
+        return;
+
+      }
+
+
+      $("estimateMessage")
+        .textContent =
+          `Estimate ${number} created.`;
+
+      $("estimateMessage")
+        .className =
+          "message success";
+
+
+      event.target.reset();
+
+      $("estimateLines")
+        .innerHTML = "";
+
+      addLine("estimate");
+
+
+      await loadEstimates();
+
+    }
+  );
+
+
+async function openEstimate(id) {
+
+  const estimate =
+    estimates.find(
+      x =>
+        x.id === id
+    );
+
+
+  const {
+    data: items
+  } =
+    await db
+      .from("estimate_items")
+      .select("*")
+      .eq(
+        "estimate_id",
+        id
+      );
+
+
+  $("estimateModalTitle")
+    .textContent =
+      `Estimate ${
+        estimate.estimate_number
+      }`;
+
+
+  let html = `
+
+    <div class="detail-grid">
+
+      <div class="detail-box">
+        <span>Customer</span>
+        <strong>
+          ${escapeHtml(
+            customerName(
+              estimate.customers
+            )
+          )}
+        </strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Total</span>
+        <strong>
+          ${money(estimate.total)}
+        </strong>
+      </div>
+
+      <div class="detail-box">
+
+        <span>Status</span>
+
+        <select
+          id="detailEstimateStatus"
+        >
+
+          <option>Draft</option>
+          <option>Sent</option>
+          <option>Accepted</option>
+          <option>Declined</option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+  `;
+
+
+  (items || [])
+    .forEach(item => {
+
+      html += `
+
+        <tr>
+
+          <td>
+            ${escapeHtml(item.item_name)}
+          </td>
+
+          <td>
+            ${escapeHtml(item.item_desc)}
+          </td>
+
+          <td>
+            ${item.quantity}
+          </td>
+
+          <td>
+            ${money(item.unit_price)}
+          </td>
+
+          <td>
+            ${money(item.line_total)}
+          </td>
+
+        </tr>
+      `;
+
+    });
+
+
+  html += `
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <div class="button-row">
+
+      <button
+        class="action-button"
+        onclick="saveEstimateStatus(${id})"
+      >
+        Save Status
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="printEstimate(${id})"
+      >
+        Print / Save PDF
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="emailEstimate(${id})"
+      >
+        Email Quote
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="textEstimate(${id})"
+      >
+        Text Quote
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="createInvoiceFromEstimate(${id})"
+      >
+        Create Invoice
+      </button>
+
+      <button
+        class="danger-button"
+        onclick="deleteEstimate(${id})"
+      >
+        Delete Estimate
+      </button>
+
+    </div>
+  `;
+
+
+  $("estimateModalContent")
+    .innerHTML =
+      html;
+
+
+  $("detailEstimateStatus")
+    .value =
+      estimate.status;
+
+
+  $("estimateModal")
+    .classList
+    .add("open");
+
+}
+
+
+async function saveEstimateStatus(id) {
+
+  await db
+    .from("estimates")
+    .update({
+      status:
+        $("detailEstimateStatus")
+          .value
+    })
+    .eq(
+      "id",
+      id
+    );
+
+
+  await loadEstimates();
+
+  closeModal(
+    "estimateModal"
+  );
+
+}
+
+
+/* ==================================================
+   INVOICES
+=================================================== */
+
+async function loadInvoices() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("invoices")
+      .select(`
+        *,
+        customers(
+          first_name,
+          last_name,
+          phone,
+          email,
+          address,
+          city,
+          state,
+          zip
+        )
+      `)
+      .order(
+        "created_at",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+    return;
+
+  }
+
+
+  invoices =
+    data || [];
+
+
+  $("invoiceCount")
+    .textContent =
+      invoices.length;
+
+
+  $("balanceDue")
+    .textContent =
+      money(
+
+        invoices.reduce(
+          (sum,invoice) =>
+            sum +
+            Number(
+              invoice.balance_due || 0
+            ),
+          0
+        )
+
+      );
+
+
+  renderInvoices(
+    invoices
+  );
+
+  renderRecentInvoices();
+
+  populatePaymentInvoices();
+
+}
+
+
+function populatePaymentInvoices() {
+
+  $("paymentInvoice")
+    .innerHTML =
+      `<option value="">
+        Select invoice
+      </option>`;
+
+
+  invoices.forEach(invoice => {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+
+    option.value =
+      invoice.id;
+
+
+    option.textContent =
+      `${invoice.invoice_number} — ${
+        money(invoice.balance_due)
+      } due`;
+
+
+    $("paymentInvoice")
+      .appendChild(option);
+
+  });
+
+}
+
+
+function renderInvoices(list) {
+
+  if (!list.length) {
+
+    $("invoiceTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          No invoices.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Invoice</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Balance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  list.forEach(invoice => {
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openInvoice(${invoice.id})"
+      >
+
+        <td>
+          ${invoice.invoice_number}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            customerName(
+              invoice.customers
+            )
+          )}
+        </td>
+
+        <td>
+          ${dateDisplay(
+            invoice.invoice_date
+          )}
+        </td>
+
+        <td>
+          <span class="status">
+            ${invoice.status || ""}
+          </span>
+        </td>
+
+        <td>
+          ${money(invoice.total)}
+        </td>
+
+        <td class="money-positive">
+          ${money(invoice.amount_paid)}
+        </td>
+
+        <td class="${
+          Number(invoice.balance_due) > 0
+            ? "money-due"
+            : "money-positive"
+        }">
+          ${money(invoice.balance_due)}
+        </td>
+
+        <td>
+          <button
+            class="small-button red"
+            onclick="event.stopPropagation(); deleteInvoice(${invoice.id})"
+          >
+            Delete
+          </button>
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("invoiceTableWrapper")
+    .innerHTML =
+      html;
+
+}
+
+
+function renderRecentInvoices() {
+
+  const recent =
+    invoices.slice(0,5);
+
+
+  if (!recent.length) {
+
+    $("recentInvoices")
+      .innerHTML =
+        `<p class="empty">
+          No invoices.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Invoice</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  recent.forEach(invoice => {
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openInvoice(${invoice.id})"
+      >
+
+        <td>
+          ${invoice.invoice_number}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            customerName(
+              invoice.customers
+            )
+          )}
+        </td>
+
+        <td>
+          ${money(invoice.total)}
+        </td>
+
+        <td>
+          ${money(invoice.balance_due)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("recentInvoices")
+    .innerHTML =
+      html;
+
+}
+
+
+$("invoiceSearch")
+  .addEventListener(
+    "input",
+    event => {
+
+      const q =
+        event.target.value
+          .toLowerCase();
+
+
+      renderInvoices(
+
+        invoices.filter(
+          x =>
+            [
+              x.invoice_number,
+              x.status,
+              customerName(
+                x.customers
+              )
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(q)
+        )
+
+      );
+
+    }
+  );
+
+
+$("invoiceForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const lines =
+        readLines("invoice");
+
+
+      if (!lines.length) {
+
+        $("invoiceMessage")
+          .textContent =
+            "Add at least one invoice item.";
+
+        return;
+
+      }
+
+
+      const subtotal =
+        lines.reduce(
+          (sum,line) =>
+            sum +
+            Number(line.line_total),
+          0
+        );
+
+
+      const taxRate =
+        Number(
+          $("invoiceTaxRate").value || 0
+        );
+
+
+      const tax =
+        subtotal *
+        (taxRate / 100);
+
+
+      const total =
+        subtotal + tax;
+
+
+      const number =
+        makeNumber("INV");
+
+
+      const {
+        data: invoice,
+        error
+      } =
+        await db
+          .from("invoices")
+          .insert({
+
+            customer_id:
+              Number(
+                $("invoiceCustomer")
+                  .value
+              ),
+
+            repair_job_id:
+              $("invoiceJob").value
+                ? Number(
+                    $("invoiceJob").value
+                  )
+                : null,
+
+            invoice_number:
+              number,
+
+            status:
+              $("invoiceStatus").value,
+
+            subtotal,
+            tax,
+            total,
+
+            amount_paid:
+              0,
+
+            balance_due:
+              total,
+
+            due_date:
+              $("invoiceDueDate").value ||
+              null,
+
+            invoice_date:
+              today(),
+
+            notes:
+              $("invoiceNotes")
+                .value.trim(),
+
+            source:
+              "Flores"
+
+          })
+          .select()
+          .single();
+
+
+      if (error) {
+
+        $("invoiceMessage")
+          .textContent =
+            error.message;
+
+        return;
+
+      }
+
+
+      const rows =
+        lines.map(line => ({
+
+          invoice_id:
+            invoice.id,
+
+          ...line
+
+        }));
+
+
+      const {
+        error: lineError
+      } =
+        await db
+          .from("invoice_items")
+          .insert(rows);
+
+
+      if (lineError) {
+
+        $("invoiceMessage")
+          .textContent =
+            lineError.message;
+
+        return;
+
+      }
+
+
+      $("invoiceMessage")
+        .textContent =
+          `Invoice ${number} created.`;
+
+      $("invoiceMessage")
+        .className =
+          "message success";
+
+
+      event.target.reset();
+
+      $("invoiceTaxRate").value =
+        0;
+
+      $("invoiceLines")
+        .innerHTML = "";
+
+      addLine("invoice");
+
+
+      await loadInvoices();
+
+    }
+  );
+
+
+async function openInvoice(id) {
+
+  const invoice =
+    invoices.find(
+      x =>
+        x.id === id
+    );
+
+
+  const {
+    data: items
+  } =
+    await db
+      .from("invoice_items")
+      .select("*")
+      .eq(
+        "invoice_id",
+        id
+      );
+
+
+  const {
+    data: invoicePayments
+  } =
+    await db
+      .from("payments")
+      .select("*")
+      .eq(
+        "invoice_id",
+        id
+      )
+      .order(
+        "payment_date",
+        { ascending:false }
+      );
+
+
+  $("invoiceModalTitle")
+    .textContent =
+      `Invoice ${
+        invoice.invoice_number
+      }`;
+
+
+  let html = `
+
+    <div class="detail-grid">
+
+      <div class="detail-box">
+        <span>Customer</span>
+        <strong>
+          ${escapeHtml(
+            customerName(
+              invoice.customers
+            )
+          )}
+        </strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Total</span>
+        <strong>
+          ${money(invoice.total)}
+        </strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Paid</span>
+        <strong>
+          ${money(invoice.amount_paid)}
+        </strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Balance Due</span>
+        <strong>
+          ${money(invoice.balance_due)}
+        </strong>
+      </div>
+
+      <div class="detail-box">
+
+        <span>Status</span>
+
+        <select
+          id="detailInvoiceStatus"
+        >
+
+          <option>Draft</option>
+          <option>Sent</option>
+          <option>Partially Paid</option>
+          <option>Paid</option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+  `;
+
+
+  (items || [])
+    .forEach(item => {
+
+      html += `
+
+        <tr>
+
+          <td>
+            ${escapeHtml(item.item_name)}
+          </td>
+
+          <td>
+            ${escapeHtml(item.item_desc)}
+          </td>
+
+          <td>
+            ${item.quantity}
+          </td>
+
+          <td>
+            ${money(item.unit_price)}
+          </td>
+
+          <td>
+            ${money(item.line_total)}
+          </td>
+
+        </tr>
+      `;
+
+    });
+
+
+  html += `
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <h3>Payments</h3>
+  `;
+
+
+  if (
+    !invoicePayments ||
+    !invoicePayments.length
+  ) {
+
+    html += `
+      <p class="empty">
+        No payments recorded.
+      </p>
+    `;
+
+  } else {
+
+    html += `
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Method</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+    `;
+
+
+    invoicePayments
+      .forEach(payment => {
+
+        html += `
+
+          <tr>
+
+            <td>
+              ${dateDisplay(
+                payment.payment_date
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                payment.payment_method
+              )}
+            </td>
+
+            <td>
+              ${money(payment.amount)}
+            </td>
+
+          </tr>
+        `;
+
+      });
+
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+  }
+
+
+  html += `
+
+    <div class="button-row">
+
+      <button
+        class="action-button"
+        onclick="saveInvoiceStatus(${id})"
+      >
+        Save Status
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="printInvoice(${id})"
+      >
+        Print / Save PDF
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="emailInvoice(${id})"
+      >
+        Email Invoice
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="textInvoice(${id})"
+      >
+        Text Invoice
+      </button>
+
+      <button
+        class="danger-button"
+        onclick="deleteInvoice(${id})"
+      >
+        Delete Invoice
+      </button>
+
+    </div>
+  `;
+
+
+  $("invoiceModalContent")
+    .innerHTML =
+      html;
+
+
+  $("detailInvoiceStatus")
+    .value =
+      invoice.status;
+
+
+  $("invoiceModal")
+    .classList
+    .add("open");
+
+}
+
+
+async function saveInvoiceStatus(id) {
+
+  await db
+    .from("invoices")
+    .update({
+      status:
+        $("detailInvoiceStatus")
+          .value
+    })
+    .eq(
+      "id",
+      id
+    );
+
+
+  await loadInvoices();
+
+  closeModal(
+    "invoiceModal"
+  );
+
+}
+
+
+/* ==================================================
+   PAYMENTS
+=================================================== */
+
+async function loadPayments() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("payments")
+      .select(`
+        *,
+        customers(
+          first_name,
+          last_name
+        ),
+        invoices(
+          invoice_number
+        )
+      `)
+      .order(
+        "payment_date",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+    return;
+
+  }
+
+
+  payments =
+    data || [];
+
+
+  renderPayments();
+
+  calculateRevenue();
+
+}
+
+
+
+function calculateRevenue() {
+
+  const now =
+    new Date();
+
+  const currentYear =
+    now.getFullYear();
+
+  const currentMonth =
+    now.getMonth();
+
+
+  let monthTotal = 0;
+  let yearTotal = 0;
+
+
+  const monthlyMap = {};
+  const yearlyMap = {};
+
+
+  payments.forEach(payment => {
+
+    if (!payment.payment_date) {
+      return;
+    }
+
+
+    const date =
+      new Date(
+        payment.payment_date +
+        "T00:00:00"
+      );
+
+
+    const amount =
+      Number(
+        payment.amount || 0
+      );
+
+
+    const year =
+      date.getFullYear();
+
+    const month =
+      date.getMonth();
+
+
+    if (
+      year === currentYear
+    ) {
+
+      yearTotal += amount;
+
+    }
+
+
+    if (
+      year === currentYear &&
+      month === currentMonth
+    ) {
+
+      monthTotal += amount;
+
+    }
+
+
+    const monthKey =
+      `${year}-${String(
+        month + 1
+      ).padStart(2, "0")}`;
+
+
+    if (!monthlyMap[monthKey]) {
+
+      monthlyMap[monthKey] = {
+        year,
+        month,
+        total: 0,
+        payments: 0
+      };
+
+    }
+
+
+    monthlyMap[monthKey].total +=
+      amount;
+
+    monthlyMap[monthKey].payments +=
+      1;
+
+
+    if (!yearlyMap[year]) {
+
+      yearlyMap[year] = {
+        total: 0,
+        payments: 0
+      };
+
+    }
+
+
+    yearlyMap[year].total +=
+      amount;
+
+    yearlyMap[year].payments +=
+      1;
+
+  });
+
+
+  $("monthRevenue")
+    .textContent =
+      money(monthTotal);
+
+
+  $("yearRevenue")
+    .textContent =
+      money(yearTotal);
+
+
+  renderMonthlyRevenue(
+    monthlyMap
+  );
+
+
+  renderYearlyRevenue(
+    yearlyMap
+  );
+
+}
+
+
+function renderMonthlyRevenue(map) {
+
+  const rows =
+    Object
+      .values(map)
+      .sort(
+        (a, b) => {
+
+          const aDate =
+            new Date(
+              a.year,
+              a.month,
+              1
+            );
+
+          const bDate =
+            new Date(
+              b.year,
+              b.month,
+              1
+            );
+
+          return bDate - aDate;
+
+        }
+      );
+
+
+  if (!rows.length) {
+
+    $("monthlyRevenueTable")
+      .innerHTML =
+        `<p class="empty">
+          No payment history yet.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Payments</th>
+          <th>Revenue</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  rows.forEach(row => {
+
+    const label =
+      new Date(
+        row.year,
+        row.month,
+        1
+      )
+        .toLocaleDateString(
+          undefined,
+          {
+            month: "long",
+            year: "numeric"
+          }
+        );
+
+
+    html += `
+
+      <tr>
+
+        <td>
+          ${label}
+        </td>
+
+        <td>
+          ${row.payments}
+        </td>
+
+        <td class="money-positive">
+          ${money(row.total)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("monthlyRevenueTable")
+    .innerHTML =
+      html;
+
+}
+
+
+function renderYearlyRevenue(map) {
+
+  const rows =
+    Object
+      .entries(map)
+      .map(
+        ([year, values]) => ({
+          year:
+            Number(year),
+
+          total:
+            values.total,
+
+          payments:
+            values.payments
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.year - a.year
+      );
+
+
+  if (!rows.length) {
+
+    $("yearlyRevenueTable")
+      .innerHTML =
+        `<p class="empty">
+          No payment history yet.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Payments</th>
+          <th>Revenue</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  rows.forEach(row => {
+
+    html += `
+
+      <tr>
+
+        <td>
+          ${row.year}
+        </td>
+
+        <td>
+          ${row.payments}
+        </td>
+
+        <td class="money-positive">
+          ${money(row.total)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("yearlyRevenueTable")
+    .innerHTML =
+      html;
+
+}
+
+
+
+function renderPayments() {
+
+  if (!payments.length) {
+
+    $("paymentTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          No payments.
+        </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Payment #</th>
+          <th>Customer</th>
+          <th>Invoice</th>
+          <th>Method</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  payments.forEach(payment => {
+
+    html += `
+
+      <tr>
+
+        <td>
+          ${dateDisplay(
+            payment.payment_date
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            payment.payment_number
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            customerName(
+              payment.customers
+            )
+          )}
+        </td>
+
+        <td>
+          ${
+            payment.invoices
+              ?.invoice_number || ""
+          }
+        </td>
+
+        <td>
+          ${escapeHtml(
+            payment.payment_method
+          )}
+        </td>
+
+        <td class="money-positive">
+          ${money(payment.amount)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  $("paymentTableWrapper")
+    .innerHTML =
+      html;
+
+}
+
+
+$("paymentInvoice")
+  .addEventListener(
+    "change",
+    () => {
+
+      const invoice =
+        invoices.find(
+          x =>
+            x.id ===
+            Number(
+              $("paymentInvoice").value
+            )
+        );
+
+
+      if (invoice) {
+
+        $("paymentAmount").value =
+          Number(
+            invoice.balance_due || 0
+          ).toFixed(2);
+
+      }
+
+    }
+  );
+
+
+$("paymentForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const invoiceId =
+        Number(
+          $("paymentInvoice").value
+        );
+
+
+      const invoice =
+        invoices.find(
+          x =>
+            x.id === invoiceId
+        );
+
+
+      const amount =
+        Number(
+          $("paymentAmount").value
+        );
+
+
+      const {
+        error
+      } =
+        await db
+          .from("payments")
+          .insert({
+
+            invoice_id:
+              invoiceId,
+
+            customer_id:
+              invoice.customer_id,
+
+            amount,
+
+            payment_method:
+              $("paymentMethod").value,
+
+            payment_date:
+              $("paymentDate").value ||
+              today(),
+
+            reference:
+              $("paymentReference")
+                .value.trim(),
+
+            notes:
+              $("paymentNotes")
+                .value.trim(),
+
+            payment_number:
+              makeNumber("PAY"),
+
+            source:
+              "Flores"
+
+          });
+
+
+      if (error) {
+
+        $("paymentMessage")
+          .textContent =
+            error.message;
+
+        return;
+
+      }
+
+
+      const newPaid =
+        Number(
+          invoice.amount_paid || 0
+        ) +
+        amount;
+
+
+      const newBalance =
+        Math.max(
+          0,
+          Number(invoice.total) -
+          newPaid
+        );
+
+
+      let newStatus =
+        invoice.status;
+
+
+      if (newBalance === 0) {
+
+        newStatus =
+          "Paid";
+
+      } else if (newPaid > 0) {
+
+        newStatus =
+          "Partially Paid";
+
+      }
+
+
+      await db
+        .from("invoices")
+        .update({
+
+          amount_paid:
+            newPaid,
+
+          balance_due:
+            newBalance,
+
+          status:
+            newStatus
+
+        })
+        .eq(
+          "id",
+          invoiceId
+        );
+
+
+      $("paymentMessage")
+        .textContent =
+          "Payment recorded.";
+
+      $("paymentMessage")
+        .className =
+          "message success";
+
+
+      event.target.reset();
+
+      $("paymentDate").value =
+        today();
+
+
+      await loadInvoices();
+
+      await loadPayments();
+
+    }
+  );
+
+
+
+/* ==================================================
+   CUSTOMER DOCUMENTS / QUOTES / INVOICES
+=================================================== */
+
+function customerContact(customer) {
+
+  return {
+    name:
+      customerName(customer),
+
+    phone:
+      customer?.phone || "",
+
+    email:
+      customer?.email || ""
+  };
+
+}
+
+
+function cleanPhone(phone) {
+
+  return String(phone || "")
+    .replace(/[^\d+]/g, "");
+
+}
+
+
+async function getEstimateItems(id) {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("estimate_items")
+      .select("*")
+      .eq("estimate_id", id)
+      .order("id", { ascending:true });
+
+
+  if (error) {
+
+    alert(error.message);
+
+    return [];
+
+  }
+
+
+  return data || [];
+
+}
+
+
+async function printEstimate(id) {
+
+  const estimate =
+    estimates.find(
+      x => x.id === id
+    );
+
+
+  if (!estimate) {
+    return;
+  }
+
+
+  const items =
+    await getEstimateItems(id);
+
+
+  let itemRows = "";
+
+
+  items.forEach(item => {
+
+    itemRows += `
+
+      <tr>
+
+        <td>
+          ${escapeHtml(
+            item.item_name
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            item.item_desc
+          )}
+        </td>
+
+        <td>
+          ${item.quantity}
+        </td>
+
+        <td>
+          ${money(
+            item.unit_price
+          )}
+        </td>
+
+        <td>
+          ${money(
+            item.line_total
+          )}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  const customer =
+    estimate.customers || {};
+
+
+  $("printArea")
+    .innerHTML = `
+
+      <div class="invoice-print">
+
+        <div class="invoice-print-header">
+
+          <div>
+
+            <img
+              src="logo.png"
+              alt="Flores Small Engine Repair"
+            >
+
+            <p>
+              <strong>
+                Flores Small Engine Repair
+              </strong>
+              <br>
+              Abbeville, Louisiana
+              <br>
+              (337) 326-8324
+              <br>
+              floressenginerepair@gmail.com
+            </p>
+
+          </div>
+
+
+          <div class="invoice-print-title">
+
+            <h1>ESTIMATE</h1>
+
+            <p>
+              <strong>
+                ${escapeHtml(
+                  estimate.estimate_number
+                )}
+              </strong>
+            </p>
+
+            <p>
+              Date:
+              ${
+                dateDisplay(
+                  estimate.quote_date
+                )
+              }
+            </p>
+
+            ${
+              estimate.expiry_date
+                ? `
+                  <p>
+                    Expires:
+                    ${
+                      dateDisplay(
+                        estimate.expiry_date
+                      )
+                    }
+                  </p>
+                `
+                : ""
+            }
+
+          </div>
+
+        </div>
+
+
+        <h3>Prepared For</h3>
+
+        <p>
+
+          <strong>
+            ${
+              escapeHtml(
+                customerName(customer)
+              )
+            }
+          </strong>
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.address
+            )
+          }
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.city
+            )
+          }
+          ${
+            escapeHtml(
+              customer.state
+            )
+          }
+          ${
+            escapeHtml(
+              customer.zip
+            )
+          }
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.phone
+            )
+          }
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.email
+            )
+          }
+
+        </p>
+
+
+        ${
+          estimate.subject
+            ? `
+              <p>
+                <strong>Subject:</strong>
+                ${
+                  escapeHtml(
+                    estimate.subject
+                  )
+                }
+              </p>
+            `
+            : ""
+        }
+
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Item</th>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${itemRows}
+
+          </tbody>
+
+        </table>
+
+
+        <div class="print-total">
+
+          <p>
+            Subtotal:
+            <strong>
+              ${
+                money(
+                  estimate.subtotal
+                )
+              }
+            </strong>
+          </p>
+
+          <h2>
+            Estimate Total:
+            ${
+              money(
+                estimate.total
+              )
+            }
+          </h2>
+
+        </div>
+
+
+        <hr>
+
+
+        <p>
+          ${
+            escapeHtml(
+              estimate.notes ||
+              "This estimate is subject to change if additional problems are found. Any additional work will be discussed before proceeding."
+            )
+          }
+        </p>
+
+        <p style="font-size:12px; color:#555;">
+          Manufacturer warranties apply to parts when available.
+          Labor is guaranteed for 30 days after completed repair.
+        </p>
+
+      </div>
+    `;
+
+
+  window.print();
+
+}
+
+
+async function emailEstimate(id) {
+
+  const estimate =
+    estimates.find(
+      x => x.id === id
+    );
+
+
+  if (!estimate) {
+    return;
+  }
+
+
+  const contact =
+    customerContact(
+      estimate.customers
+    );
+
+
+  if (!contact.email) {
+
+    alert(
+      "This customer does not have an email address saved."
+    );
+
+    return;
+  }
+
+
+  const items =
+    await getEstimateItems(id);
+
+
+  const itemText =
+    items
+      .map(
+        item =>
+          `${item.item_name} - ${item.quantity} x ${money(item.unit_price)} = ${money(item.line_total)}`
+      )
+      .join("\n");
+
+
+  const subject =
+    encodeURIComponent(
+      `Flores Small Engine Repair Estimate ${estimate.estimate_number}`
+    );
+
+
+  const body =
+    encodeURIComponent(
+`Hello ${contact.name},
+
+Here is your repair estimate from Flores Small Engine Repair.
+
+Estimate: ${estimate.estimate_number}
+Total: ${money(estimate.total)}
+
+${itemText}
+
+Please reply to approve the estimate or contact us with any questions.
+
+Flores Small Engine Repair
+(337) 326-8324`
+    );
+
+
+  location.href =
+    `mailto:${contact.email}?subject=${subject}&body=${body}`;
+
+}
+
+
+async function textEstimate(id) {
+
+  const estimate =
+    estimates.find(
+      x => x.id === id
+    );
+
+
+  if (!estimate) {
+    return;
+  }
+
+
+  const contact =
+    customerContact(
+      estimate.customers
+    );
+
+
+  if (!contact.phone) {
+
+    alert(
+      "This customer does not have a phone number saved."
+    );
+
+    return;
+  }
+
+
+  const body =
+    encodeURIComponent(
+`Hi ${contact.name}, this is Flores Small Engine Repair. Your estimate ${estimate.estimate_number} is ${money(estimate.total)}. Reply to approve or contact me with any questions.`
+    );
+
+
+  location.href =
+    `sms:${cleanPhone(contact.phone)}?body=${body}`;
+
+}
+
+
+async function emailInvoice(id) {
+
+  const invoice =
+    invoices.find(
+      x => x.id === id
+    );
+
+
+  if (!invoice) {
+    return;
+  }
+
+
+  const contact =
+    customerContact(
+      invoice.customers
+    );
+
+
+  if (!contact.email) {
+
+    alert(
+      "This customer does not have an email address saved."
+    );
+
+    return;
+  }
+
+
+  const {
+    data: items,
+    error
+  } =
+    await db
+      .from("invoice_items")
+      .select("*")
+      .eq("invoice_id", id)
+      .order("id", { ascending:true });
+
+
+  if (error) {
+
+    alert(error.message);
+
+    return;
+  }
+
+
+  const itemText =
+    (items || [])
+      .map(
+        item =>
+          `${item.item_name} - ${item.quantity} x ${money(item.unit_price)} = ${money(item.line_total)}`
+      )
+      .join("\n");
+
+
+  const subject =
+    encodeURIComponent(
+      `Flores Small Engine Repair Invoice ${invoice.invoice_number}`
+    );
+
+
+  const body =
+    encodeURIComponent(
+`Hello ${contact.name},
+
+Here is your invoice from Flores Small Engine Repair.
+
+Invoice: ${invoice.invoice_number}
+Total: ${money(invoice.total)}
+Paid: ${money(invoice.amount_paid)}
+Balance Due: ${money(invoice.balance_due)}
+
+${itemText}
+
+Thank you for your business.
+
+Flores Small Engine Repair
+(337) 326-8324`
+    );
+
+
+  location.href =
+    `mailto:${contact.email}?subject=${subject}&body=${body}`;
+
+}
+
+
+function textInvoice(id) {
+
+  const invoice =
+    invoices.find(
+      x => x.id === id
+    );
+
+
+  if (!invoice) {
+    return;
+  }
+
+
+  const contact =
+    customerContact(
+      invoice.customers
+    );
+
+
+  if (!contact.phone) {
+
+    alert(
+      "This customer does not have a phone number saved."
+    );
+
+    return;
+  }
+
+
+  const body =
+    encodeURIComponent(
+`Hi ${contact.name}, this is Flores Small Engine Repair. Invoice ${invoice.invoice_number}: total ${money(invoice.total)}, balance due ${money(invoice.balance_due)}. Thank you for your business.`
+    );
+
+
+  location.href =
+    `sms:${cleanPhone(contact.phone)}?body=${body}`;
+
+}
+
+
+
+/* ==================================================
+   PRINT INVOICE
+=================================================== */
+
+async function printInvoice(id) {
+
+  const invoice =
+    invoices.find(
+      x =>
+        x.id === id
+    );
+
+
+  const {
+    data: items
+  } =
+    await db
+      .from("invoice_items")
+      .select("*")
+      .eq(
+        "invoice_id",
+        id
+      );
+
+
+  let itemRows = "";
+
+
+  (items || [])
+    .forEach(item => {
+
+      itemRows += `
+
+        <tr>
+
+          <td>
+            ${escapeHtml(
+              item.item_name
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              item.item_desc
+            )}
+          </td>
+
+          <td>
+            ${item.quantity}
+          </td>
+
+          <td>
+            ${money(
+              item.unit_price
+            )}
+          </td>
+
+          <td>
+            ${money(
+              item.line_total
+            )}
+          </td>
+
+        </tr>
+      `;
+
+    });
+
+
+  const customer =
+    invoice.customers || {};
+
+
+  $("printArea")
+    .innerHTML = `
+
+      <div class="invoice-print">
+
+        <div class="invoice-print-header">
+
+          <div>
+
+            <img
+              src="logo.png"
+              alt="Flores Small Engine Repair"
+            >
+
+            <p>
+              <strong>
+                Flores Small Engine Repair
+              </strong>
+              <br>
+              Abbeville, Louisiana
+              <br>
+              (337) 326-8324
+              <br>
+              floressenginerepair@gmail.com
+            </p>
+
+          </div>
+
+
+          <div class="invoice-print-title">
+
+            <h1>INVOICE</h1>
+
+            <p>
+              <strong>
+                ${
+                  invoice.invoice_number
+                }
+              </strong>
+            </p>
+
+            <p>
+              Date:
+              ${
+                dateDisplay(
+                  invoice.invoice_date
+                )
+              }
+            </p>
+
+            <p>
+              Due:
+              ${
+                dateDisplay(
+                  invoice.due_date
+                )
+              }
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <h3>Bill To</h3>
+
+        <p>
+
+          <strong>
+            ${
+              escapeHtml(
+                customerName(customer)
+              )
+            }
+          </strong>
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.address
+            )
+          }
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.city
+            )
+          }
+          ${
+            escapeHtml(
+              customer.state
+            )
+          }
+          ${
+            escapeHtml(
+              customer.zip
+            )
+          }
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.phone
+            )
+          }
+
+          <br>
+
+          ${
+            escapeHtml(
+              customer.email
+            )
+          }
+
+        </p>
+
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Item</th>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${itemRows}
+
+          </tbody>
+
+        </table>
+
+
+        <div class="print-total">
+
+          <p>
+            Subtotal:
+            <strong>
+              ${
+                money(
+                  invoice.subtotal
+                )
+              }
+            </strong>
+          </p>
+
+          <p>
+            Tax:
+            <strong>
+              ${
+                money(
+                  invoice.tax
+                )
+              }
+            </strong>
+          </p>
+
+          <p>
+            Total:
+            <strong>
+              ${
+                money(
+                  invoice.total
+                )
+              }
+            </strong>
+          </p>
+
+          <p>
+            Amount Paid:
+            <strong>
+              ${
+                money(
+                  invoice.amount_paid
+                )
+              }
+            </strong>
+          </p>
+
+          <h2>
+            Balance Due:
+            ${
+              money(
+                invoice.balance_due
+              )
+            }
+          </h2>
+
+        </div>
+
+
+        <hr>
+
+
+        <p>
+          ${
+            escapeHtml(
+              invoice.notes ||
+              "Thank you for your business."
+            )
+          }
+        </p>
+
+        <p style="font-size:12px; color:#555;">
+          Manufacturer warranties apply to
+          parts when available. Labor is
+          guaranteed for 30 days.
+        </p>
+
+      </div>
+    `;
+
+
+  window.print();
+
+}
+
+
+
+/* ==================================================
+   DELETE + ESTIMATE TO INVOICE
+=================================================== */
+
+async function deleteCustomer(id) {
+
+  const customer =
+    customers.find(x => x.id === id);
+
+  if (!customer) return;
+
+  const name =
+    customerName(customer) || "this customer";
+
+  if (!confirm(
+    `Delete ${name}?\n\nThis is only allowed if the customer has no repair jobs, estimates, invoices, or equipment attached.`
+  )) {
+    return;
+  }
+
+  const checks = [
+    ["repair_jobs", "customer_id"],
+    ["estimates", "customer_id"],
+    ["invoices", "customer_id"],
+    ["equipment", "customer_id"]
+  ];
+
+  for (const [table, column] of checks) {
+
+    const { count, error } =
+      await db
+        .from(table)
+        .select("id", {
+          count: "exact",
+          head: true
+        })
+        .eq(column, id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (count > 0) {
+      alert(
+        `Cannot delete ${name} yet. They still have records attached. Delete their repair jobs, estimates/invoices, or equipment first.`
+      );
+      return;
+    }
+  }
+
+  const { error } =
+    await db
+      .from("customers")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadCustomers();
+}
+
+
+async function deleteEstimate(id) {
+
+  const estimate =
+    estimates.find(x => x.id === id);
+
+  if (!estimate) return;
+
+  if (!confirm(
+    `Delete estimate ${estimate.estimate_number}?\n\nThis permanently deletes the quote and its line items.`
+  )) {
+    return;
+  }
+
+  const linkedInvoice =
+    invoices.find(
+      invoice =>
+        Number(invoice.estimate_id) === Number(id)
+    );
+
+  if (linkedInvoice) {
+    alert(
+      `This estimate is linked to invoice ${linkedInvoice.invoice_number}. Delete that invoice first if you still want to remove the estimate.`
+    );
+    return;
+  }
+
+  let result =
+    await db
+      .from("estimate_items")
+      .delete()
+      .eq("estimate_id", id);
+
+  if (result.error) {
+    alert(result.error.message);
+    return;
+  }
+
+  result =
+    await db
+      .from("estimates")
+      .delete()
+      .eq("id", id);
+
+  if (result.error) {
+    alert(result.error.message);
+    return;
+  }
+
+  closeModal("estimateModal");
+  await loadEstimates();
+}
+
+
+async function deleteInvoice(id) {
+
+  const invoice =
+    invoices.find(x => x.id === id);
+
+  if (!invoice) return;
+
+  const hasPayments =
+    Number(invoice.amount_paid || 0) > 0;
+
+  const warning =
+    hasPayments
+      ? "\n\nWARNING: This invoice has payments. Deleting it will also delete its payment records."
+      : "";
+
+  if (!confirm(
+    `Delete invoice ${invoice.invoice_number}?\n\nThis permanently deletes the invoice and its line items.${warning}`
+  )) {
+    return;
+  }
+
+  let result =
+    await db
+      .from("payments")
+      .delete()
+      .eq("invoice_id", id);
+
+  if (result.error) {
+    alert(result.error.message);
+    return;
+  }
+
+  result =
+    await db
+      .from("invoice_items")
+      .delete()
+      .eq("invoice_id", id);
+
+  if (result.error) {
+    alert(result.error.message);
+    return;
+  }
+
+  result =
+    await db
+      .from("invoices")
+      .delete()
+      .eq("id", id);
+
+  if (result.error) {
+    alert(result.error.message);
+    return;
+  }
+
+  closeModal("invoiceModal");
+  await loadInvoices();
+  await loadPayments();
+}
+
+
+async function createInvoiceFromEstimate(id) {
+
+  const estimate =
+    estimates.find(x => x.id === id);
+
+  if (!estimate) return;
+
+  const existing =
+    invoices.find(
+      invoice =>
+        Number(invoice.estimate_id) === Number(id)
+    );
+
+  if (existing) {
+    alert(
+      `Estimate ${estimate.estimate_number} already has invoice ${existing.invoice_number}.`
+    );
+    return;
+  }
+
+  const {
+    data: items,
+    error: itemLoadError
+  } =
+    await db
+      .from("estimate_items")
+      .select("*")
+      .eq("estimate_id", id);
+
+  if (itemLoadError) {
+    alert(itemLoadError.message);
+    return;
+  }
+
+  if (!items || !items.length) {
+    alert("This estimate has no items to invoice.");
+    return;
+  }
+
+  if (!confirm(
+    `Create an invoice from estimate ${estimate.estimate_number}?\n\nAll quote items will transfer automatically.`
+  )) {
+    return;
+  }
+
+  const subtotal =
+    items.reduce(
+      (sum, item) =>
+        sum + Number(item.line_total || 0),
+      0
+    );
+
+  const number =
+    makeNumber("INV");
+
+  const {
+    data: invoice,
+    error
+  } =
+    await db
+      .from("invoices")
+      .insert({
+        customer_id:
+          estimate.customer_id,
+
+        repair_job_id:
+          estimate.repair_job_id || null,
+
+        estimate_id:
+          estimate.id,
+
+        invoice_number:
+          number,
+
+        status:
+          "Draft",
+
+        subtotal,
+        tax:
+          0,
+
+        total:
+          subtotal,
+
+        amount_paid:
+          0,
+
+        balance_due:
+          subtotal,
+
+        invoice_date:
+          today(),
+
+        due_date:
+          null,
+
+        notes:
+          `Created from estimate ${estimate.estimate_number}`,
+
+        source:
+          "Flores"
+      })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  const rows =
+    items.map(item => ({
+      invoice_id:
+        invoice.id,
+
+      item_name:
+        item.item_name,
+
+      item_desc:
+        item.item_desc,
+
+      quantity:
+        Number(item.quantity || 0),
+
+      unit_price:
+        Number(item.unit_price || 0),
+
+      line_total:
+        Number(item.line_total || 0)
+    }));
+
+  const {
+    error: lineError
+  } =
+    await db
+      .from("invoice_items")
+      .insert(rows);
+
+  if (lineError) {
+
+    await db
+      .from("invoices")
+      .delete()
+      .eq("id", invoice.id);
+
+    alert(lineError.message);
+    return;
+  }
+
+  await db
+    .from("estimates")
+    .update({
+      status:
+        "Accepted"
+    })
+    .eq("id", id);
+
+  closeModal("estimateModal");
+
+  await loadEstimates();
+  await loadInvoices();
+
+  alert(
+    `Invoice ${number} created. All estimate items were transferred.`
+  );
+
+  const invoiceTab =
+    document.querySelector(
+      '.nav-tab[data-view="invoicesView"]'
+    );
+
+  if (invoiceTab) {
+    invoiceTab.click();
+  }
+
+  openInvoice(invoice.id);
+}
+
+
+/* ==================================================
+   START
+=================================================== */
+
+async function startAdmin() {
+
+  const allowed =
+    await protectPage();
+
+
+  if (!allowed) {
+    return;
+  }
+
+
+  $("paymentDate").value =
+    today();
+
+
+  addLine("estimate");
+  addLine("invoice");
+
+
+  await loadCustomers();
+  await loadJobs();
+  await loadEstimates();
+  await loadInvoices();
+  await loadPayments();
+
+}
+
+
+startAdmin();
+
+</script>
+
+
+</body>
+</html>
