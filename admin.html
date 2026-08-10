@@ -7413,6 +7413,97 @@ async function openInvoice(id) {
     </div>
 
 
+    ${
+      Number(invoice.balance_due || 0) > 0
+        ? `
+          <div
+            class="panel"
+            style="margin-top:20px;margin-bottom:20px;"
+          >
+
+            <h3 style="margin-top:0;">
+              Add Payment
+            </h3>
+
+            <div class="form-grid three">
+
+              <label>
+                Amount
+                <input
+                  id="invoicePaymentAmount"
+                  type="number"
+                  min="0.01"
+                  max="${Number(invoice.balance_due || 0).toFixed(2)}"
+                  step="0.01"
+                  placeholder="0.00"
+                >
+              </label>
+
+              <label>
+                Payment Method
+                <select id="invoicePaymentMethod">
+                  <option>Cash</option>
+                  <option>Card</option>
+                  <option>Check</option>
+                  <option>Cash App</option>
+                  <option>Zelle</option>
+                  <option>Other</option>
+                </select>
+              </label>
+
+              <label>
+                Payment Date
+                <input
+                  id="invoicePaymentDate"
+                  type="date"
+                  value="${today()}"
+                >
+              </label>
+
+              <label class="full-width">
+                Reference / Note
+                <input
+                  id="invoicePaymentReference"
+                  placeholder="Optional"
+                >
+              </label>
+
+            </div>
+
+            <div class="button-row">
+
+              <button
+                class="action-button"
+                type="button"
+                onclick="recordInvoicePayment(${id})"
+              >
+                Add Partial Payment
+              </button>
+
+              <button
+                class="secondary-button"
+                type="button"
+                onclick="setInvoicePaymentToBalance(${id})"
+              >
+                Pay Full Balance
+              </button>
+
+            </div>
+
+            <p
+              id="invoicePaymentMessage"
+              class="message"
+            ></p>
+
+          </div>
+        `
+        : `
+          <p class="success" style="font-weight:bold;">
+            This invoice is paid in full.
+          </p>
+        `
+    }
+
     <h3>Payments</h3>
   `;
 
@@ -7542,6 +7633,249 @@ async function openInvoice(id) {
   $("invoiceModal")
     .classList
     .add("open");
+
+}
+
+
+
+function setInvoicePaymentToBalance(id) {
+
+  const invoice =
+    invoices.find(
+      x =>
+        Number(x.id) ===
+        Number(id)
+    );
+
+
+  if (!invoice) {
+    return;
+  }
+
+
+  const amountInput =
+    $("invoicePaymentAmount");
+
+
+  if (amountInput) {
+
+    amountInput.value =
+      Number(
+        invoice.balance_due || 0
+      )
+        .toFixed(2);
+
+  }
+
+}
+
+
+async function recordInvoicePayment(id) {
+
+  const invoice =
+    invoices.find(
+      x =>
+        Number(x.id) ===
+        Number(id)
+    );
+
+
+  if (!invoice) {
+
+    alert(
+      "Invoice could not be found."
+    );
+
+    return;
+
+  }
+
+
+  const amount =
+    Number(
+      $("invoicePaymentAmount")
+        ?.value || 0
+    );
+
+
+  const currentBalance =
+    Number(
+      invoice.balance_due || 0
+    );
+
+
+  if (
+    !amount ||
+    amount <= 0
+  ) {
+
+    $("invoicePaymentMessage")
+      .textContent =
+        "Enter a payment amount greater than $0.";
+
+    $("invoicePaymentMessage")
+      .className =
+        "message error";
+
+    return;
+
+  }
+
+
+  if (
+    amount >
+    currentBalance + 0.001
+  ) {
+
+    $("invoicePaymentMessage")
+      .textContent =
+        `Payment cannot be more than the remaining balance of ${money(currentBalance)}.`;
+
+    $("invoicePaymentMessage")
+      .className =
+        "message error";
+
+    return;
+
+  }
+
+
+  const method =
+    $("invoicePaymentMethod")
+      ?.value ||
+    "Cash";
+
+
+  const paymentDate =
+    $("invoicePaymentDate")
+      ?.value ||
+    today();
+
+
+  const reference =
+    $("invoicePaymentReference")
+      ?.value
+      .trim() ||
+    "";
+
+
+  const {
+    error: paymentError
+  } =
+    await db
+      .from("payments")
+      .insert({
+
+        invoice_id:
+          Number(id),
+
+        customer_id:
+          invoice.customer_id,
+
+        amount,
+
+        payment_method:
+          method,
+
+        payment_date:
+          paymentDate,
+
+        reference,
+
+        notes:
+          reference,
+
+        payment_number:
+          makeNumber("PAY"),
+
+        source:
+          "Flores"
+
+      });
+
+
+  if (paymentError) {
+
+    $("invoicePaymentMessage")
+      .textContent =
+        paymentError.message;
+
+    $("invoicePaymentMessage")
+      .className =
+        "message error";
+
+    return;
+
+  }
+
+
+  const newPaid =
+    Number(
+      invoice.amount_paid || 0
+    ) +
+    amount;
+
+
+  const newBalance =
+    Math.max(
+      0,
+      Number(invoice.total || 0) -
+      newPaid
+    );
+
+
+  const newStatus =
+    newBalance <= 0.001
+      ? "Paid"
+      : "Partially Paid";
+
+
+  const {
+    error: invoiceError
+  } =
+    await db
+      .from("invoices")
+      .update({
+
+        amount_paid:
+          newPaid,
+
+        balance_due:
+          newBalance,
+
+        status:
+          newStatus
+
+      })
+      .eq(
+        "id",
+        Number(id)
+      );
+
+
+  if (invoiceError) {
+
+    $("invoicePaymentMessage")
+      .textContent =
+        invoiceError.message;
+
+    $("invoicePaymentMessage")
+      .className =
+        "message error";
+
+    return;
+
+  }
+
+
+  await loadInvoices();
+
+  await loadPayments();
+
+
+  await openInvoice(
+    Number(id)
+  );
 
 }
 
