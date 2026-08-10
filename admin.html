@@ -873,6 +873,13 @@
 
     <button
       class="nav-tab"
+      data-view="itemsView"
+    >
+      Items
+    </button>
+
+    <button
+      class="nav-tab"
       data-view="jobsView"
     >
       Repair Jobs
@@ -1187,6 +1194,133 @@
 
         <div
           id="customerTableWrapper"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         ITEMS
+    =================================================== -->
+
+    <section
+      id="itemsView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Items
+      </h1>
+
+      <div class="panel">
+
+        <h2>Add / Update Item</h2>
+
+        <form id="itemForm">
+
+          <input type="hidden" id="itemId">
+
+          <div class="form-grid">
+
+            <label>
+              Item Name
+              <input
+                id="itemName"
+                required
+                placeholder="Labor"
+              >
+            </label>
+
+            <label>
+              Rate
+              <input
+                id="itemRate"
+                type="number"
+                step="0.01"
+                min="0"
+                value="0"
+                required
+              >
+            </label>
+
+            <label>
+              Unit
+              <input
+                id="itemUnit"
+                placeholder="each / hr / pcs"
+              >
+            </label>
+
+            <label>
+              Type
+              <select id="itemProductType">
+                <option value="goods">Goods</option>
+                <option value="service">Service</option>
+              </select>
+            </label>
+
+            <label class="full-width">
+              Description
+              <textarea id="itemDescription"></textarea>
+            </label>
+
+            <label>
+              Status
+              <select id="itemActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </label>
+
+          </div>
+
+          <div class="button-row">
+
+            <button
+              class="action-button"
+              type="submit"
+            >
+              Save Item
+            </button>
+
+            <button
+              id="clearItemButton"
+              class="secondary-button"
+              type="button"
+            >
+              Clear
+            </button>
+
+          </div>
+
+          <p
+            id="itemMessage"
+            class="message"
+          ></p>
+
+        </form>
+
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <h2>Saved Items</h2>
+
+          <input
+            id="itemSearch"
+            class="search-box"
+            placeholder="Search items..."
+          >
+
+        </div>
+
+        <div
+          id="itemTableWrapper"
           class="table-wrap"
         ></div>
 
@@ -2094,6 +2228,7 @@ const db =
 
 let serviceRequests = [];
 let customers = [];
+let items = [];
 let jobs = [];
 let estimates = [];
 let invoices = [];
@@ -2272,6 +2407,13 @@ async function loadViewData(viewId) {
   if (viewId === "customersView") {
 
     await loadCustomers();
+
+  }
+
+
+  if (viewId === "itemsView") {
+
+    await loadItems();
 
   }
 
@@ -2922,6 +3064,7 @@ async function convertRequest(id) {
 
 
   loadedViews.add("customersView");
+  loadedViews.add("itemsView");
   loadedViews.add("jobsView");
   loadedViews.add("requestsView");
 
@@ -4401,10 +4544,18 @@ function lineHtml(type) {
     <div class="line-item">
 
       <label>
-        Item
+        Saved Item
+        <select
+          class="catalog-item-select"
+          data-line-type="${type}"
+        >
+          ${catalogOptions()}
+        </select>
+
         <input
           class="${type}-item-name"
-          placeholder="Labor / Part"
+          placeholder="Item name"
+          style="margin-top:8px;"
         >
       </label>
 
@@ -4498,6 +4649,25 @@ function bindLineEvents(type) {
               calculateDocument(type);
 
         });
+
+
+      const catalogSelect =
+        row.querySelector(
+          ".catalog-item-select"
+        );
+
+
+      if (catalogSelect) {
+
+        catalogSelect.onchange =
+          () =>
+            applyCatalogItem(
+              type,
+              row,
+              catalogSelect.value
+            );
+
+      }
 
 
       row
@@ -8016,6 +8186,7 @@ async function startAdmin() {
 
   await Promise.all([
     loadCustomers(),
+    loadItems(),
     loadJobs(),
     loadInvoices(),
     loadPayments(),

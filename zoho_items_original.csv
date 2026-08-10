@@ -1,0 +1,44 @@
+Item ID,Item Name,Description,Rate,Tax1 Name,Tax1 Percentage,Tax1 Type,Product Type,Source,Reference ID,Last Sync Time,Status,Usage unit
+6914207000000094124,Sharpen Blades,"Remove blades, sharpen, balance, reinstall, and torque to specification.",USD 20.00,,,,goods,14,,,Inactive,each
+6914207000000094137,Labor,,USD 30.00,,,,goods,14,,,Inactive,hr
+6914207000000094148,PTO Clutch,,USD 150.00,,,,goods,14,,,Inactive,pcs
+6914207000000094217,Deck Belt,,USD 61.05,,,,goods,14,,,Inactive,pcs
+6914207000000094261,Travel Fee,,USD 20.00,,,,goods,14,,,Inactive,Flt Rt
+6914207000000094335,Throttle Cable Stihl FS90,,USD 45.00,,,,goods,14,,,Inactive,pcs
+6914207000000094346,Spark Arrestor Removal,,USD 5.00,,,,goods,14,,,Inactive,pcs
+6914207000000094357,Carb Clean,,USD 30.00,,,,goods,14,,,Inactive,pcs
+6914207000000094415,Tune Up - 2,Riding Mower,USD 100.00,,,,goods,14,,,Inactive,pcs
+6914207000000094524,Small Repairs / Adjustments,Dependent upon parts,USD 50.00,,,,service,14,,,Inactive,each
+6914207000000094535,Diagnostic,Complete inspection to determine why equipment is not operating correctly. Includes estimate for repairs.,USD 15.00,,,,service,14,,,Inactive,hr
+6914207000000094546,Pick up / Delivery,Local pricing,USD 20.00,,,,goods,14,,,Inactive,Flt Rt
+6914207000000098005,Throttle Control Handle,,USD 30.00,,,,goods,14,,,Inactive,pcs
+6914207000000101019,Tensioner Spring,,USD 35.00,,,,goods,14,,,Inactive,pcs
+6914207000000101143,Tggl Swtch,,USD 12.00,,,,goods,14,,,Inactive,pcs
+6914207000000113019,Front end diff,,USD 72.00,,,,goods,13,,,Inactive,pcs
+6914207000000113030,Front boot kit,,USD 34.00,,,,goods,13,,,Inactive,
+6914207000000114001,Tune Up - WE,,USD 35.00,,,,goods,14,,,Inactive,pcs
+6914207000000157001,Customer Purchased Install,,USD 20.00,,,,goods,13,,,Inactive,Flt Rt
+6914207000000157012,Starter Cylinoid,Can-am,USD 15.00,,,,goods,13,,,Inactive,each
+6914207000000172001,Stator,,USD 40.00,,,,goods,13,,,Inactive,each
+6914207000000172012,Carburetor,,USD 30.00,,,,goods,13,,,Inactive,each
+6914207000000175025,Belt Change,,USD 25.00,,,,goods,13,,,Inactive,each
+6914207000000187019,Oil,,USD 30.00,,,,goods,13,,,Inactive,Flt Rt
+6914207000000202047,Weed eater repair,Repair,USD 0.00,,,,goods,1,,,Inactive,pcs
+6914207000000204047,Zero turn service,"Engine service, blade sharpening, deck cleaning, belt inspection, spindle inspection, tire pressure check, and full operational inspection.",USD 150.00,,,,service,1,,,Active,each
+6914207000000204068,Weed eater service,"Inspect fuel system, clean carburetor (if needed), replace spark plug, inspect air filter and test run.",USD 65.00,,,,service,1,,,Active,each
+6914207000000204295,Diagnostic Inspection,Complete inspection to determine why equipment is not operating correctly. Includes estimate for repairs.,USD 25.00,,,,goods,1,,,Active,hr
+6914207000000204302,Generator Preventative Maintenance,"Change oil, inspect spark plug and air filter, inspect fuel system, test battery (if equipped), inspect controls, and run/test generator under load.",USD 125.00,,,,service,1,,,Active,each
+6914207000000204309,Generator Full Tune-Up,"Full maintenance including oil, spark plug, air filter, fuel system inspection, carburetor cleaning (if needed), and performance testing.",USD 195.00,,,,service,1,,,Active,each
+6914207000000204316,Ringing Mower Service,"Oil change, sharpen blade, clean deck, inspect belts, check tire pressure, lubricate moving parts, and performance test.",USD 100.00,,,,service,1,,,Active,each
+6914207000000204323,Pressure Washer Service,"Oil change, spark plug replacement, air filter inspection, pump inspection, hose inspection, and operational test.",USD 80.00,,,,goods,1,,,Active,each
+6914207000000204330,Chainsaw Service,"Clean saw, sharpen chain, inspect bar, adjust carburetor if needed, inspect fuel system, and test operation.",USD 80.00,,,,goods,1,,,Active,each
+6914207000000204337,Leaf Blower Service,"Clean fuel system, inspect carburetor, replace spark plug if needed, clean air filter, and test operation.",USD 65.00,,,,service,1,,,Active,
+6914207000000204344,Carburetor Cleaning,"Remove, disassemble, clean, inspect, install new gaskets if needed, reinstall, adjust, and test.",USD 40.00,,,,service,1,,,Active,
+6914207000000204351,Travel Fee/ Pick Up & Delivery,,USD 30.00,,,,goods,1,,,Active,
+6914207000000204358,Fuel System Repair,"Replace fuel lines, fuel filter, primer bulb, flush tank, and inspect fuel delivery components.",USD 60.00,,,,service,1,,,Active,
+6914207000000204365,Oil Change,"Drain old oil, refill with correct engine oil, inspect for leaks, and check oil level.",USD 50.00,,,,service,1,,,Active,
+6914207000000204372,Blade Sharping,"Remove blades, sharpen, balance, reinstall, and torque to specification.",USD 20.00,,,,service,1,,,Active,each
+6914207000000204379,Blade Replacemnt,Install new mower blades and verify proper cutting performance. Labor + Parts,USD 30.00,,,,service,1,,,Active,each
+6914207000000204386,Emergency Service,Priority scheduling for urgent repairs when available.,USD 75.00,,,,service,1,,,Active,each
+6914207000000211014,Pressure Washer Diagnostic,,USD 30.00,,,,service,14,,,Active,Flt Rt
+6914207000000221002,Travel labor,,USD 50.00,,,,service,1,,,Active,hr
