@@ -3380,6 +3380,542 @@ $("customerForm")
    JOBS
 =================================================== */
 
+
+/* ==================================================
+   ITEMS CATALOG
+=================================================== */
+
+async function loadItems() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("items")
+      .select("*")
+      .order("name");
+
+  if (error) {
+
+    console.error(error);
+
+    const wrapper =
+      $("itemTableWrapper");
+
+    if (wrapper) {
+      wrapper.innerHTML =
+        `<p class="error">
+          ${escapeHtml(error.message)}
+        </p>`;
+    }
+
+    return;
+
+  }
+
+  items =
+    data || [];
+
+  renderItems();
+
+  refreshCatalogSelects();
+
+}
+
+
+function renderItems(list = items) {
+
+  const wrapper =
+    $("itemTableWrapper");
+
+  if (!wrapper) {
+    return;
+  }
+
+
+  if (!list.length) {
+
+    wrapper.innerHTML =
+      `<p class="empty">
+        No saved items.
+      </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Description</th>
+          <th>Rate</th>
+          <th>Unit</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+
+  list.forEach(item => {
+
+    html += `
+      <tr>
+        <td>
+          ${escapeHtml(item.name)}
+        </td>
+
+        <td style="white-space:normal;min-width:220px;">
+          ${escapeHtml(item.description)}
+        </td>
+
+        <td>
+          ${money(item.rate)}
+        </td>
+
+        <td>
+          ${escapeHtml(item.unit)}
+        </td>
+
+        <td>
+          ${escapeHtml(item.product_type)}
+        </td>
+
+        <td>
+          <span class="status">
+            ${item.active ? "Active" : "Inactive"}
+          </span>
+        </td>
+
+        <td>
+
+          <button
+            class="small-button red"
+            onclick="editItem(${item.id})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="small-button"
+            onclick="deleteItem(${item.id})"
+          >
+            Delete
+          </button>
+
+        </td>
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  wrapper.innerHTML =
+    html;
+
+}
+
+
+function clearItemForm() {
+
+  $("itemId").value = "";
+  $("itemName").value = "";
+  $("itemDescription").value = "";
+  $("itemRate").value = "0";
+  $("itemUnit").value = "";
+  $("itemProductType").value = "goods";
+  $("itemActive").value = "true";
+  $("itemMessage").textContent = "";
+
+}
+
+
+$("clearItemButton")
+  ?.addEventListener(
+    "click",
+    clearItemForm
+  );
+
+
+$("itemSearch")
+  ?.addEventListener(
+    "input",
+    event => {
+
+      const q =
+        event.target.value
+          .trim()
+          .toLowerCase();
+
+
+      const filtered =
+        items.filter(
+          item =>
+            [
+              item.name,
+              item.description,
+              item.unit,
+              item.product_type
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(q)
+        );
+
+
+      renderItems(
+        filtered
+      );
+
+    }
+  );
+
+
+$("itemForm")
+  ?.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const id =
+        Number(
+          $("itemId").value || 0
+        );
+
+
+      const payload = {
+
+        name:
+          $("itemName")
+            .value
+            .trim(),
+
+        description:
+          $("itemDescription")
+            .value
+            .trim(),
+
+        rate:
+          Number(
+            $("itemRate").value || 0
+          ),
+
+        unit:
+          $("itemUnit")
+            .value
+            .trim(),
+
+        product_type:
+          $("itemProductType").value,
+
+        active:
+          $("itemActive").value === "true"
+
+      };
+
+
+      let result;
+
+
+      if (id) {
+
+        result =
+          await db
+            .from("items")
+            .update(payload)
+            .eq(
+              "id",
+              id
+            );
+
+      } else {
+
+        result =
+          await db
+            .from("items")
+            .insert(payload);
+
+      }
+
+
+      if (result.error) {
+
+        $("itemMessage")
+          .textContent =
+            result.error.message;
+
+        $("itemMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      $("itemMessage")
+        .textContent =
+          id
+            ? "Item updated."
+            : "Item added.";
+
+      $("itemMessage")
+        .className =
+          "message success";
+
+
+      await loadItems();
+
+      clearItemForm();
+
+    }
+  );
+
+
+function editItem(id) {
+
+  const item =
+    items.find(
+      x => x.id === id
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  $("itemId").value =
+    item.id;
+
+  $("itemName").value =
+    item.name || "";
+
+  $("itemDescription").value =
+    item.description || "";
+
+  $("itemRate").value =
+    Number(
+      item.rate || 0
+    );
+
+  $("itemUnit").value =
+    item.unit || "";
+
+  $("itemProductType").value =
+    item.product_type || "goods";
+
+  $("itemActive").value =
+    item.active
+      ? "true"
+      : "false";
+
+
+  $("itemName")
+    .focus();
+
+}
+
+
+async function deleteItem(id) {
+
+  const item =
+    items.find(
+      x => x.id === id
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  if (!confirm(
+    `Delete "${item.name}"?\n\nThis will not change old estimates or invoices.`
+  )) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from("items")
+      .delete()
+      .eq(
+        "id",
+        id
+      );
+
+
+  if (error) {
+
+    alert(
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadItems();
+
+}
+
+
+function catalogOptions() {
+
+  const active =
+    items
+      .filter(
+        item => item.active
+      )
+      .sort(
+        (a,b) =>
+          String(a.name)
+            .localeCompare(
+              String(b.name)
+            )
+      );
+
+
+  return `
+    <option value="">
+      Select saved item...
+    </option>
+
+    ${active
+      .map(
+        item => `
+          <option value="${item.id}">
+            ${escapeHtml(item.name)} — ${money(item.rate)}
+          </option>
+        `
+      )
+      .join("")}
+  `;
+
+}
+
+
+function refreshCatalogSelects() {
+
+  document
+    .querySelectorAll(
+      ".catalog-item-select"
+    )
+    .forEach(
+      select => {
+
+        const current =
+          select.value;
+
+
+        select.innerHTML =
+          catalogOptions();
+
+
+        if (
+          current &&
+          items.some(
+            item =>
+              String(item.id) ===
+              String(current)
+          )
+        ) {
+
+          select.value =
+            current;
+
+        }
+
+      }
+    );
+
+}
+
+
+function applyCatalogItem(
+  type,
+  row,
+  itemId
+) {
+
+  const item =
+    items.find(
+      x =>
+        String(x.id) ===
+        String(itemId)
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  const nameInput =
+    row.querySelector(
+      `.${type}-item-name`
+    );
+
+  const descInput =
+    row.querySelector(
+      `.${type}-item-description`
+    );
+
+  const priceInput =
+    row.querySelector(
+      `.${type}-item-price`
+    );
+
+
+  if (nameInput) {
+    nameInput.value =
+      item.name || "";
+  }
+
+
+  if (descInput) {
+    descInput.value =
+      item.description || "";
+  }
+
+
+  if (priceInput) {
+    priceInput.value =
+      Number(
+        item.rate || 0
+      )
+        .toFixed(2);
+  }
+
+
+  calculateDocument(
+    type
+  );
+
+}
+
+
+
+
 async function loadJobs() {
 
   const {
@@ -8195,6 +8731,7 @@ async function startAdmin() {
 
 
   loadedViews.add("customersView");
+  loadedViews.add("itemsView");
   loadedViews.add("jobsView");
   loadedViews.add("invoicesView");
   loadedViews.add("paymentsView");
