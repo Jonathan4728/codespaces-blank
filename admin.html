@@ -4330,6 +4330,25 @@ $("jobForm")
   );
 
 
+
+function closeModal(id) {
+
+  const modal =
+    $(id);
+
+  if (!modal) {
+    return;
+  }
+
+  modal
+    .classList
+    .remove("open");
+
+  document.body.style.overflow = "";
+
+}
+
+
 async function openJob(id) {
 
   const job =
@@ -4343,6 +4362,9 @@ async function openJob(id) {
     return;
   }
 
+
+  $("editJobMessage").textContent = "";
+  $("editJobMessage").className = "message";
 
   $("editJobId").value =
     job.id;
@@ -4669,6 +4691,10 @@ $("saveJobButton")
 
 
       await loadJobs();
+
+      closeModal(
+        "jobModal"
+      );
 
     }
   );
