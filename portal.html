@@ -30,24 +30,7 @@ footer{padding:25px;text-align:center;color:#aaa;border-top:1px solid #292929;ma
 <h1>Check Your Repair</h1>
 <p class="muted">Enter your job number and the last 4 digits of the phone number on your repair order.</p>
 <label>Job Number</label>
-<div style="display:flex;align-items:center;">
-  <span style="
-    padding:13px;
-    background:#222;
-    border:1px solid #444;
-    border-right:0;
-    border-radius:6px 0 0 6px;
-    font-weight:bold;
-  ">FSER-</span>
-
-  <input
-    id="jobNumber"
-    inputmode="numeric"
-    maxlength="4"
-    placeholder="4827"
-    style="border-radius:0 6px 6px 0;"
-  >
-</div>
+<input id="jobNumber" value="FSER-" maxlength="9" autocomplete="off">
 <label>Last 4 of Phone</label>
 <input id="phoneLast4" inputmode="numeric" maxlength="4" placeholder="1234">
 <button id="loginButton" class="primary full">View Repair Status</button>
@@ -67,7 +50,18 @@ async function respondEstimate(id,response){if(!confirm(`Are you sure you want t
 function estimateHtml(e){const can=["Draft","Sent"].includes(e.status);return`<section class="document"><div class="doc-head"><div><p class="eyebrow">Estimate</p><h2>${esc(e.estimate_number)}</h2><p class="muted">${dateDisplay(e.quote_date)}${e.subject?" · "+esc(e.subject):""}</p></div><div><div class="money">${money(e.total)}</div><span class="status">${esc(e.status)}</span></div></div>${itemTable(e.items)}${can?`<div class="buttons"><button class="primary" onclick="respondEstimate(${e.id},'Accepted')">Approve Estimate</button><button class="secondary" onclick="respondEstimate(${e.id},'Declined')">Decline Estimate</button></div>`:""}</section>`}
 function invoiceHtml(i){return`<section class="document"><div class="doc-head"><div><p class="eyebrow">Invoice</p><h2>${esc(i.invoice_number)}</h2><p class="muted">${dateDisplay(i.invoice_date)}</p></div><div><div class="money">${money(i.balance_due)}</div><span class="status">${esc(i.status)}</span></div></div>${itemTable(i.items)}<div class="grid" style="margin-top:16px;margin-bottom:0"><div class="card"><div class="label">Invoice Total</div><div class="value">${money(i.total)}</div></div><div class="card"><div class="label">Balance Due</div><div class="value">${money(i.balance_due)}</div></div></div></section>`}
 async function loadPortal(){const{data,error}=await db.rpc("get_customer_portal_login",{p_job_number:loginJob,p_phone_last4:loginPhone});if(error){$("loginError").textContent=error.message;return}if(!data?.ok){$("loginError").textContent=data?.message||"Unable to find repair.";return}$("loginPanel").style.display="none";const j=data.job||{},c=data.customer||{},e=data.equipment||{},ests=data.estimates||[],invs=data.invoices||[];$("portal").innerHTML=`<section class="hero"><p class="eyebrow">Repair Status</p><h1>${esc(customerName(c)||"Customer")}</h1><p class="muted">Job ${esc(j.job_number)}</p><span class="status">${esc(j.status)}</span></section><section class="grid"><div class="card"><div class="label">Equipment</div><div class="value">${esc(equipmentName(e)||"Equipment")}</div></div><div class="card"><div class="label">Service Type</div><div class="value">${esc(j.service_type)}</div></div></section><section class="card"><div class="label">Reported Problem</div><div class="value">${esc(j.complaint)}</div></section>${ests.length?ests.map(estimateHtml).join(""):`<section class="document"><h2>Estimate</h2><p class="muted">No estimate has been posted yet.</p></section>`}${invs.map(invoiceHtml).join("")}<section class="document"><h2>Need to reach us?</h2><div class="buttons"><a class="button primary" href="tel:+13373268324">Call (337) 326-8324</a><a class="button contact" href="sms:+13373268324">Send a Text</a></div></section>`}
-$("loginButton").addEventListener("click",async()=>{$("loginError").textContent="";loginJob="FSER-"+$("jobNumber").value.replace(/\D/g,"").slice(0,4);loginPhone=$("phoneLast4").value.replace(/\D/g,"").slice(-4);if(!loginJob||loginPhone.length!==4){$("loginError").textContent="Enter your job number and the last 4 digits of your phone number.";return}await loadPortal()});
+const jobInput=$("jobNumber");
+jobInput.addEventListener("focus",()=>{if(jobInput.value.length<5)jobInput.value="FSER-";setTimeout(()=>jobInput.setSelectionRange(jobInput.value.length,jobInput.value.length),0)});
+jobInput.addEventListener("input",()=>{
+  const numbers=jobInput.value.replace(/^FSER-/i,"").replace(/\D/g,"").slice(0,4);
+  jobInput.value="FSER-"+numbers;
+});
+jobInput.addEventListener("keydown",e=>{
+  if((e.key==="Backspace"||e.key==="Delete")&&jobInput.selectionStart<=5)e.preventDefault();
+  if(e.key==="Home"){e.preventDefault();jobInput.setSelectionRange(5,5);}
+});
+jobInput.addEventListener("click",()=>{if(jobInput.selectionStart<5)jobInput.setSelectionRange(5,5);});
+$("loginButton").addEventListener("click",async()=>{$("loginError").textContent="";loginJob=$("jobNumber").value.trim().toUpperCase();loginPhone=$("phoneLast4").value.replace(/\D/g,"").slice(-4);if(!loginJob||loginPhone.length!==4){$("loginError").textContent="Enter your job number and the last 4 digits of your phone number.";return}await loadPortal()});
 $("phoneLast4").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginButton").click()});
 </script>
 </body>
