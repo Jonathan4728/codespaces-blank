@@ -2,44 +2,56 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Customer Portal | Flores Small Engine Repair</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#080808;color:#fff;font-family:Arial,Helvetica,sans-serif}
-header{border-top:3px solid #df1f26;border-bottom:1px solid #2b2b2b;background:#050505}
-.top{max-width:900px;margin:auto;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:12px}.brand img{width:58px;height:58px;object-fit:contain}.brand strong{display:block;font-size:18px}.brand span{color:#df1f26;font-size:12px;font-weight:bold;text-transform:uppercase}
-.container{width:min(900px,calc(100% - 28px));margin:30px auto}.hero,.card,.document,.message{background:#111;border:1px solid #303030;border-radius:9px}
-.hero{padding:24px;border-top:3px solid #df1f26;margin-bottom:18px}.eyebrow{color:#df1f26;font-size:12px;font-weight:800;text-transform:uppercase;margin:0 0 6px}.hero h1{margin:0 0 8px;font-size:clamp(28px,6vw,42px)}.muted{color:#aaa}
-.status{display:inline-block;padding:7px 11px;border-radius:999px;background:#292929;border:1px solid #444;font-weight:800}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}.card{padding:20px}.label{color:#aaa;font-size:11px;text-transform:uppercase;font-weight:700}.value{margin-top:4px;font-size:17px;font-weight:700}.detail{margin-bottom:13px}
-.document{margin-top:18px;padding:20px}.doc-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:15px}.doc-head h2{margin:0}.money{font-size:24px;font-weight:800;color:#64d982}
-.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;padding:10px;border-bottom:1px solid #292929;font-size:14px;white-space:nowrap}th{color:#df1f26;font-size:11px;text-transform:uppercase}
-.button-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}button,.button{border:0;border-radius:6px;padding:12px 16px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}.approve{background:#df1f26;color:#fff}.decline{background:#303030;color:#fff}.contact{background:#fff;color:#111}
-.message{padding:20px;text-align:center}.error{color:#ff7777}footer{margin-top:40px;padding:22px;border-top:1px solid #2b2b2b;text-align:center;color:#aaa;font-size:13px}
-@media(max-width:650px){.grid{grid-template-columns:1fr}.brand img{width:48px;height:48px}.doc-head{flex-direction:column}.button-row>*{width:100%;text-align:center}}
+header{background:#050505;border-top:3px solid #df1f26;border-bottom:1px solid #292929}
+.top{max-width:900px;margin:auto;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:12px}.brand img{width:56px;height:56px;object-fit:contain}.brand strong{display:block}.brand span{display:block;color:#df1f26;font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:3px}
+.container{width:min(900px,calc(100% - 28px));margin:30px auto}.panel,.hero,.card,.document{background:#111;border:1px solid #303030;border-radius:9px}
+.panel{max-width:520px;margin:45px auto;padding:25px;border-top:3px solid #df1f26}.panel h1{margin-top:0}.muted{color:#aaa}
+label{display:block;margin:15px 0 6px;font-size:13px;font-weight:bold}input{width:100%;padding:13px;border-radius:6px;border:1px solid #444;background:#080808;color:#fff;font:inherit}
+button,.button{border:0;border-radius:6px;padding:12px 16px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}.primary{background:#df1f26;color:#fff}.secondary{background:#303030;color:#fff}.contact{background:#fff;color:#111}.full{width:100%;margin-top:18px}
+.error{color:#ff7777;margin-top:12px}.hero{padding:24px;border-top:3px solid #df1f26;margin-bottom:18px}.eyebrow{color:#df1f26;font-size:12px;font-weight:800;text-transform:uppercase;margin:0 0 6px}.hero h1{margin:0 0 8px;font-size:clamp(28px,6vw,42px)}
+.status{display:inline-block;padding:7px 11px;border-radius:999px;background:#292929;border:1px solid #444;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}.card{padding:20px}.label{color:#aaa;font-size:11px;text-transform:uppercase;font-weight:700}.value{margin-top:4px;font-size:17px;font-weight:700}
+.document{margin-top:18px;padding:20px}.doc-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.doc-head h2{margin:0}.money{font-size:24px;font-weight:800;color:#65d982}.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;padding:10px;border-bottom:1px solid #292929;font-size:14px;white-space:nowrap}th{color:#df1f26;font-size:11px;text-transform:uppercase}.buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+footer{padding:25px;text-align:center;color:#aaa;border-top:1px solid #292929;margin-top:40px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.doc-head{flex-direction:column}.buttons>*{width:100%;text-align:center}.brand img{width:46px;height:46px}}
 </style>
 </head>
 <body>
 <header><div class="top"><div class="brand"><img src="logo.png" alt="Flores Small Engine Repair"><div><strong>Flores Small Engine Repair</strong><span>Customer Portal</span></div></div><a class="button contact" href="tel:+13373268324">Call / Text</a></div></header>
-<main class="container"><div id="portal"><div class="message">Loading your repair information...</div></div></main>
+<main class="container">
+<section id="loginPanel" class="panel">
+<h1>Check Your Repair</h1>
+<p class="muted">Enter your job number and the last 4 digits of the phone number on your repair order.</p>
+<label>Job Number</label>
+<input id="jobNumber" placeholder="FSER-4827">
+<label>Last 4 of Phone</label>
+<input id="phoneLast4" inputmode="numeric" maxlength="4" placeholder="1234">
+<button id="loginButton" class="primary full">View Repair Status</button>
+<div id="loginError" class="error"></div>
+</section>
+<div id="portal"></div>
+</main>
 <footer>Flores Small Engine Repair · (337) 326-8324</footer>
 <script>
 const db=window.supabase.createClient("https://ykqbjqiujnqljwwyxrre.supabase.co","sb_publishable_CmCfIvZJJwMNV0QzQwrEsw_W0X8XOvj");
-const token=new URLSearchParams(location.search).get("token"),portal=document.getElementById("portal");
+const $=id=>document.getElementById(id);let loginJob="",loginPhone="";
 const esc=v=>String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-const money=v=>`$${Number(v||0).toFixed(2)}`;
-const dateDisplay=v=>v?new Date(v+"T00:00:00").toLocaleDateString():"";
-const customerName=c=>[c?.first_name||"",c?.last_name||""].join(" ").trim();
-const equipmentName=e=>[e?.brand||"",e?.equipment_type||"",e?.model||""].filter(Boolean).join(" ");
+const money=v=>`$${Number(v||0).toFixed(2)}`;const dateDisplay=v=>v?new Date(v+"T00:00:00").toLocaleDateString():"";
+const customerName=c=>[c?.first_name||"",c?.last_name||""].join(" ").trim();const equipmentName=e=>[e?.brand||"",e?.equipment_type||"",e?.model||""].filter(Boolean).join(" ");
 function itemTable(items){if(!items?.length)return`<p class="muted">No line items.</p>`;return`<div class="table-wrap"><table><thead><tr><th>Item</th><th>Description</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${esc(i.item_name)}</td><td>${esc(i.item_desc)}</td><td>${i.quantity}</td><td>${money(i.unit_price)}</td><td>${money(i.line_total)}</td></tr>`).join("")}</tbody></table></div>`}
-async function respondEstimate(id,response){if(!confirm(`Are you sure you want to ${response==="Accepted"?"approve":"decline"} this estimate?`))return;const{data,error}=await db.rpc("respond_to_estimate",{p_token:token,p_estimate_id:id,p_response:response});if(error){alert(error.message);return}if(!data?.ok){alert(data?.message||"Unable to update estimate.");return}alert(response==="Accepted"?"Estimate approved. Thank you.":"Estimate declined.");await loadPortal()}
-function estimateHtml(e){const can=["Draft","Sent"].includes(e.status);return`<section class="document"><div class="doc-head"><div><p class="eyebrow">Estimate</p><h2>${esc(e.estimate_number)}</h2><p class="muted">${dateDisplay(e.quote_date)}${e.subject?" · "+esc(e.subject):""}</p></div><div><div class="money">${money(e.total)}</div><span class="status">${esc(e.status)}</span></div></div>${itemTable(e.items)}${can?`<div class="button-row"><button class="approve" onclick="respondEstimate(${e.id},'Accepted')">Approve Estimate</button><button class="decline" onclick="respondEstimate(${e.id},'Declined')">Decline Estimate</button></div>`:""}</section>`}
+async function respondEstimate(id,response){if(!confirm(`Are you sure you want to ${response==="Accepted"?"approve":"decline"} this estimate?`))return;const{data,error}=await db.rpc("respond_to_estimate_login",{p_job_number:loginJob,p_phone_last4:loginPhone,p_estimate_id:id,p_response:response});if(error){alert(error.message);return}if(!data?.ok){alert(data?.message||"Unable to update estimate.");return}alert(response==="Accepted"?"Estimate approved. Thank you.":"Estimate declined.");await loadPortal()}
+function estimateHtml(e){const can=["Draft","Sent"].includes(e.status);return`<section class="document"><div class="doc-head"><div><p class="eyebrow">Estimate</p><h2>${esc(e.estimate_number)}</h2><p class="muted">${dateDisplay(e.quote_date)}${e.subject?" · "+esc(e.subject):""}</p></div><div><div class="money">${money(e.total)}</div><span class="status">${esc(e.status)}</span></div></div>${itemTable(e.items)}${can?`<div class="buttons"><button class="primary" onclick="respondEstimate(${e.id},'Accepted')">Approve Estimate</button><button class="secondary" onclick="respondEstimate(${e.id},'Declined')">Decline Estimate</button></div>`:""}</section>`}
 function invoiceHtml(i){return`<section class="document"><div class="doc-head"><div><p class="eyebrow">Invoice</p><h2>${esc(i.invoice_number)}</h2><p class="muted">${dateDisplay(i.invoice_date)}</p></div><div><div class="money">${money(i.balance_due)}</div><span class="status">${esc(i.status)}</span></div></div>${itemTable(i.items)}<div class="grid" style="margin-top:16px;margin-bottom:0"><div class="card"><div class="label">Invoice Total</div><div class="value">${money(i.total)}</div></div><div class="card"><div class="label">Balance Due</div><div class="value">${money(i.balance_due)}</div></div></div></section>`}
-async function loadPortal(){if(!token){portal.innerHTML=`<div class="message error">This customer portal link is missing its access token.</div>`;return}const{data,error}=await db.rpc("get_customer_portal",{p_token:token});if(error){portal.innerHTML=`<div class="message error">${esc(error.message)}</div>`;return}if(!data?.ok){portal.innerHTML=`<div class="message error">${esc(data?.message||"Portal link not found.")}</div>`;return}const j=data.job||{},c=data.customer||{},e=data.equipment||{},ests=data.estimates||[],invs=data.invoices||[];portal.innerHTML=`<section class="hero"><p class="eyebrow">Repair Status</p><h1>${esc(customerName(c)||"Customer")}</h1><p class="muted">Job ${esc(j.job_number)}</p><span class="status">${esc(j.status)}</span></section><section class="grid"><div class="card"><div class="label">Equipment</div><div class="value">${esc(equipmentName(e)||"Equipment")}</div></div><div class="card"><div class="label">Service Type</div><div class="value">${esc(j.service_type)}</div></div></section><section class="card"><div class="label">Reported Problem</div><div class="value">${esc(j.complaint)}</div></section>${ests.length?ests.map(estimateHtml).join(""):`<section class="document"><h2>Estimate</h2><p class="muted">No estimate has been posted yet.</p></section>`}${invs.map(invoiceHtml).join("")}<section class="document"><h2>Need to reach us?</h2><p class="muted">Questions about your repair, quote, or invoice?</p><div class="button-row"><a class="button approve" href="tel:+13373268324">Call (337) 326-8324</a><a class="button contact" href="sms:+13373268324">Send a Text</a></div></section>`}
-loadPortal();
+async function loadPortal(){const{data,error}=await db.rpc("get_customer_portal_login",{p_job_number:loginJob,p_phone_last4:loginPhone});if(error){$("loginError").textContent=error.message;return}if(!data?.ok){$("loginError").textContent=data?.message||"Unable to find repair.";return}$("loginPanel").style.display="none";const j=data.job||{},c=data.customer||{},e=data.equipment||{},ests=data.estimates||[],invs=data.invoices||[];$("portal").innerHTML=`<section class="hero"><p class="eyebrow">Repair Status</p><h1>${esc(customerName(c)||"Customer")}</h1><p class="muted">Job ${esc(j.job_number)}</p><span class="status">${esc(j.status)}</span></section><section class="grid"><div class="card"><div class="label">Equipment</div><div class="value">${esc(equipmentName(e)||"Equipment")}</div></div><div class="card"><div class="label">Service Type</div><div class="value">${esc(j.service_type)}</div></div></section><section class="card"><div class="label">Reported Problem</div><div class="value">${esc(j.complaint)}</div></section>${ests.length?ests.map(estimateHtml).join(""):`<section class="document"><h2>Estimate</h2><p class="muted">No estimate has been posted yet.</p></section>`}${invs.map(invoiceHtml).join("")}<section class="document"><h2>Need to reach us?</h2><div class="buttons"><a class="button primary" href="tel:+13373268324">Call (337) 326-8324</a><a class="button contact" href="sms:+13373268324">Send a Text</a></div></section>`}
+$("loginButton").addEventListener("click",async()=>{$("loginError").textContent="";loginJob=$("jobNumber").value.trim().toUpperCase();loginPhone=$("phoneLast4").value.replace(/\D/g,"").slice(-4);if(!loginJob||loginPhone.length!==4){$("loginError").textContent="Enter your job number and the last 4 digits of your phone number.";return}await loadPortal()});
+$("phoneLast4").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginButton").click()});
 </script>
 </body>
 </html>

@@ -1967,6 +1967,14 @@
       </button>
 
       <button
+        id="textJobUpdateButton"
+        class="secondary-button"
+        type="button"
+      >
+        Text Customer Update
+      </button>
+
+      <button
         id="copyPortalButton"
         class="secondary-button"
         type="button"
@@ -3241,7 +3249,8 @@ async function loadJobs() {
         *,
         customers(
           first_name,
-          last_name
+          last_name,
+          phone
         ),
         equipment(
           equipment_type,
@@ -3988,44 +3997,130 @@ $("saveJobButton")
 
 
 /* ==================================================
+   TEXT CUSTOMER JOB UPDATE
+=================================================== */
+
+$("textJobUpdateButton")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const jobId =
+        Number(
+          $("editJobId").value
+        );
+
+      const job =
+        jobs.find(
+          x => x.id === jobId
+        );
+
+      if (!job) {
+        return;
+      }
+
+      const phone =
+        job.customers?.phone || "";
+
+      if (!phone) {
+
+        alert(
+          "This customer does not have a phone number saved."
+        );
+
+        return;
+
+      }
+
+      const customer =
+        customerName(
+          job.customers
+        ) || "there";
+
+      const equipment =
+        jobEquipment(job) ||
+        "your equipment";
+
+      const status =
+        $("editJobStatus").value ||
+        job.status ||
+        "Received";
+
+      const portalUrl =
+        "https://floressmallenginerepair.com/portal.html";
+
+      const message =
+`Hi ${customer}, this is Flores Small Engine Repair.
+
+Update for job ${job.job_number} (${equipment}):
+Status: ${status}
+
+Check your repair anytime:
+${portalUrl}
+
+Use job number ${job.job_number} and the last 4 digits of your phone number.
+
+Call or text (337) 326-8324 if you have any questions.`;
+
+      const cleanPhone =
+        String(phone)
+          .replace(/[^\d+]/g, "");
+
+      window.location.href =
+        `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+
+    }
+  );
+
+
+/* ==================================================
    CUSTOMER PORTAL LINK
 =================================================== */
 
 $("copyPortalButton")?.addEventListener("click", async () => {
-  const jobId = Number($("editJobId").value);
-  if (!jobId) return;
 
-  let job = jobs.find(x => x.id === jobId);
+  const jobId =
+    Number(
+      $("editJobId").value
+    );
 
-  if (!job?.portal_token) {
-    const { data, error } = await db
-      .from("repair_jobs")
-      .select("id, portal_token")
-      .eq("id", jobId)
-      .single();
+  const job =
+    jobs.find(
+      x => x.id === jobId
+    );
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    if (!data?.portal_token) {
-      alert("This repair job does not have a portal token yet. Run the customer portal SQL setup first.");
-      return;
-    }
-
-    job.portal_token = data.portal_token;
+  if (!job) {
+    return;
   }
 
-  const link =
-    `https://floressmallenginerepair.com/portal.html?token=${encodeURIComponent(job.portal_token)}`;
+  const portalMessage =
+`Flores Small Engine Repair Customer Portal
+
+https://floressmallenginerepair.com/portal.html
+
+Job Number: ${job.job_number}
+
+Use the last 4 digits of the phone number on your repair order to sign in.`;
 
   try {
-    await navigator.clipboard.writeText(link);
-    alert("Customer portal link copied. Paste it into a text message to the customer.");
+
+    await navigator.clipboard.writeText(
+      portalMessage
+    );
+
+    alert(
+      "Customer portal message copied. Paste it into a text message to the customer."
+    );
+
   } catch (error) {
-    prompt("Copy this customer portal link:", link);
+
+    prompt(
+      "Copy this customer portal message:",
+      portalMessage
+    );
+
   }
+
 });
 
 
