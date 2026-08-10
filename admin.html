@@ -910,6 +910,13 @@
 
     <button
       class="nav-tab"
+      data-view="timeClockView"
+    >
+      Time Clock
+    </button>
+
+    <button
+      class="nav-tab"
       data-view="paymentsView"
     >
       Payments
@@ -1814,6 +1821,90 @@
 
 
     <!-- ==================================================
+         TIME CLOCK
+    =================================================== -->
+
+    <section
+      id="timeClockView"
+      class="view"
+    >
+
+      <h1 class="page-title">Time Clock</h1>
+
+      <div class="panel">
+
+        <h2>Job Timer</h2>
+
+        <div class="form-grid">
+
+          <label>
+            Customer / Repair Job
+            <select id="timeClockJob"></select>
+          </label>
+
+          <div class="detail-box">
+            <span>Current Timer</span>
+            <strong id="timeClockDisplay">00:00:00</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Total Time on This Job</span>
+            <strong id="timeClockJobTotal">0.00 hrs</strong>
+          </div>
+
+          <div class="detail-box">
+            <span>Timer Status</span>
+            <strong id="timeClockStatus">Stopped</strong>
+          </div>
+
+        </div>
+
+        <div class="button-row">
+
+          <button
+            id="startTimeClockButton"
+            class="action-button"
+            type="button"
+          >
+            Start Timer
+          </button>
+
+          <button
+            id="stopTimeClockButton"
+            class="danger-button"
+            type="button"
+          >
+            Stop Timer
+          </button>
+
+        </div>
+
+        <p
+          id="timeClockMessage"
+          class="message"
+        ></p>
+
+      </div>
+
+      <div class="panel">
+
+        <h2>Time History</h2>
+
+        <p style="color:#999;margin-top:-8px;">
+          Every start/stop session is saved. Returning to a job adds to its previous time.
+        </p>
+
+        <div
+          id="timeClockHistory"
+          class="table-wrap"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
          PAYMENTS
     =================================================== -->
 
@@ -2302,6 +2393,9 @@ let estimates = [];
 let editingEstimateId = null;
 let invoices = [];
 let payments = [];
+let timeEntries = [];
+let activeTimeEntry = null;
+let timeClockInterval = null;
 
 
 /* ==================================================
@@ -2504,6 +2598,13 @@ async function loadViewData(viewId) {
   if (viewId === "invoicesView") {
 
     await loadInvoices();
+
+  }
+
+
+  if (viewId === "timeClockView") {
+
+    await loadTimeClock();
 
   }
 
@@ -10164,6 +10265,588 @@ async function createInvoiceFromEstimate(id) {
 
   openInvoice(invoice.id);
 }
+
+
+
+/* ==================================================
+   TIME CLOCK
+=================================================== */
+
+function formatClockSeconds(totalSeconds) {
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(totalSeconds || 0)
+    );
+
+  const h =
+    String(
+      Math.floor(seconds / 3600)
+    ).padStart(2,"0");
+
+  const m =
+    String(
+      Math.floor((seconds % 3600) / 60)
+    ).padStart(2,"0");
+
+  const s =
+    String(
+      seconds % 60
+    ).padStart(2,"0");
+
+  return `${h}:${m}:${s}`;
+
+}
+
+
+function timeEntrySeconds(entry) {
+
+  if (!entry?.started_at) {
+    return 0;
+  }
+
+  const start =
+    new Date(entry.started_at)
+      .getTime();
+
+  const end =
+    entry.ended_at
+      ? new Date(entry.ended_at).getTime()
+      : Date.now();
+
+  return Math.max(
+    0,
+    Math.round((end - start) / 1000)
+  );
+
+}
+
+
+function totalSecondsForJob(jobId) {
+
+  return timeEntries
+    .filter(
+      entry =>
+        Number(entry.repair_job_id) ===
+        Number(jobId)
+    )
+    .reduce(
+      (sum, entry) =>
+        sum + timeEntrySeconds(entry),
+      0
+    );
+
+}
+
+
+function populateTimeClockJobs() {
+
+  const select =
+    $("timeClockJob");
+
+  if (!select) {
+    return;
+  }
+
+  const current =
+    select.value;
+
+  select.innerHTML =
+    `<option value="">Select a repair job...</option>` +
+    jobs
+      .filter(
+        job =>
+          !["Completed","Closed"]
+            .includes(job.status)
+      )
+      .map(
+        job => `
+          <option value="${job.id}">
+            ${escapeHtml(
+              `${customerName(job.customers)} — ${job.job_number || job.ticket_number || "Job"} — ${jobEquipment(job)}`
+            )}
+          </option>
+        `
+      )
+      .join("");
+
+  if (
+    current &&
+    jobs.some(
+      job =>
+        String(job.id) ===
+        String(current)
+    )
+  ) {
+    select.value = current;
+  } else if (activeTimeEntry) {
+    select.value =
+      String(activeTimeEntry.repair_job_id);
+  }
+
+}
+
+
+function renderTimeClock() {
+
+  const selectedJobId =
+    Number(
+      $("timeClockJob")?.value || 0
+    );
+
+  const runningForSelected =
+    activeTimeEntry &&
+    Number(activeTimeEntry.repair_job_id) ===
+    selectedJobId;
+
+  if ($("timeClockDisplay")) {
+
+    $("timeClockDisplay")
+      .textContent =
+        runningForSelected
+          ? formatClockSeconds(
+              timeEntrySeconds(activeTimeEntry)
+            )
+          : "00:00:00";
+
+  }
+
+  if ($("timeClockJobTotal")) {
+
+    const total =
+      selectedJobId
+        ? totalSecondsForJob(selectedJobId)
+        : 0;
+
+    $("timeClockJobTotal")
+      .textContent =
+        `${(total / 3600).toFixed(2)} hrs`;
+
+  }
+
+  if ($("timeClockStatus")) {
+
+    if (activeTimeEntry) {
+
+      const activeJob =
+        jobs.find(
+          job =>
+            Number(job.id) ===
+            Number(activeTimeEntry.repair_job_id)
+        );
+
+      $("timeClockStatus")
+        .textContent =
+          runningForSelected
+            ? "Running"
+            : `Running: ${activeJob?.job_number || activeJob?.ticket_number || "another job"}`;
+
+    } else {
+
+      $("timeClockStatus")
+        .textContent =
+          "Stopped";
+
+    }
+
+  }
+
+  renderTimeClockHistory();
+
+}
+
+
+function renderTimeClockHistory() {
+
+  const wrapper =
+    $("timeClockHistory");
+
+  if (!wrapper) {
+    return;
+  }
+
+  const selectedJobId =
+    Number(
+      $("timeClockJob")?.value || 0
+    );
+
+  const list =
+    selectedJobId
+      ? timeEntries.filter(
+          entry =>
+            Number(entry.repair_job_id) ===
+            selectedJobId
+        )
+      : timeEntries;
+
+  if (!list.length) {
+
+    wrapper.innerHTML =
+      `<p class="empty">No time recorded yet.</p>`;
+
+    return;
+
+  }
+
+  wrapper.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Customer</th>
+          <th>Started</th>
+          <th>Stopped</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(entry => {
+
+          const job =
+            jobs.find(
+              x =>
+                Number(x.id) ===
+                Number(entry.repair_job_id)
+            );
+
+          return `
+            <tr>
+              <td>${escapeHtml(job?.job_number || job?.ticket_number || "")}</td>
+              <td>${escapeHtml(customerName(job?.customers))}</td>
+              <td>${entry.started_at ? new Date(entry.started_at).toLocaleString() : ""}</td>
+              <td>${entry.ended_at ? new Date(entry.ended_at).toLocaleString() : `<span class="status">Running</span>`}</td>
+              <td>${formatClockSeconds(timeEntrySeconds(entry))}</td>
+            </tr>
+          `;
+
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+
+}
+
+
+async function loadTimeClock() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("time_entries")
+      .select("*")
+      .order(
+        "started_at",
+        { ascending:false }
+      );
+
+  if (error) {
+
+    $("timeClockMessage")
+      .textContent =
+        error.message;
+
+    $("timeClockMessage")
+      .className =
+        "message error";
+
+    return;
+
+  }
+
+  timeEntries =
+    data || [];
+
+  activeTimeEntry =
+    timeEntries.find(
+      entry =>
+        !entry.ended_at
+    ) || null;
+
+  populateTimeClockJobs();
+  renderTimeClock();
+
+  clearInterval(timeClockInterval);
+
+  timeClockInterval =
+    setInterval(
+      renderTimeClock,
+      1000
+    );
+
+}
+
+
+async function syncJobLaborFromClock(jobId) {
+
+  const totalSeconds =
+    totalSecondsForJob(jobId);
+
+  const laborHours =
+    Number(
+      (totalSeconds / 3600)
+        .toFixed(2)
+    );
+
+  const {
+    error
+  } =
+    await db
+      .from("repair_jobs")
+      .update({
+        labor_hours:
+          laborHours
+      })
+      .eq(
+        "id",
+        Number(jobId)
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  const localJob =
+    jobs.find(
+      job =>
+        Number(job.id) ===
+        Number(jobId)
+    );
+
+  if (localJob) {
+    localJob.labor_hours =
+      laborHours;
+  }
+
+  if (
+    Number($("editJobId")?.value) ===
+    Number(jobId)
+  ) {
+    $("editLaborHours").value =
+      laborHours;
+  }
+
+}
+
+
+async function stopActiveTimeEntry(
+  showMessage = true
+) {
+
+  if (!activeTimeEntry) {
+    return;
+  }
+
+  const entryId =
+    activeTimeEntry.id;
+
+  const jobId =
+    Number(
+      activeTimeEntry.repair_job_id
+    );
+
+  const endedAt =
+    new Date().toISOString();
+
+  const {
+    error
+  } =
+    await db
+      .from("time_entries")
+      .update({
+        ended_at:
+          endedAt
+      })
+      .eq(
+        "id",
+        entryId
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  const localEntry =
+    timeEntries.find(
+      entry =>
+        entry.id === entryId
+    );
+
+  if (localEntry) {
+    localEntry.ended_at =
+      endedAt;
+  }
+
+  activeTimeEntry =
+    null;
+
+  await syncJobLaborFromClock(
+    jobId
+  );
+
+  if (showMessage) {
+
+    $("timeClockMessage")
+      .textContent =
+        "Timer stopped. Labor hours were updated automatically.";
+
+    $("timeClockMessage")
+      .className =
+        "message success";
+
+  }
+
+  renderTimeClock();
+
+}
+
+
+$("startTimeClockButton")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      const jobId =
+        Number(
+          $("timeClockJob").value || 0
+        );
+
+      if (!jobId) {
+
+        $("timeClockMessage")
+          .textContent =
+            "Select a customer / repair job first.";
+
+        $("timeClockMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+      try {
+
+        if (activeTimeEntry) {
+
+          if (
+            Number(activeTimeEntry.repair_job_id) ===
+            jobId
+          ) {
+
+            $("timeClockMessage")
+              .textContent =
+                "That job timer is already running.";
+
+            $("timeClockMessage")
+              .className =
+                "message error";
+
+            return;
+
+          }
+
+          /* Switching projects automatically stops the old one,
+             saves its time, and adds it to that job's labor hours. */
+          await stopActiveTimeEntry(false);
+
+        }
+
+        const {
+          data,
+          error
+        } =
+          await db
+            .from("time_entries")
+            .insert({
+              repair_job_id:
+                jobId,
+              started_at:
+                new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (error) {
+          throw error;
+        }
+
+        timeEntries.unshift(data);
+        activeTimeEntry = data;
+
+        $("timeClockMessage")
+          .textContent =
+            "Timer started.";
+
+        $("timeClockMessage")
+          .className =
+            "message success";
+
+        renderTimeClock();
+
+      } catch (error) {
+
+        $("timeClockMessage")
+          .textContent =
+            error.message;
+
+        $("timeClockMessage")
+          .className =
+            "message error";
+
+      }
+
+    }
+  );
+
+
+$("stopTimeClockButton")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      if (!activeTimeEntry) {
+
+        $("timeClockMessage")
+          .textContent =
+            "No timer is currently running.";
+
+        $("timeClockMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+      try {
+
+        await stopActiveTimeEntry(true);
+
+      } catch (error) {
+
+        $("timeClockMessage")
+          .textContent =
+            error.message;
+
+        $("timeClockMessage")
+          .className =
+            "message error";
+
+      }
+
+    }
+  );
+
+
+$("timeClockJob")
+  ?.addEventListener(
+    "change",
+    renderTimeClock
+  );
+
 
 
 /* ==================================================
