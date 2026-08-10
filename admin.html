@@ -1967,6 +1967,14 @@
       </button>
 
       <button
+        id="copyPortalButton"
+        class="secondary-button"
+        type="button"
+      >
+        Copy Customer Portal Link
+      </button>
+
+      <button
         id="deleteJobButton"
         class="danger-button"
         type="button"
@@ -3974,6 +3982,48 @@ $("saveJobButton")
     }
   );
 
+
+
+/* ==================================================
+   CUSTOMER PORTAL LINK
+=================================================== */
+
+$("copyPortalButton")?.addEventListener("click", async () => {
+  const jobId = Number($("editJobId").value);
+  if (!jobId) return;
+
+  let job = jobs.find(x => x.id === jobId);
+
+  if (!job?.portal_token) {
+    const { data, error } = await db
+      .from("repair_jobs")
+      .select("id, portal_token")
+      .eq("id", jobId)
+      .single();
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (!data?.portal_token) {
+      alert("This repair job does not have a portal token yet. Run the customer portal SQL setup first.");
+      return;
+    }
+
+    job.portal_token = data.portal_token;
+  }
+
+  const link =
+    `https://floressmallenginerepair.com/portal.html?token=${encodeURIComponent(job.portal_token)}`;
+
+  try {
+    await navigator.clipboard.writeText(link);
+    alert("Customer portal link copied. Paste it into a text message to the customer.");
+  } catch (error) {
+    prompt("Copy this customer portal link:", link);
+  }
+});
 
 
 /* ==================================================
