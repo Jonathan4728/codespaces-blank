@@ -2046,6 +2046,34 @@
     </div>
 
 
+    <h3>Job Profit</h3>
+
+    <div
+      id="jobProfitSummary"
+      class="detail-grid"
+    >
+      <div class="detail-box">
+        <span>Labor / Fees Revenue</span>
+        <strong id="jobServiceRevenue">$0.00</strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Parts Revenue</span>
+        <strong id="jobPartsRevenue">$0.00</strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Parts Cost</span>
+        <strong id="jobPartsCost">$0.00</strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Estimated Profit</span>
+        <strong id="jobEstimatedProfit">$0.00</strong>
+      </div>
+    </div>
+
+
     <h3>Parts</h3>
 
 
@@ -2093,6 +2121,16 @@
           type="number"
           step="0.01"
         >
+      </label>
+
+      <label>
+        Part Status
+        <select id="newPartStatus">
+          <option>Needed</option>
+          <option>Ordered</option>
+          <option>Received</option>
+          <option>Installed</option>
+        </select>
       </label>
 
     </div>
@@ -4448,11 +4486,90 @@ async function loadJobParts(jobId) {
 
 
   if (error) {
+
+    $("jobPartsList")
+      .innerHTML =
+        `<p class="error">
+          ${escapeHtml(error.message)}
+        </p>`;
+
     return;
+
   }
 
 
-  if (!data.length) {
+  const job =
+    jobs.find(
+      x =>
+        Number(x.id) ===
+        Number(jobId)
+    );
+
+
+  const laborRevenue =
+    Number(job?.labor_hours || 0) *
+    Number(job?.labor_rate || 0);
+
+
+  const serviceRevenue =
+    laborRevenue +
+    Number(job?.travel_fee || 0) +
+    Number(job?.pickup_delivery_fee || 0);
+
+
+  const partsCost =
+    (data || [])
+      .reduce(
+        (sum, part) =>
+          sum +
+          (
+            Number(part.quantity || 0) *
+            Number(part.cost_each || 0)
+          ),
+        0
+      );
+
+
+  const partsRevenue =
+    (data || [])
+      .reduce(
+        (sum, part) =>
+          sum +
+          (
+            Number(part.quantity || 0) *
+            Number(part.sell_price_each || 0)
+          ),
+        0
+      );
+
+
+  const estimatedProfit =
+    serviceRevenue +
+    partsRevenue -
+    partsCost;
+
+
+  $("jobServiceRevenue")
+    .textContent =
+      money(serviceRevenue);
+
+
+  $("jobPartsRevenue")
+    .textContent =
+      money(partsRevenue);
+
+
+  $("jobPartsCost")
+    .textContent =
+      money(partsCost);
+
+
+  $("jobEstimatedProfit")
+    .textContent =
+      money(estimatedProfit);
+
+
+  if (!data?.length) {
 
     $("jobPartsList")
       .innerHTML =
@@ -4476,6 +4593,7 @@ async function loadJobParts(jobId) {
           <th>Qty</th>
           <th>Cost</th>
           <th>Sell</th>
+          <th>Status</th>
         </tr>
       </thead>
 
@@ -4513,6 +4631,24 @@ async function loadJobParts(jobId) {
           ${money(part.sell_price_each)}
         </td>
 
+        <td>
+          <select
+            onchange="updateJobPartStatus(${part.id}, this.value, ${jobId})"
+            style="min-width:125px;margin:0;"
+          >
+            ${["Needed","Ordered","Received","Installed"]
+              .map(
+                status =>
+                  `<option ${
+                    (part.status || "Needed") === status
+                      ? "selected"
+                      : ""
+                  }>${status}</option>`
+              )
+              .join("")}
+          </select>
+        </td>
+
       </tr>
     `;
 
@@ -4530,6 +4666,46 @@ async function loadJobParts(jobId) {
       html;
 
 }
+
+
+async function updateJobPartStatus(
+  partId,
+  status,
+  jobId
+) {
+
+  const {
+    error
+  } =
+    await db
+      .from("job_parts")
+      .update({
+        status
+      })
+      .eq(
+        "id",
+        Number(partId)
+      );
+
+
+  if (error) {
+
+    alert(
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadJobParts(
+    Number(jobId)
+  );
+
+}
+
+
 
 
 $("addJobPartButton")
@@ -4585,7 +4761,11 @@ $("addJobPartButton")
             sell_price_each:
               Number(
                 $("newPartSell").value || 0
-              )
+              ),
+
+            status:
+              $("newPartStatus").value ||
+              "Needed"
 
           });
 
@@ -4606,9 +4786,92 @@ $("addJobPartButton")
       $("newPartQty").value = 1;
       $("newPartCost").value = "";
       $("newPartSell").value = "";
+      $("newPartStatus").value = "Needed";
 
 
       await loadJobParts(jobId);
+
+    }
+  );
+
+
+
+[
+  "editLaborHours",
+  "editLaborRate",
+  "editTravelFee",
+  "editPickupFee"
+]
+  .forEach(
+    id => {
+
+      $(id)
+        ?.addEventListener(
+          "input",
+          () => {
+
+            const jobId =
+              Number(
+                $("editJobId").value
+              );
+
+
+            const job =
+              jobs.find(
+                x =>
+                  Number(x.id) ===
+                  jobId
+              );
+
+
+            if (!job) {
+              return;
+            }
+
+
+            /* Temporarily mirror current form values so the
+               profit cards update before Save Job is clicked. */
+            const original = {
+              labor_hours: job.labor_hours,
+              labor_rate: job.labor_rate,
+              travel_fee: job.travel_fee,
+              pickup_delivery_fee: job.pickup_delivery_fee
+            };
+
+
+            job.labor_hours =
+              Number(
+                $("editLaborHours").value || 0
+              );
+
+            job.labor_rate =
+              Number(
+                $("editLaborRate").value || 0
+              );
+
+            job.travel_fee =
+              Number(
+                $("editTravelFee").value || 0
+              );
+
+            job.pickup_delivery_fee =
+              Number(
+                $("editPickupFee").value || 0
+              );
+
+
+            loadJobParts(
+              jobId
+            );
+
+
+            Object.assign(
+              job,
+              original
+            );
+
+          }
+        );
 
     }
   );
