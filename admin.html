@@ -1565,12 +1565,26 @@
           </div>
 
 
-          <button
-            class="action-button"
-            type="submit"
-          >
-            Save Estimate
-          </button>
+          <div class="button-row">
+
+            <button
+              id="estimateSubmitButton"
+              class="action-button"
+              type="submit"
+            >
+              Save Estimate
+            </button>
+
+            <button
+              id="cancelEstimateEditButton"
+              class="secondary-button"
+              type="button"
+              style="display:none;"
+            >
+              Cancel Edit
+            </button>
+
+          </div>
 
 
           <p
@@ -2231,6 +2245,7 @@ let customers = [];
 let items = [];
 let jobs = [];
 let estimates = [];
+let editingEstimateId = null;
 let invoices = [];
 let payments = [];
 
@@ -5851,6 +5866,305 @@ $("estimateJob")
   );
 
 
+
+function resetEstimateEditor() {
+
+  editingEstimateId =
+    null;
+
+
+  $("estimateForm")
+    .reset();
+
+
+  $("estimateLines")
+    .innerHTML = "";
+
+
+  addLine(
+    "estimate"
+  );
+
+
+  $("estimateSubmitButton")
+    .textContent =
+      "Save Estimate";
+
+
+  $("cancelEstimateEditButton")
+    .style.display =
+      "none";
+
+
+  $("estimateMessage")
+    .textContent =
+      "";
+
+
+  calculateDocument(
+    "estimate"
+  );
+
+}
+
+
+$("cancelEstimateEditButton")
+  ?.addEventListener(
+    "click",
+    resetEstimateEditor
+  );
+
+
+async function editEstimate(id) {
+
+  const estimate =
+    estimates.find(
+      x =>
+        Number(x.id) ===
+        Number(id)
+    );
+
+
+  if (!estimate) {
+
+    alert(
+      "Estimate could not be found."
+    );
+
+    return;
+
+  }
+
+
+  const {
+    data: estimateItems,
+    error
+  } =
+    await db
+      .from("estimate_items")
+      .select("*")
+      .eq(
+        "estimate_id",
+        id
+      )
+      .order(
+        "id",
+        { ascending:true }
+      );
+
+
+  if (error) {
+
+    alert(
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  editingEstimateId =
+    Number(id);
+
+
+  closeModal(
+    "estimateModal"
+  );
+
+
+  /* Make sure the Estimates tab is visible. */
+  document
+    .querySelectorAll(
+      ".nav-tab"
+    )
+    .forEach(
+      button =>
+        button.classList.remove(
+          "active"
+        )
+    );
+
+
+  document
+    .querySelectorAll(
+      ".view"
+    )
+    .forEach(
+      view =>
+        view.classList.remove(
+          "active"
+        )
+    );
+
+
+  const estimatesTab =
+    document.querySelector(
+      '[data-view="estimatesView"]'
+    );
+
+
+  if (estimatesTab) {
+
+    estimatesTab.classList.add(
+      "active"
+    );
+
+  }
+
+
+  $("estimatesView")
+    .classList.add(
+      "active"
+    );
+
+
+  $("estimateCustomer").value =
+    String(
+      estimate.customer_id || ""
+    );
+
+
+  $("estimateJob").value =
+    estimate.repair_job_id
+      ? String(
+          estimate.repair_job_id
+        )
+      : "";
+
+
+  $("estimateStatus").value =
+    estimate.status ||
+    "Draft";
+
+
+  $("estimateExpiry").value =
+    estimate.expiry_date ||
+    "";
+
+
+  $("estimateSubject").value =
+    estimate.subject ||
+    "";
+
+
+  $("estimateLines")
+    .innerHTML =
+      "";
+
+
+  (estimateItems || [])
+    .forEach(
+      item => {
+
+        addLine(
+          "estimate"
+        );
+
+
+        const rows =
+          $("estimateLines")
+            .querySelectorAll(
+              ".line-item"
+            );
+
+
+        const row =
+          rows[
+            rows.length - 1
+          ];
+
+
+        row
+          .querySelector(
+            ".estimate-item-name"
+          )
+          .value =
+            item.item_name || "";
+
+
+        row
+          .querySelector(
+            ".estimate-item-description"
+          )
+          .value =
+            item.item_desc || "";
+
+
+        row
+          .querySelector(
+            ".estimate-item-qty"
+          )
+          .value =
+            Number(
+              item.quantity || 1
+            );
+
+
+        row
+          .querySelector(
+            ".estimate-item-price"
+          )
+          .value =
+            Number(
+              item.unit_price || 0
+            )
+              .toFixed(2);
+
+      }
+    );
+
+
+  if (!(estimateItems || []).length) {
+
+    addLine(
+      "estimate"
+    );
+
+  }
+
+
+  bindLineEvents(
+    "estimate"
+  );
+
+
+  calculateDocument(
+    "estimate"
+  );
+
+
+  $("estimateSubmitButton")
+    .textContent =
+      "Save Changes";
+
+
+  $("cancelEstimateEditButton")
+    .style.display =
+      "inline-block";
+
+
+  $("estimateMessage")
+    .textContent =
+      `Editing ${estimate.estimate_number}`;
+
+
+  $("estimateMessage")
+    .className =
+      "message success";
+
+
+  window.scrollTo({
+    top:
+      $("estimatesView")
+        .offsetTop,
+    behavior:
+      "smooth"
+  });
+
+}
+
+
 $("estimateForm")
   .addEventListener(
     "submit",
@@ -5860,7 +6174,9 @@ $("estimateForm")
 
 
       const lines =
-        readLines("estimate");
+        readLines(
+          "estimate"
+        );
 
 
       if (!lines.length) {
@@ -5868,6 +6184,10 @@ $("estimateForm")
         $("estimateMessage")
           .textContent =
             "Add at least one estimate item.";
+
+        $("estimateMessage")
+          .className =
+            "message error";
 
         return;
 
@@ -5878,13 +6198,190 @@ $("estimateForm")
         lines.reduce(
           (sum,line) =>
             sum +
-            Number(line.line_total),
+            Number(
+              line.line_total
+            ),
           0
         );
 
 
+      /* ==================================================
+         EDIT EXISTING ESTIMATE
+      =================================================== */
+
+      if (editingEstimateId) {
+
+        const estimate =
+          estimates.find(
+            x =>
+              Number(x.id) ===
+              Number(editingEstimateId)
+          );
+
+
+        const {
+          error: updateError
+        } =
+          await db
+            .from("estimates")
+            .update({
+
+              customer_id:
+                Number(
+                  $("estimateCustomer")
+                    .value
+                ),
+
+              repair_job_id:
+                $("estimateJob").value
+                  ? Number(
+                      $("estimateJob")
+                        .value
+                    )
+                  : null,
+
+              status:
+                $("estimateStatus")
+                  .value,
+
+              expiry_date:
+                $("estimateExpiry")
+                  .value ||
+                null,
+
+              subject:
+                $("estimateSubject")
+                  .value
+                  .trim(),
+
+              subtotal,
+              total:
+                subtotal
+
+            })
+            .eq(
+              "id",
+              editingEstimateId
+            );
+
+
+        if (updateError) {
+
+          $("estimateMessage")
+            .textContent =
+              updateError.message;
+
+          $("estimateMessage")
+            .className =
+              "message error";
+
+          return;
+
+        }
+
+
+        const {
+          error: deleteLineError
+        } =
+          await db
+            .from(
+              "estimate_items"
+            )
+            .delete()
+            .eq(
+              "estimate_id",
+              editingEstimateId
+            );
+
+
+        if (deleteLineError) {
+
+          $("estimateMessage")
+            .textContent =
+              deleteLineError.message;
+
+          $("estimateMessage")
+            .className =
+              "message error";
+
+          return;
+
+        }
+
+
+        const rows =
+          lines.map(
+            line => ({
+
+              estimate_id:
+                editingEstimateId,
+
+              ...line
+
+            })
+          );
+
+
+        const {
+          error: insertLineError
+        } =
+          await db
+            .from(
+              "estimate_items"
+            )
+            .insert(
+              rows
+            );
+
+
+        if (insertLineError) {
+
+          $("estimateMessage")
+            .textContent =
+              insertLineError.message;
+
+          $("estimateMessage")
+            .className =
+              "message error";
+
+          return;
+
+        }
+
+
+        const number =
+          estimate?.estimate_number ||
+          "Estimate";
+
+
+        await loadEstimates();
+
+
+        resetEstimateEditor();
+
+
+        $("estimateMessage")
+          .textContent =
+            `${number} updated.`;
+
+        $("estimateMessage")
+          .className =
+            "message success";
+
+
+        return;
+
+      }
+
+
+      /* ==================================================
+         CREATE NEW ESTIMATE
+      =================================================== */
+
       const number =
-        makeNumber("EST");
+        makeNumber(
+          "EST"
+        );
 
 
       const {
@@ -5892,7 +6389,9 @@ $("estimateForm")
         error
       } =
         await db
-          .from("estimates")
+          .from(
+            "estimates"
+          )
           .insert({
 
             customer_id:
@@ -5902,9 +6401,11 @@ $("estimateForm")
               ),
 
             repair_job_id:
-              $("estimateJob").value
+              $("estimateJob")
+                .value
                 ? Number(
-                    $("estimateJob").value
+                    $("estimateJob")
+                      .value
                   )
                 : null,
 
@@ -5912,18 +6413,21 @@ $("estimateForm")
               number,
 
             status:
-              $("estimateStatus").value,
+              $("estimateStatus")
+                .value,
 
             quote_date:
               today(),
 
             expiry_date:
-              $("estimateExpiry").value ||
+              $("estimateExpiry")
+                .value ||
               null,
 
             subject:
               $("estimateSubject")
-                .value.trim(),
+                .value
+                .trim(),
 
             subtotal,
             total:
@@ -5943,28 +6447,38 @@ $("estimateForm")
           .textContent =
             error.message;
 
+        $("estimateMessage")
+          .className =
+            "message error";
+
         return;
 
       }
 
 
       const rows =
-        lines.map(line => ({
+        lines.map(
+          line => ({
 
-          estimate_id:
-            estimate.id,
+            estimate_id:
+              estimate.id,
 
-          ...line
+            ...line
 
-        }));
+          })
+        );
 
 
       const {
         error: lineError
       } =
         await db
-          .from("estimate_items")
-          .insert(rows);
+          .from(
+            "estimate_items"
+          )
+          .insert(
+            rows
+          );
 
 
       if (lineError) {
@@ -5973,9 +6487,19 @@ $("estimateForm")
           .textContent =
             lineError.message;
 
+        $("estimateMessage")
+          .className =
+            "message error";
+
         return;
 
       }
+
+
+      await loadEstimates();
+
+
+      resetEstimateEditor();
 
 
       $("estimateMessage")
@@ -5985,17 +6509,6 @@ $("estimateForm")
       $("estimateMessage")
         .className =
           "message success";
-
-
-      event.target.reset();
-
-      $("estimateLines")
-        .innerHTML = "";
-
-      addLine("estimate");
-
-
-      await loadEstimates();
 
     }
   );
@@ -6135,6 +6648,13 @@ async function openEstimate(id) {
 
       <button
         class="action-button"
+        onclick="editEstimate(${id})"
+      >
+        Edit Estimate
+      </button>
+
+      <button
+        class="secondary-button"
         onclick="saveEstimateStatus(${id})"
       >
         Save Status
