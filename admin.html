@@ -2160,6 +2160,19 @@ function escapeHtml(value) {
 
 function makeNumber(prefix) {
 
+  // Repair jobs use FSER-####
+  if (prefix === "FSER") {
+
+    const random =
+      Math.floor(
+        Math.random() * 10000
+      );
+
+    return `FSER-${String(random).padStart(4, "0")}`;
+  }
+
+
+  // Keep estimates/invoices using the current date + random format
   const d =
     new Date();
 
@@ -2178,16 +2191,6 @@ function makeNumber(prefix) {
   return `${prefix}-${date}-${random}`;
 
 }
-
-
-function closeModal(id) {
-
-  $(id)
-    .classList
-    .remove("open");
-
-}
-
 
 /* ==================================================
    SECURITY
