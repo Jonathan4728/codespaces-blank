@@ -5624,6 +5624,233 @@ $("estimateSearch")
   );
 
 
+
+/* ==================================================
+   AUTO-FILL ESTIMATE FROM REPAIR JOB
+=================================================== */
+
+async function loadEstimateFromRepairJob(jobId) {
+
+  const job =
+    jobs.find(
+      x =>
+        Number(x.id) ===
+        Number(jobId)
+    );
+
+
+  if (!job) {
+    return;
+  }
+
+
+  /* Match the estimate to the repair-job customer. */
+  if ($("estimateCustomer")) {
+    $("estimateCustomer").value =
+      String(job.customer_id);
+  }
+
+
+  /* Give the estimate a useful subject automatically. */
+  if (
+    $("estimateSubject") &&
+    !$("estimateSubject").value.trim()
+  ) {
+
+    const equipment =
+      jobEquipment(job);
+
+    $("estimateSubject").value =
+      equipment
+        ? `Repair Estimate - ${equipment}`
+        : "Repair Estimate";
+
+  }
+
+
+  const {
+    data: parts,
+    error
+  } =
+    await db
+      .from("job_parts")
+      .select("*")
+      .eq(
+        "repair_job_id",
+        Number(jobId)
+      )
+      .order(
+        "created_at",
+        { ascending:true }
+      );
+
+
+  if (error) {
+
+    $("estimateMessage")
+      .textContent =
+        error.message;
+
+    $("estimateMessage")
+      .className =
+        "message error";
+
+    return;
+
+  }
+
+
+  /* Replace the blank/default estimate rows with ticket items. */
+  $("estimateLines")
+    .innerHTML = "";
+
+
+  if (!parts?.length) {
+
+    addLine(
+      "estimate"
+    );
+
+    $("estimateMessage")
+      .textContent =
+        "This repair ticket has no parts/items added yet.";
+
+    $("estimateMessage")
+      .className =
+        "message";
+
+    return;
+
+  }
+
+
+  parts.forEach(
+    part => {
+
+      addLine(
+        "estimate"
+      );
+
+
+      const rows =
+        $("estimateLines")
+          .querySelectorAll(
+            ".line-item"
+          );
+
+
+      const row =
+        rows[
+          rows.length - 1
+        ];
+
+
+      const name =
+        row.querySelector(
+          ".estimate-item-name"
+        );
+
+      const description =
+        row.querySelector(
+          ".estimate-item-description"
+        );
+
+      const qty =
+        row.querySelector(
+          ".estimate-item-qty"
+        );
+
+      const price =
+        row.querySelector(
+          ".estimate-item-price"
+        );
+
+
+      if (name) {
+
+        name.value =
+          part.description ||
+          "Part";
+
+      }
+
+
+      if (description) {
+
+        description.value =
+          part.part_number
+            ? `Part # ${part.part_number}`
+            : "";
+
+      }
+
+
+      if (qty) {
+
+        qty.value =
+          Number(
+            part.quantity || 1
+          );
+
+      }
+
+
+      if (price) {
+
+        price.value =
+          Number(
+            part.sell_price_each || 0
+          )
+            .toFixed(2);
+
+      }
+
+    }
+  );
+
+
+  calculateDocument(
+    "estimate"
+  );
+
+
+  $("estimateMessage")
+    .textContent =
+      `${parts.length} ticket item${parts.length === 1 ? "" : "s"} added to estimate.`;
+
+  $("estimateMessage")
+    .className =
+      "message success";
+
+}
+
+
+$("estimateJob")
+  ?.addEventListener(
+    "change",
+    async event => {
+
+      const jobId =
+        Number(
+          event.target.value || 0
+        );
+
+
+      if (!jobId) {
+
+        return;
+
+      }
+
+
+      await loadEstimateFromRepairJob(
+        jobId
+      );
+
+    }
+  );
+
+
 $("estimateForm")
   .addEventListener(
     "submit",
