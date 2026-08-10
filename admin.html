@@ -13,7 +13,16 @@
 
   <link rel="icon" type="image/png" href="favicon.png">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+<div id="customerHistoryModal" class="modal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal('customerHistoryModal')" type="button">×</button>
+    <h2 id="customerHistoryTitle">Customer History</h2>
+    <div id="customerHistoryContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
 
@@ -1075,7 +1084,14 @@
 
       </div>
 
-    </section>
+    
+      <div class="panel">
+        <h2>Needs Attention</h2>
+        <div id="dashboardAlerts" class="detail-grid"></div>
+        <div id="dashboardAlertList" class="table-wrap" style="margin-top:16px;"></div>
+      </div>
+
+</section>
 
 
     <!-- ==================================================
@@ -3133,6 +3149,90 @@ async function convertRequest(id) {
    CUSTOMERS
 =================================================== */
 
+
+async function loadDashboardAlerts() {
+  const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
+  const activeJobs = jobs.filter(j => !["completed","picked up","closed"].includes(String(j.status||"").toLowerCase()));
+  const waitingApproval = activeJobs.filter(j => String(j.status||"").toLowerCase().includes("approval"));
+  const waitingParts = activeJobs.filter(j => String(j.status||"").toLowerCase().includes("part"));
+  const readyPickup = jobs.filter(j => String(j.status||"").toLowerCase().includes("ready"));
+  const oldJobs = activeJobs.filter(j => {
+    const raw=j.created_at||j.date_received;
+    return raw && new Date(raw)<sevenDaysAgo;
+  });
+  const unpaid=invoices.filter(i=>Number(i.balance_due||0)>0);
+  const outstanding=unpaid.reduce((s,i)=>s+Number(i.balance_due||0),0);
+
+  if (!$("dashboardAlerts") || !$("dashboardAlertList")) return;
+
+  $("dashboardAlerts").innerHTML=`
+    <div class="detail-box"><span>Waiting on Approval</span><strong>${waitingApproval.length}</strong></div>
+    <div class="detail-box"><span>Waiting on Parts</span><strong>${waitingParts.length}</strong></div>
+    <div class="detail-box"><span>Ready for Pickup</span><strong>${readyPickup.length}</strong></div>
+    <div class="detail-box"><span>Open 7+ Days</span><strong>${oldJobs.length}</strong></div>
+    <div class="detail-box"><span>Invoices With Balance</span><strong>${unpaid.length}</strong></div>
+    <div class="detail-box"><span>Outstanding Balance</span><strong>${money(outstanding)}</strong></div>`;
+
+  const alerts=[];
+  const addJob=(type,j)=>alerts.push({type,customer:customerName(j.customers),ref:j.ticket_number||"",detail:jobEquipment(j),click:`openJob(${j.id})`});
+  waitingApproval.forEach(j=>addJob("Waiting on Approval",j));
+  waitingParts.forEach(j=>addJob("Waiting on Parts",j));
+  readyPickup.forEach(j=>addJob("Ready for Pickup",j));
+  oldJobs.forEach(j=>addJob("Open 7+ Days",j));
+  unpaid.forEach(i=>alerts.push({
+    type:Number(i.amount_paid||0)>0?"Partially Paid":"Unpaid Invoice",
+    customer:customerName(i.customers),ref:i.invoice_number||"",
+    detail:`Balance ${money(i.balance_due)}`,click:`openInvoice(${i.id})`
+  }));
+
+  $("dashboardAlertList").innerHTML = alerts.length ? `
+    <table><thead><tr><th>Alert</th><th>Customer</th><th>Ticket / Invoice</th><th>Details</th></tr></thead>
+    <tbody>${alerts.map(a=>`<tr style="cursor:pointer;" onclick="${a.click}">
+      <td><span class="status">${escapeHtml(a.type)}</span></td>
+      <td>${escapeHtml(a.customer)}</td><td>${escapeHtml(a.ref)}</td><td>${escapeHtml(a.detail)}</td>
+    </tr>`).join("")}</tbody></table>` :
+    `<p class="empty">Nothing needs attention right now.</p>`;
+}
+
+async function openCustomerHistory(customerId) {
+  const customer=customers.find(x=>Number(x.id)===Number(customerId));
+  if(!customer){ alert("Customer could not be found."); return; }
+
+  const [jr,er,ir,pr]=await Promise.all([
+    db.from("repair_jobs").select("*").eq("customer_id",customerId).order("created_at",{ascending:false}),
+    db.from("estimates").select("*").eq("customer_id",customerId).order("created_at",{ascending:false}),
+    db.from("invoices").select("*").eq("customer_id",customerId).order("created_at",{ascending:false}),
+    db.from("payments").select("*").eq("customer_id",customerId).order("payment_date",{ascending:false})
+  ]);
+  const cj=jr.data||[], ce=er.data||[], ci=ir.data||[], cp=pr.data||[];
+  const totalPaid=cp.reduce((s,p)=>s+Number(p.amount||0),0);
+  const outstanding=ci.reduce((s,i)=>s+Number(i.balance_due||0),0);
+  $("customerHistoryTitle").textContent=`${customerName(customer)} — History`;
+
+  $("customerHistoryContent").innerHTML=`
+    <div class="detail-grid">
+      <div class="detail-box"><span>Repair Jobs</span><strong>${cj.length}</strong></div>
+      <div class="detail-box"><span>Estimates</span><strong>${ce.length}</strong></div>
+      <div class="detail-box"><span>Invoices</span><strong>${ci.length}</strong></div>
+      <div class="detail-box"><span>Total Payments</span><strong>${money(totalPaid)}</strong></div>
+      <div class="detail-box"><span>Balance Due</span><strong>${money(outstanding)}</strong></div>
+    </div>
+    <h3>Repair History</h3>
+    ${cj.length?`<div class="table-wrap"><table><thead><tr><th>Ticket</th><th>Equipment</th><th>Status</th><th>Date</th></tr></thead><tbody>
+    ${cj.map(j=>`<tr style="cursor:pointer;" onclick="closeModal('customerHistoryModal');openJob(${j.id})"><td>${escapeHtml(j.ticket_number||"")}</td><td>${escapeHtml(jobEquipment(j))}</td><td>${escapeHtml(j.status||"")}</td><td>${dateDisplay(j.date_received||j.created_at)}</td></tr>`).join("")}
+    </tbody></table></div>`:`<p class="empty">No repair jobs.</p>`}
+    <h3>Estimate History</h3>
+    ${ce.length?`<div class="table-wrap"><table><thead><tr><th>Estimate</th><th>Status</th><th>Total</th><th>Date</th></tr></thead><tbody>
+    ${ce.map(e=>`<tr style="cursor:pointer;" onclick="closeModal('customerHistoryModal');openEstimate(${e.id})"><td>${escapeHtml(e.estimate_number||"")}</td><td>${escapeHtml(e.status||"")}</td><td>${money(e.total)}</td><td>${dateDisplay(e.quote_date||e.created_at)}</td></tr>`).join("")}
+    </tbody></table></div>`:`<p class="empty">No estimates.</p>`}
+    <h3>Invoice History</h3>
+    ${ci.length?`<div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Status</th><th>Total</th><th>Paid</th><th>Balance</th></tr></thead><tbody>
+    ${ci.map(i=>`<tr style="cursor:pointer;" onclick="closeModal('customerHistoryModal');openInvoice(${i.id})"><td>${escapeHtml(i.invoice_number||"")}</td><td>${escapeHtml(i.status||"")}</td><td>${money(i.total)}</td><td>${money(i.amount_paid)}</td><td>${money(i.balance_due)}</td></tr>`).join("")}
+    </tbody></table></div>`:`<p class="empty">No invoices.</p>`}`;
+
+  $("customerHistoryModal").classList.add("open");
+}
+
 async function loadCustomers() {
 
   const {
@@ -3278,6 +3378,8 @@ function renderCustomers(list) {
         </td>
 
         <td>
+          <button class="small-button" onclick="event.stopPropagation(); openCustomerHistory(${customer.id})">History</button>
+
           <button
             class="small-button red"
             onclick="event.stopPropagation(); deleteCustomer(${customer.id})"
