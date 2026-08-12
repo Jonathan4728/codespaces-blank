@@ -6283,12 +6283,12 @@ $("readyPickupTextButton")
         `If you were happy with our service, we would greatly appreciate it if you would take a moment to leave us a Google review: https://g.page/r/CVPS3WL6jDtSECE/review ` +
         `Thank you for choosing Flores Small Engine Repair!`;
 
-      const phone =
+      const smsPhone =
         String(phone)
           .replace(/[^\d+]/g, "");
 
       window.location.href =
-        `sms:${phone}?body=${encodeURIComponent(message)}`;
+        `sms:${smsPhone}?body=${encodeURIComponent(message)}`;
 
     }
   );
@@ -12053,10 +12053,6 @@ $("timeClockJob")
    START
 =================================================== */
 
-async function startAdmin() {
-
-  const allowed =
-    await 
 /* ==================================================
    EXPENSES
 =================================================== */
@@ -12377,7 +12373,10 @@ document.addEventListener(
 );
 
 
-protectPage();
+async function startAdmin() {
+
+  const allowed =
+    await protectPage();
 
 
   if (!allowed) {
@@ -12402,6 +12401,7 @@ protectPage();
     loadJobs(),
     loadInvoices(),
     loadPayments(),
+    loadExpenses(),
     loadRequestCount()
   ]);
 
@@ -12411,6 +12411,7 @@ protectPage();
   loadedViews.add("jobsView");
   loadedViews.add("invoicesView");
   loadedViews.add("paymentsView");
+  loadedViews.add("expensesView");
 
 }
 
