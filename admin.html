@@ -979,6 +979,16 @@
           <strong id="yearRevenue">$0.00</strong>
         </div>
 
+        <div class="stat-card">
+          <span>Estimated Profit This Month</span>
+          <strong id="monthProfit">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Estimated Profit This Year</span>
+          <strong id="yearProfit">$0.00</strong>
+        </div>
+
       </div>
 
 
@@ -3286,6 +3296,191 @@ async function convertRequest(id) {
 =================================================== */
 
 
+
+async function calculateDashboardProfit() {
+
+  const now =
+    new Date();
+
+  const currentYear =
+    now.getFullYear();
+
+  const currentMonth =
+    now.getMonth();
+
+
+  const {
+    data: allParts,
+    error
+  } =
+    await db
+      .from("job_parts")
+      .select(
+        "repair_job_id, quantity, cost_each, sell_price_each"
+      );
+
+
+  if (error) {
+
+    console.error(
+      "Profit calculation error:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  const partsByJob = {};
+
+
+  (allParts || [])
+    .forEach(
+      part => {
+
+        const id =
+          Number(
+            part.repair_job_id
+          );
+
+
+        if (!partsByJob[id]) {
+
+          partsByJob[id] = {
+            cost: 0,
+            revenue: 0
+          };
+
+        }
+
+
+        partsByJob[id].cost +=
+          Number(
+            part.quantity || 0
+          ) *
+          Number(
+            part.cost_each || 0
+          );
+
+
+        partsByJob[id].revenue +=
+          Number(
+            part.quantity || 0
+          ) *
+          Number(
+            part.sell_price_each || 0
+          );
+
+      }
+    );
+
+
+  let monthProfit = 0;
+  let yearProfit = 0;
+
+
+  jobs.forEach(
+    job => {
+
+      const dateValue =
+        job.date_completed ||
+        job.created_at;
+
+
+      if (!dateValue) {
+        return;
+      }
+
+
+      const date =
+        new Date(
+          dateValue
+        );
+
+
+      const laborRevenue =
+        Number(
+          job.labor_hours || 0
+        ) *
+        Number(
+          job.labor_rate || 0
+        );
+
+
+      const serviceRevenue =
+        laborRevenue +
+        Number(
+          job.service_fee || 0
+        ) +
+        Number(
+          job.travel_fee || 0
+        ) +
+        Number(
+          job.pickup_delivery_fee || 0
+        );
+
+
+      const partTotals =
+        partsByJob[
+          Number(job.id)
+        ] || {
+          cost: 0,
+          revenue: 0
+        };
+
+
+      const profit =
+        serviceRevenue +
+        partTotals.revenue -
+        partTotals.cost;
+
+
+      if (
+        date.getFullYear() ===
+        currentYear
+      ) {
+
+        yearProfit +=
+          profit;
+
+
+        if (
+          date.getMonth() ===
+          currentMonth
+        ) {
+
+          monthProfit +=
+            profit;
+
+        }
+
+      }
+
+    }
+  );
+
+
+  if ($("monthProfit")) {
+
+    $("monthProfit")
+      .textContent =
+        money(monthProfit);
+
+  }
+
+
+  if ($("yearProfit")) {
+
+    $("yearProfit")
+      .textContent =
+        money(yearProfit);
+
+  }
+
+}
+
+
 async function loadDashboardAlerts() {
   const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
   const activeJobs = jobs.filter(j => !["completed","picked up","closed"].includes(String(j.status||"").toLowerCase()));
@@ -4257,6 +4452,8 @@ async function loadJobs() {
 
   renderJobs();
 
+  await calculateDashboardProfit();
+
   renderRecentJobs();
 
   populateJobSelects();
@@ -4985,6 +5182,8 @@ async function updateJobPartStatus(
     Number(jobId)
   );
 
+
+  await calculateDashboardProfit();
 }
 
 
