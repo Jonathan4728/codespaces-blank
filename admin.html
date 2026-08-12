@@ -5903,13 +5903,19 @@ $("readyPickupTextButton")
       }
 
       const customer =
+        job.customers ||
         customers.find(
           x =>
             Number(x.id) ===
             Number(job.customer_id)
         );
 
-      if (!customer?.phone) {
+      const savedPhone =
+        customer?.phone ||
+        job.customers?.phone ||
+        "";
+
+      if (!savedPhone) {
         alert("This customer does not have a phone number saved.");
         return;
       }
@@ -5964,7 +5970,7 @@ $("readyPickupTextButton")
         `Thank you for choosing Flores Small Engine Repair!`;
 
       const phone =
-        String(customer.phone)
+        String(savedPhone)
           .replace(/[^\d+]/g, "");
 
       window.location.href =
