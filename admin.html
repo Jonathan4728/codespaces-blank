@@ -4900,7 +4900,8 @@ async function loadJobs() {
         customers(
           first_name,
           last_name,
-          phone
+          phone,
+          portal_number
         ),
         equipment(
           equipment_type,
@@ -6949,7 +6950,8 @@ async function loadEstimates() {
           address,
           city,
           state,
-          zip
+          zip,
+          portal_number
         )
       `)
       .order(
@@ -8456,7 +8458,8 @@ async function loadInvoices() {
           address,
           city,
           state,
-          zip
+          zip,
+          portal_number
         )
       `)
       .order(
@@ -10649,6 +10652,14 @@ Total: ${money(estimate.total)}
 
 ${itemText}
 
+Customer Portal:
+https://floressmallenginerepair.com/portal.html
+
+Your permanent FSER portal number: ${estimate.customers?.portal_number || "Contact us for your portal number"}
+Use the last 4 digits of your phone number to sign in.
+
+You can use this same FSER number anytime to view current and past repairs, estimates, and invoices.
+
 Please reply to approve the estimate or contact us with any questions.
 
 Flores Small Engine Repair
@@ -10691,9 +10702,30 @@ async function textEstimate(id) {
   }
 
 
+  const portalNumber =
+    estimate.customers?.portal_number ||
+    "Contact us for your portal number";
+
+
+  const portalUrl =
+    "https://floressmallenginerepair.com/portal.html";
+
+
   const body =
     encodeURIComponent(
-`Hi ${contact.name}, this is Flores Small Engine Repair. Your estimate ${estimate.estimate_number} is ${money(estimate.total)}. Reply to approve or contact me with any questions.`
+`Hi ${contact.name}, this is Flores Small Engine Repair.
+
+Your estimate ${estimate.estimate_number} is ${money(estimate.total)}.
+
+You can review your estimate and track your repair anytime in the Customer Portal:
+${portalUrl}
+
+Your permanent FSER portal number is: ${portalNumber}
+Use the last 4 digits of your phone number to sign in.
+
+Keep this same FSER number for all future repairs, estimates, and invoices.
+
+Reply to this message if you have any questions.`
     );
 
 
