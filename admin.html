@@ -2178,6 +2178,11 @@
         <span>Estimated Profit</span>
         <strong id="jobEstimatedProfit">$0.00</strong>
       </div>
+
+      <div class="detail-box">
+        <span>Repair Ticket Total</span>
+        <strong id="jobTicketTotal">$0.00</strong>
+      </div>
     </div>
 
 
@@ -2189,6 +2194,8 @@
       class="table-wrap"
     ></div>
 
+
+    <input type="hidden" id="editingJobPartId">
 
     <div class="form-grid three">
 
@@ -2248,8 +2255,18 @@
       <button
         id="addJobPartButton"
         class="secondary-button"
+        type="button"
       >
         Add Part
+      </button>
+
+      <button
+        id="cancelJobPartEditButton"
+        class="secondary-button"
+        type="button"
+        style="display:none;"
+      >
+        Cancel Part Edit
       </button>
 
       <button
@@ -4413,6 +4430,7 @@ function renderRecentJobs() {
           <th>Job</th>
           <th>Customer</th>
           <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
 
@@ -4657,6 +4675,10 @@ async function openJob(id) {
   $("newPartQty").value = 1;
   $("newPartCost").value = "";
   $("newPartSell").value = "";
+  $("newPartStatus").value = "Needed";
+  $("editingJobPartId").value = "";
+  $("addJobPartButton").textContent = "Add Part";
+  $("cancelJobPartEditButton").style.display = "none";
 
 
   await loadJobParts(id);
@@ -4752,6 +4774,11 @@ async function loadJobParts(jobId) {
     partsCost;
 
 
+  const ticketTotal =
+    serviceRevenue +
+    partsRevenue;
+
+
   $("jobServiceRevenue")
     .textContent =
       money(serviceRevenue);
@@ -4770,6 +4797,11 @@ async function loadJobParts(jobId) {
   $("jobEstimatedProfit")
     .textContent =
       money(estimatedProfit);
+
+
+  $("jobTicketTotal")
+    .textContent =
+      money(ticketTotal);
 
 
   if (!data?.length) {
@@ -4852,6 +4884,24 @@ async function loadJobParts(jobId) {
           </select>
         </td>
 
+        <td>
+          <button
+            class="small-button"
+            type="button"
+            onclick='editJobPart(${JSON.stringify(part)})'
+          >
+            Edit
+          </button>
+
+          <button
+            class="small-button red"
+            type="button"
+            onclick="deleteJobPart(${part.id}, ${jobId})"
+          >
+            Delete
+          </button>
+        </td>
+
       </tr>
     `;
 
@@ -4911,6 +4961,102 @@ async function updateJobPartStatus(
 
 
 
+
+function resetJobPartForm() {
+
+  $("editingJobPartId").value = "";
+  $("newPartDescription").value = "";
+  $("newPartNumber").value = "";
+  $("newPartQty").value = 1;
+  $("newPartCost").value = "";
+  $("newPartSell").value = "";
+  $("newPartStatus").value = "Needed";
+
+  $("addJobPartButton").textContent =
+    "Add Part";
+
+  $("cancelJobPartEditButton")
+    .style.display =
+      "none";
+
+}
+
+
+function editJobPart(part) {
+
+  $("editingJobPartId").value =
+    part.id;
+
+  $("newPartDescription").value =
+    part.description || "";
+
+  $("newPartNumber").value =
+    part.part_number || "";
+
+  $("newPartQty").value =
+    Number(part.quantity || 1);
+
+  $("newPartCost").value =
+    Number(part.cost_each || 0);
+
+  $("newPartSell").value =
+    Number(part.sell_price_each || 0);
+
+  $("newPartStatus").value =
+    part.status || "Needed";
+
+  $("addJobPartButton").textContent =
+    "Save Part Changes";
+
+  $("cancelJobPartEditButton")
+    .style.display =
+      "inline-block";
+
+  $("newPartDescription")
+    .focus();
+
+}
+
+
+$("cancelJobPartEditButton")
+  .addEventListener(
+    "click",
+    resetJobPartForm
+  );
+
+
+async function deleteJobPart(
+  partId,
+  jobId
+) {
+
+  if (!confirm("Delete this part from the repair ticket?")) {
+    return;
+  }
+
+  const { error } =
+    await db
+      .from("job_parts")
+      .delete()
+      .eq(
+        "id",
+        Number(partId)
+      );
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  resetJobPartForm();
+
+  await loadJobParts(
+    Number(jobId)
+  );
+
+}
+
+
 $("addJobPartButton")
   .addEventListener(
     "click",
@@ -4933,44 +5079,75 @@ $("addJobPartButton")
       }
 
 
+      const editingPartId =
+        Number(
+          $("editingJobPartId").value || 0
+        );
+
+
+      const partData = {
+
+        repair_job_id:
+          jobId,
+
+        description:
+          $("newPartDescription")
+            .value.trim(),
+
+        part_number:
+          $("newPartNumber")
+            .value.trim(),
+
+        quantity:
+          Number(
+            $("newPartQty").value || 1
+          ),
+
+        cost_each:
+          Number(
+            $("newPartCost").value || 0
+          ),
+
+        sell_price_each:
+          Number(
+            $("newPartSell").value || 0
+          ),
+
+        status:
+          $("newPartStatus").value ||
+          "Needed"
+
+      };
+
+
+      let result;
+
+
+      if (editingPartId) {
+
+        result =
+          await db
+            .from("job_parts")
+            .update(partData)
+            .eq(
+              "id",
+              editingPartId
+            );
+
+      } else {
+
+        result =
+          await db
+            .from("job_parts")
+            .insert(partData);
+
+      }
+
+
       const {
         error
       } =
-        await db
-          .from("job_parts")
-          .insert({
-
-            repair_job_id:
-              jobId,
-
-            description:
-              $("newPartDescription")
-                .value.trim(),
-
-            part_number:
-              $("newPartNumber")
-                .value.trim(),
-
-            quantity:
-              Number(
-                $("newPartQty").value || 1
-              ),
-
-            cost_each:
-              Number(
-                $("newPartCost").value || 0
-              ),
-
-            sell_price_each:
-              Number(
-                $("newPartSell").value || 0
-              ),
-
-            status:
-              $("newPartStatus").value ||
-              "Needed"
-
-          });
+        result;
 
 
       if (error) {
@@ -4984,12 +5161,18 @@ $("addJobPartButton")
       }
 
 
-      $("newPartDescription").value = "";
-      $("newPartNumber").value = "";
-      $("newPartQty").value = 1;
-      $("newPartCost").value = "";
-      $("newPartSell").value = "";
-      $("newPartStatus").value = "Needed";
+      resetJobPartForm();
+
+
+      $("editJobMessage")
+        .textContent =
+          editingPartId
+            ? "Part updated."
+            : "Part added.";
+
+      $("editJobMessage")
+        .className =
+          "message success";
 
 
       await loadJobParts(jobId);
