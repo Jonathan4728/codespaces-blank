@@ -2966,7 +2966,7 @@ function escapeHtml(value) {
 
  function makeNumber(prefix) {
 
-  // Repair jobs use FSER-####
+  // Permanent customer portal number
   if (prefix === "FSER") {
 
     const random =
@@ -2975,6 +2975,18 @@ function escapeHtml(value) {
       );
 
     return `FSER-${String(random).padStart(4, "0")}`;
+  }
+
+
+  // Individual repair ticket number
+  if (prefix === "JOB") {
+
+    const random =
+      Math.floor(
+        Math.random() * 10000
+      );
+
+    return `JOB-${String(random).padStart(4, "0")}`;
   }
 
 
@@ -3298,6 +3310,7 @@ function renderServiceRequests() {
       <thead>
         <tr>
           <th>Date</th>
+          <th>Portal #</th>
           <th>Name</th>
           <th>Phone</th>
           <th>Equipment</th>
@@ -3562,6 +3575,9 @@ async function convertRequest(id) {
         .from("customers")
         .insert({
 
+          portal_number:
+            makeNumber("FSER"),
+
           first_name:
             firstName,
 
@@ -3663,7 +3679,7 @@ async function convertRequest(id) {
           equipment.id,
 
         job_number:
-          makeNumber("FSER"),
+          makeNumber("JOB"),
 
         service_type:
           request.service_type ||
@@ -4091,7 +4107,7 @@ function populateCustomerSelects() {
 
 
       option.textContent =
-        customerName(customer);
+        `${customerName(customer)}${customer.portal_number ? ` — ${customer.portal_number}` : ""}`;
 
 
       select.appendChild(option);
@@ -4142,6 +4158,10 @@ function renderCustomers(list) {
     html += `
 
       <tr>
+
+        <td>
+          <strong>${escapeHtml(customer.portal_number || "")}</strong>
+        </td>
 
         <td>
           ${escapeHtml(
@@ -4215,6 +4235,7 @@ $("customerSearch")
           customer =>
 
             [
+              customer.portal_number,
               customer.first_name,
               customer.last_name,
               customer.phone,
@@ -4247,6 +4268,9 @@ $("customerForm")
         await db
           .from("customers")
           .insert({
+
+            portal_number:
+              makeNumber("FSER"),
 
             first_name:
               $("customerFirstName")
@@ -5229,7 +5253,7 @@ $("jobForm")
               equipment.id,
 
             job_number:
-              makeNumber("FSER"),
+              makeNumber("JOB"),
 
             service_type:
               $("serviceType").value,
@@ -6173,8 +6197,10 @@ Current status: ${status}
 Customer Portal:
 ${portalUrl}
 
-Portal number: ${job.job_number}
+Your permanent portal number: ${job.customers?.portal_number || "Contact us for your portal number"}
 Use the last 4 digits of your phone number to sign in.
+
+You can use this same FSER portal number anytime you return to view all current and past repairs, estimates, and invoices.
 
 Call or text (337) 326-8324 if you have any questions.`;
 
@@ -6278,8 +6304,9 @@ $("readyPickupTextButton")
       const message =
         `Hello ${firstName}, your ${equipment} is ready for pickup at Flores Small Engine Repair. ` +
         `Your total is ${money(total)}. Payment is required in full at the time of pickup. ` +
-        `You can view your invoice and repair details in the customer portal here: ${portalUrl} ` +
-        `${jobNumber ? `Your repair number is ${jobNumber}. ` : ""}` +
+        `You can view your invoice and repair history in the customer portal here: ${portalUrl} ` +
+        `Your permanent portal number is ${job.customers?.portal_number || "available by contacting us"}. ` +
+        `${jobNumber ? `This repair number is ${jobNumber}. ` : ""}` +
         `If you were happy with our service, we would greatly appreciate it if you would take a moment to leave us a Google review: https://g.page/r/CVPS3WL6jDtSECE/review ` +
         `Thank you for choosing Flores Small Engine Repair!`;
 
@@ -6315,9 +6342,10 @@ $("copyPortalButton")?.addEventListener("click", async () => {
 
 https://floressmallenginerepair.com/portal.html
 
-Job Number: ${job.job_number}
+Permanent Portal Number: ${job.customers?.portal_number || ""}
 
-Use the last 4 digits of the phone number on your repair order to sign in.`;
+Use the last 4 digits of the phone number on your account to sign in.
+You can use this same FSER number anytime to see all current and past repairs and invoices.`;
 
   try {
 
