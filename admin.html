@@ -922,6 +922,13 @@
       Payments
     </button>
 
+    <button
+      class="nav-tab"
+      data-view="expensesView"
+    >
+      Expenses
+    </button>
+
   </aside>
 
 
@@ -987,6 +994,26 @@
         <div class="stat-card">
           <span>Estimated Profit This Year</span>
           <strong id="yearProfit">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Expenses This Month</span>
+          <strong id="monthExpenses">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Expenses This Year</span>
+          <strong id="yearExpenses">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Net Profit This Month</span>
+          <strong id="monthNetProfit">$0.00</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Net Profit This Year</span>
+          <strong id="yearNetProfit">$0.00</strong>
         </div>
 
       </div>
@@ -2038,6 +2065,109 @@
     </section>
 
 
+
+    <!-- ==================================================
+         EXPENSES
+    =================================================== -->
+
+    <section
+      id="expensesView"
+      class="view"
+    >
+
+      <h1 class="page-title">Expenses</h1>
+
+      <div class="panel">
+
+        <h2>Add Expense</h2>
+
+        <form id="expenseForm">
+
+          <input type="hidden" id="expenseId">
+
+          <div class="form-grid">
+
+            <label>
+              Date
+              <input id="expenseDate" type="date" required>
+            </label>
+
+            <label>
+              Category
+              <select id="expenseCategory" required>
+                <option>Fuel</option>
+                <option>Tools</option>
+                <option>Shop Supplies</option>
+                <option>Advertising</option>
+                <option>Parts / Supplies</option>
+                <option>Equipment</option>
+                <option>Vehicle</option>
+                <option>Fees</option>
+                <option>Other</option>
+              </select>
+            </label>
+
+            <label>
+              Amount
+              <input
+                id="expenseAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+              >
+            </label>
+
+            <label>
+              Description
+              <input
+                id="expenseDescription"
+                placeholder="Gas for pickup, shop towels, tool, etc."
+                required
+              >
+            </label>
+
+            <label class="full-width">
+              Notes
+              <textarea id="expenseNotes"></textarea>
+            </label>
+
+          </div>
+
+          <div class="button-row">
+            <button class="action-button" type="submit" id="expenseSaveButton">
+              Save Expense
+            </button>
+
+            <button class="secondary-button" type="button" id="clearExpenseButton">
+              Clear
+            </button>
+          </div>
+
+          <p id="expenseMessage" class="message"></p>
+
+        </form>
+
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-header">
+          <h2>Expense History</h2>
+          <input
+            id="expenseSearch"
+            class="search-box"
+            placeholder="Search expenses..."
+          >
+        </div>
+
+        <div id="expenseTableWrapper" class="table-wrap"></div>
+
+      </div>
+
+    </section>
+
+
   </main>
 
 </div>
@@ -2313,6 +2443,14 @@
       </button>
 
       <button
+        id="readyPickupTextButton"
+        class="secondary-button"
+        type="button"
+      >
+        Text Ready for Pickup
+      </button>
+
+      <button
         id="copyPortalButton"
         class="secondary-button"
         type="button"
@@ -2438,6 +2576,7 @@ let estimates = [];
 let editingEstimateId = null;
 let invoices = [];
 let payments = [];
+let expenses = [];
 let timeEntries = [];
 let activeTimeEntry = null;
 let timeClockInterval = null;
@@ -2657,6 +2796,12 @@ async function loadViewData(viewId) {
   if (viewId === "paymentsView") {
 
     await loadPayments();
+
+  }
+
+  if (viewId === "expensesView") {
+
+    await loadExpenses();
 
   }
 
@@ -5734,6 +5879,90 @@ Call or text (337) 326-8324 if you have any questions.`;
    CUSTOMER PORTAL LINK
 =================================================== */
 
+
+$("readyPickupTextButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const jobId =
+        Number(
+          $("editJobId").value
+        );
+
+      const job =
+        jobs.find(
+          x =>
+            Number(x.id) ===
+            jobId
+        );
+
+      if (!job) {
+        alert("Repair job not found.");
+        return;
+      }
+
+      const customer =
+        customers.find(
+          x =>
+            Number(x.id) ===
+            Number(job.customer_id)
+        );
+
+      if (!customer?.phone) {
+        alert("This customer does not have a phone number saved.");
+        return;
+      }
+
+      const { data: parts } =
+        await db
+          .from("job_parts")
+          .select("quantity,sell_price_each")
+          .eq("repair_job_id", jobId);
+
+      const partsRevenue =
+        (parts || [])
+          .reduce(
+            (sum, part) =>
+              sum +
+              Number(part.quantity || 0) *
+              Number(part.sell_price_each || 0),
+            0
+          );
+
+      const total =
+        Number(job.labor_hours || 0) *
+        Number(job.labor_rate || 0) +
+        Number(job.service_fee || 0) +
+        Number(job.travel_fee || 0) +
+        Number(job.pickup_delivery_fee || 0) +
+        partsRevenue;
+
+      const equipment =
+        jobEquipment(job) ||
+        "equipment";
+
+      const firstName =
+        customer.first_name ||
+        customerName(customer) ||
+        "there";
+
+      const message =
+        `Hello ${firstName}, your ${equipment} is ready for pickup at Flores Small Engine Repair. ` +
+        `Your total is ${money(total)}. Payment is required in full at the time of pickup. ` +
+        `Thank you for choosing Flores Small Engine Repair!`;
+
+      const phone =
+        String(customer.phone)
+          .replace(/[^\d+]/g, "");
+
+      window.location.href =
+        `sms:${phone}?body=${encodeURIComponent(message)}`;
+
+    }
+  );
+
+
 $("copyPortalButton")?.addEventListener("click", async () => {
 
   const jobId =
@@ -5981,6 +6210,8 @@ $("deleteJobButton")
 
 
       await loadJobs();
+
+    await loadExpenses();
 
 
       alert(
@@ -11494,7 +11725,328 @@ $("timeClockJob")
 async function startAdmin() {
 
   const allowed =
-    await protectPage();
+    await 
+/* ==================================================
+   EXPENSES
+=================================================== */
+
+function clearExpenseForm() {
+
+  $("expenseId").value = "";
+  $("expenseDate").value = today();
+  $("expenseCategory").value = "Fuel";
+  $("expenseAmount").value = "";
+  $("expenseDescription").value = "";
+  $("expenseNotes").value = "";
+  $("expenseSaveButton").textContent = "Save Expense";
+  $("expenseMessage").textContent = "";
+
+}
+
+
+async function loadExpenses() {
+
+  const { data, error } =
+    await db
+      .from("expenses")
+      .select("*")
+      .order("expense_date", { ascending:false })
+      .order("created_at", { ascending:false });
+
+  if (error) {
+
+    $("expenseTableWrapper").innerHTML =
+      `<p class="empty">${escapeHtml(error.message)}</p>`;
+
+    return;
+  }
+
+  expenses = data || [];
+
+  renderExpenses();
+  updateExpenseDashboard();
+
+}
+
+
+function renderExpenses() {
+
+  const q =
+    ($("expenseSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const rows =
+    expenses.filter(expense =>
+      [
+        expense.category,
+        expense.description,
+        expense.notes,
+        expense.expense_date
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(q)
+    );
+
+  if (!rows.length) {
+
+    $("expenseTableWrapper").innerHTML =
+      `<p class="empty">No expenses found.</p>`;
+
+    return;
+  }
+
+  $("expenseTableWrapper").innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(expense => `
+          <tr>
+            <td>${escapeHtml(dateDisplay(expense.expense_date))}</td>
+            <td>${escapeHtml(expense.category || "")}</td>
+            <td>${escapeHtml(expense.description || "")}</td>
+            <td>${money(expense.amount)}</td>
+            <td>
+              <button
+                class="small-button"
+                type="button"
+                onclick="editExpense(${expense.id})"
+              >
+                Edit
+              </button>
+              <button
+                class="small-button red"
+                type="button"
+                onclick="deleteExpense(${expense.id})"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+
+}
+
+
+function editExpense(id) {
+
+  const expense =
+    expenses.find(
+      x => Number(x.id) === Number(id)
+    );
+
+  if (!expense) {
+    return;
+  }
+
+  $("expenseId").value = expense.id;
+  $("expenseDate").value = expense.expense_date || today();
+  $("expenseCategory").value = expense.category || "Other";
+  $("expenseAmount").value = Number(expense.amount || 0);
+  $("expenseDescription").value = expense.description || "";
+  $("expenseNotes").value = expense.notes || "";
+  $("expenseSaveButton").textContent = "Save Changes";
+
+  window.scrollTo({ top:0, behavior:"smooth" });
+
+}
+
+
+async function deleteExpense(id) {
+
+  if (!confirm("Delete this expense?")) {
+    return;
+  }
+
+  const { error } =
+    await db
+      .from("expenses")
+      .delete()
+      .eq("id", Number(id));
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadExpenses();
+
+}
+
+
+$("expenseForm")
+  ?.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+      const id =
+        Number(
+          $("expenseId").value || 0
+        );
+
+      const payload = {
+        expense_date: $("expenseDate").value,
+        category: $("expenseCategory").value,
+        amount: Number($("expenseAmount").value || 0),
+        description: $("expenseDescription").value.trim(),
+        notes: $("expenseNotes").value.trim()
+      };
+
+      let result;
+
+      if (id) {
+
+        result =
+          await db
+            .from("expenses")
+            .update(payload)
+            .eq("id", id);
+
+      } else {
+
+        result =
+          await db
+            .from("expenses")
+            .insert(payload);
+
+      }
+
+      if (result.error) {
+
+        $("expenseMessage").textContent =
+          result.error.message;
+
+        $("expenseMessage").className =
+          "message error";
+
+        return;
+      }
+
+      clearExpenseForm();
+
+      $("expenseMessage").textContent =
+        id ? "Expense updated." : "Expense saved.";
+
+      $("expenseMessage").className =
+        "message success";
+
+      await loadExpenses();
+
+    }
+  );
+
+
+$("clearExpenseButton")
+  ?.addEventListener(
+    "click",
+    clearExpenseForm
+  );
+
+
+$("expenseSearch")
+  ?.addEventListener(
+    "input",
+    renderExpenses
+  );
+
+
+function updateExpenseDashboard() {
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  let monthExpenses = 0;
+  let yearExpenses = 0;
+
+  expenses.forEach(expense => {
+
+    if (!expense.expense_date) {
+      return;
+    }
+
+    const d =
+      new Date(
+        expense.expense_date + "T00:00:00"
+      );
+
+    if (d.getFullYear() === year) {
+
+      yearExpenses +=
+        Number(expense.amount || 0);
+
+      if (d.getMonth() === month) {
+
+        monthExpenses +=
+          Number(expense.amount || 0);
+
+      }
+
+    }
+
+  });
+
+  if ($("monthExpenses")) {
+    $("monthExpenses").textContent =
+      money(monthExpenses);
+  }
+
+  if ($("yearExpenses")) {
+    $("yearExpenses").textContent =
+      money(yearExpenses);
+  }
+
+  const monthGrossProfit =
+    Number(
+      String($("monthProfit")?.textContent || "0")
+        .replace(/[$,]/g, "")
+    );
+
+  const yearGrossProfit =
+    Number(
+      String($("yearProfit")?.textContent || "0")
+        .replace(/[$,]/g, "")
+    );
+
+  if ($("monthNetProfit")) {
+    $("monthNetProfit").textContent =
+      money(monthGrossProfit - monthExpenses);
+  }
+
+  if ($("yearNetProfit")) {
+    $("yearNetProfit").textContent =
+      money(yearGrossProfit - yearExpenses);
+  }
+
+}
+
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    if ($("expenseDate") && !$("expenseDate").value) {
+      $("expenseDate").value = today();
+    }
+  }
+);
+
+
+protectPage();
 
 
   if (!allowed) {
