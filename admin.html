@@ -5947,9 +5947,20 @@ $("readyPickupTextButton")
         customerName(customer) ||
         "there";
 
+      const jobNumber =
+        job.job_number ||
+        job.ticket_number ||
+        "";
+
+      const portalUrl =
+        `https://floressmallenginerepair.com/portal.html`;
+
       const message =
         `Hello ${firstName}, your ${equipment} is ready for pickup at Flores Small Engine Repair. ` +
         `Your total is ${money(total)}. Payment is required in full at the time of pickup. ` +
+        `You can view your invoice and repair details in the customer portal here: ${portalUrl} ` +
+        `${jobNumber ? `Your repair number is ${jobNumber}. ` : ""}` +
+        `If you were happy with our service, we would greatly appreciate it if you would take a moment to leave us a Google review: https://g.page/r/CVPS3WL6jDtSECE/review ` +
         `Thank you for choosing Flores Small Engine Repair!`;
 
       const phone =
