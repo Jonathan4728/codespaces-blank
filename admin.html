@@ -6342,14 +6342,16 @@ async function loadEstimateFromRepairJob(jobId) {
   }
 
 
-  /* Match the estimate to the repair-job customer. */
   if ($("estimateCustomer")) {
     $("estimateCustomer").value =
       String(job.customer_id);
   }
 
+  filterEstimateJobsByCustomer();
 
-  /* Give the estimate a useful subject automatically. */
+  $("estimateJob").value = String(jobId);
+
+
   if (
     $("estimateSubject") &&
     !$("estimateSubject").value.trim()
@@ -6398,12 +6400,216 @@ async function loadEstimateFromRepairJob(jobId) {
   }
 
 
-  /* Replace the blank/default estimate rows with ticket items. */
   $("estimateLines")
     .innerHTML = "";
 
 
-  if (!parts?.length) {
+  let addedCount = 0;
+
+
+  function addEstimateCharge(
+    nameValue,
+    descriptionValue,
+    qtyValue,
+    priceValue
+  ) {
+
+    addLine(
+      "estimate"
+    );
+
+
+    const rows =
+      $("estimateLines")
+        .querySelectorAll(
+          ".line-item"
+        );
+
+
+    const row =
+      rows[
+        rows.length - 1
+      ];
+
+
+    const name =
+      row.querySelector(
+        ".estimate-item-name"
+      );
+
+    const description =
+      row.querySelector(
+        ".estimate-item-description"
+      );
+
+    const qty =
+      row.querySelector(
+        ".estimate-item-qty"
+      );
+
+    const price =
+      row.querySelector(
+        ".estimate-item-price"
+      );
+
+
+    if (name) {
+      name.value =
+        nameValue || "";
+    }
+
+
+    if (description) {
+      description.value =
+        descriptionValue || "";
+    }
+
+
+    if (qty) {
+      qty.value =
+        Number(qtyValue || 1);
+    }
+
+
+    if (price) {
+      price.value =
+        Number(priceValue || 0)
+          .toFixed(2);
+    }
+
+
+    addedCount++;
+
+  }
+
+
+  /* ------------------------------------------
+     SERVICE FEE
+  ------------------------------------------ */
+
+  const serviceFee =
+    Number(
+      job.service_fee || 0
+    );
+
+
+  if (serviceFee > 0) {
+
+    addEstimateCharge(
+      "Service Fee",
+      "Repair / service charge",
+      1,
+      serviceFee
+    );
+
+  }
+
+
+  /* ------------------------------------------
+     LABOR
+  ------------------------------------------ */
+
+  const laborHours =
+    Number(
+      job.labor_hours || 0
+    );
+
+
+  const laborRate =
+    Number(
+      job.labor_rate || 0
+    );
+
+
+  if (
+    laborHours > 0 &&
+    laborRate > 0
+  ) {
+
+    addEstimateCharge(
+      "Labor",
+      `${laborHours.toFixed(2)} hrs @ ${money(laborRate)}/hr`,
+      laborHours,
+      laborRate
+    );
+
+  }
+
+
+  /* ------------------------------------------
+     TRAVEL FEE
+  ------------------------------------------ */
+
+  const travelFee =
+    Number(
+      job.travel_fee || 0
+    );
+
+
+  if (travelFee > 0) {
+
+    addEstimateCharge(
+      "Travel Fee",
+      "Mobile service / travel charge",
+      1,
+      travelFee
+    );
+
+  }
+
+
+  /* ------------------------------------------
+     PICKUP / DELIVERY
+  ------------------------------------------ */
+
+  const pickupFee =
+    Number(
+      job.pickup_delivery_fee || 0
+    );
+
+
+  if (pickupFee > 0) {
+
+    addEstimateCharge(
+      "Pickup / Delivery",
+      "Equipment pickup / delivery charge",
+      1,
+      pickupFee
+    );
+
+  }
+
+
+  /* ------------------------------------------
+     PARTS
+  ------------------------------------------ */
+
+  (parts || [])
+    .forEach(
+      part => {
+
+        addEstimateCharge(
+          part.description ||
+          "Part",
+
+          part.part_number
+            ? `Part # ${part.part_number}`
+            : "",
+
+          Number(
+            part.quantity || 1
+          ),
+
+          Number(
+            part.sell_price_each || 0
+          )
+        );
+
+      }
+    );
+
+
+  if (!addedCount) {
 
     addLine(
       "estimate"
@@ -6411,100 +6617,19 @@ async function loadEstimateFromRepairJob(jobId) {
 
     $("estimateMessage")
       .textContent =
-        "This repair ticket has no parts/items added yet.";
+        "This repair ticket has no charges added yet.";
 
     $("estimateMessage")
       .className =
         "message";
 
+    calculateDocument(
+      "estimate"
+    );
+
     return;
 
   }
-
-
-  parts.forEach(
-    part => {
-
-      addLine(
-        "estimate"
-      );
-
-
-      const rows =
-        $("estimateLines")
-          .querySelectorAll(
-            ".line-item"
-          );
-
-
-      const row =
-        rows[
-          rows.length - 1
-        ];
-
-
-      const name =
-        row.querySelector(
-          ".estimate-item-name"
-        );
-
-      const description =
-        row.querySelector(
-          ".estimate-item-description"
-        );
-
-      const qty =
-        row.querySelector(
-          ".estimate-item-qty"
-        );
-
-      const price =
-        row.querySelector(
-          ".estimate-item-price"
-        );
-
-
-      if (name) {
-
-        name.value =
-          part.description ||
-          "Part";
-
-      }
-
-
-      if (description) {
-
-        description.value =
-          part.part_number
-            ? `Part # ${part.part_number}`
-            : "";
-
-      }
-
-
-      if (qty) {
-
-        qty.value =
-          Number(
-            part.quantity || 1
-          );
-
-      }
-
-
-      if (price) {
-
-        price.value =
-          Number(
-            part.sell_price_each || 0
-          )
-            .toFixed(2);
-
-      }
-
-    }
-  );
 
 
   calculateDocument(
@@ -6514,13 +6639,107 @@ async function loadEstimateFromRepairJob(jobId) {
 
   $("estimateMessage")
     .textContent =
-      `${parts.length} ticket item${parts.length === 1 ? "" : "s"} added to estimate.`;
+      `${addedCount} ticket charge${addedCount === 1 ? "" : "s"} added to estimate.`;
 
   $("estimateMessage")
     .className =
       "message success";
 
 }
+
+
+
+function filterEstimateJobsByCustomer() {
+
+  const customerId =
+    Number(
+      $("estimateCustomer")?.value || 0
+    );
+
+
+  const select =
+    $("estimateJob");
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const currentJob =
+    select.value;
+
+
+  const matchingJobs =
+    customerId
+      ? jobs.filter(
+          job =>
+            Number(job.customer_id) ===
+            customerId
+        )
+      : [];
+
+
+  select.innerHTML =
+    `<option value="">Select repair job...</option>` +
+    matchingJobs
+      .map(
+        job => `
+          <option value="${job.id}">
+            ${escapeHtml(
+              `${job.job_number || job.ticket_number || "Repair Job"} — ${jobEquipment(job)}`
+            )}
+          </option>
+        `
+      )
+      .join("");
+
+
+  if (
+    currentJob &&
+    matchingJobs.some(
+      job =>
+        String(job.id) ===
+        String(currentJob)
+    )
+  ) {
+
+    select.value =
+      currentJob;
+
+  }
+
+}
+
+
+$("estimateCustomer")
+  ?.addEventListener(
+    "change",
+    () => {
+
+      filterEstimateJobsByCustomer();
+
+      /*
+        Clear any old ticket charges when switching customers
+        so charges from the previous customer cannot remain.
+      */
+      $("estimateLines")
+        .innerHTML = "";
+
+      addLine(
+        "estimate"
+      );
+
+      calculateDocument(
+        "estimate"
+      );
+
+      $("estimateMessage")
+        .textContent =
+          "";
+
+    }
+  );
 
 
 $("estimateJob")
@@ -6706,6 +6925,9 @@ async function editEstimate(id) {
     String(
       estimate.customer_id || ""
     );
+
+
+  filterEstimateJobsByCustomer();
 
 
   $("estimateJob").value =
