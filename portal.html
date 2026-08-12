@@ -36,6 +36,12 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 .job-section{margin-top:20px;padding-top:18px;border-top:1px solid #303030}
 .job-section:first-of-type{margin-top:0;padding-top:0;border-top:0}
 .job-section-title{margin:0 0 10px;color:#df1f26;font-size:16px}
+.doc-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.doc-tab{background:#292929;color:#fff;border:1px solid #444;padding:11px 15px;border-radius:6px;font-weight:800;cursor:pointer}
+.doc-tab.active{background:#df1f26;border-color:#df1f26}
+.doc-panel{display:none;margin-top:14px}
+.doc-panel.active{display:block}
+
 footer{padding:25px;text-align:center;color:#aaa;border-top:1px solid #292929;margin-top:40px}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.doc-head{flex-direction:column}.buttons>*{width:100%;text-align:center}.brand img{width:46px;height:46px}.job-head{flex-direction:column}.job-toggle{align-items:flex-start}.job-toggle-right{flex-direction:column;align-items:flex-end}.job-toggle-title{font-size:16px}}
 @media print{body *{visibility:hidden!important}#invoicePrintArea,#invoicePrintArea *{visibility:visible!important}#invoicePrintArea{position:absolute;left:0;top:0;width:100%;padding:25px;background:#fff;color:#111}#invoicePrintArea table{color:#111}#invoicePrintArea th{color:#111}}
@@ -111,111 +117,87 @@ function toggleJob(jobId){
   el.classList.toggle("open");
 }
 
+
+function showJobDoc(jobId,type){
+  const root=$(`job-${jobId}`);
+  if(!root)return;
+
+  root.querySelectorAll(".doc-tab").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.type===type);
+  });
+
+  root.querySelectorAll(".doc-panel").forEach(panel=>{
+    panel.classList.toggle("active",panel.dataset.type===type);
+  });
+}
+
 function jobHtml(j){
   const e=j.equipment||{};
   const estimates=j.estimates||[];
   const invoices=j.invoices||[];
+  const firstType=estimates.length ? "quote" : (invoices.length ? "invoice" : "");
 
   return`
     <section class="job-accordion" id="job-${j.id}">
 
-      <button
-        class="job-toggle"
-        type="button"
-        onclick="toggleJob(${j.id})"
-      >
+      <button class="job-toggle" type="button" onclick="toggleJob(${j.id})">
         <div class="job-toggle-left">
-
           <span class="job-toggle-title">
             ${esc(j.job_number)} — ${esc(equipmentName(e)||"Equipment")}
           </span>
-
           <span class="job-toggle-sub">
-            ${estimates.length} quote${estimates.length===1?"":"s"} ·
-            ${invoices.length} invoice${invoices.length===1?"":"s"}
+            ${dateDisplay(j.created_at)}
           </span>
-
         </div>
 
         <div class="job-toggle-right">
           <span class="status">${esc(j.status)}</span>
           <span class="job-chevron">⌄</span>
         </div>
-
       </button>
-
 
       <div class="job-content">
 
-        <div class="job-section">
+        <section class="grid">
+          <div class="card">
+            <div class="label">Current Status</div>
+            <div class="value">${esc(j.status||"")}</div>
+          </div>
 
-          <h3 class="job-section-title">
-            Repair Status
-          </h3>
+          <div class="card">
+            <div class="label">Service Type</div>
+            <div class="value">${esc(j.service_type||"")}</div>
+          </div>
 
-          <section class="grid">
+          <div class="card">
+            <div class="label">Received</div>
+            <div class="value">${dateDisplay(j.created_at)}</div>
+          </div>
 
-            <div class="card">
-              <div class="label">Current Status</div>
-              <div class="value">${esc(j.status||"")}</div>
-            </div>
+          <div class="card">
+            <div class="label">Equipment</div>
+            <div class="value">${esc(equipmentName(e)||"Equipment")}</div>
+          </div>
+        </section>
 
-            <div class="card">
-              <div class="label">Service Type</div>
-              <div class="value">${esc(j.service_type||"")}</div>
-            </div>
+        <section class="card">
+          <div class="label">Reported Problem</div>
+          <div class="value">${esc(j.complaint||"")}</div>
+        </section>
 
-            <div class="card">
-              <div class="label">Received</div>
-              <div class="value">${dateDisplay(j.created_at)}</div>
-            </div>
+        ${
+          firstType
+            ? `<div class="doc-tabs">
+                ${estimates.length ? `<button class="doc-tab ${firstType==="quote"?"active":""}" data-type="quote" onclick="showJobDoc(${j.id},'quote')">Quote</button>` : ""}
+                ${invoices.length ? `<button class="doc-tab ${firstType==="invoice"?"active":""}" data-type="invoice" onclick="showJobDoc(${j.id},'invoice')">Invoice</button>` : ""}
+              </div>
 
-            <div class="card">
-              <div class="label">Equipment</div>
-              <div class="value">${esc(equipmentName(e)||"Equipment")}</div>
-            </div>
-
-          </section>
-
-          <section class="card">
-            <div class="label">Reported Problem</div>
-            <div class="value">${esc(j.complaint||"")}</div>
-          </section>
-
-        </div>
-
-
-        <div class="job-section">
-
-          <h3 class="job-section-title">
-            Quotes / Estimates
-          </h3>
-
-          ${
-            estimates.length
-              ? estimates.map(estimateHtml).join("")
-              : `<p class="muted">No quote has been posted for this repair.</p>`
-          }
-
-        </div>
-
-
-        <div class="job-section">
-
-          <h3 class="job-section-title">
-            Invoices
-          </h3>
-
-          ${
-            invoices.length
-              ? invoices.map(invoiceHtml).join("")
-              : `<p class="muted">No invoice has been posted for this repair.</p>`
-          }
-
-        </div>
+              ${estimates.length ? `<div class="doc-panel ${firstType==="quote"?"active":""}" data-type="quote">${estimates.map(estimateHtml).join("")}</div>` : ""}
+              ${invoices.length ? `<div class="doc-panel ${firstType==="invoice"?"active":""}" data-type="invoice">${invoices.map(invoiceHtml).join("")}</div>` : ""}`
+            : `<p class="muted" style="margin-top:18px">No quote or invoice has been posted for this repair yet.</p>`
+        }
 
       </div>
-
     </section>
   `;
 }
