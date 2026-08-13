@@ -45,6 +45,15 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 footer{padding:25px;text-align:center;color:#aaa;border-top:1px solid #292929;margin-top:40px}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.doc-head{flex-direction:column}.buttons>*{width:100%;text-align:center}.brand img{width:46px;height:46px}.job-head{flex-direction:column}.job-toggle{align-items:flex-start}.job-toggle-right{flex-direction:column;align-items:flex-end}.job-toggle-title{font-size:16px}}
 @media print{body *{visibility:hidden!important}#invoicePrintArea,#invoicePrintArea *{visibility:visible!important}#invoicePrintArea{position:absolute;left:0;top:0;width:100%;padding:25px;background:#fff;color:#111}#invoicePrintArea table{color:#111}#invoicePrintArea th{color:#111}}
+
+.quote-decision-box{margin-top:18px;padding:16px;border:1px solid #3b3b3b;border-radius:10px;background:#0b0b0b}
+.quote-policy{margin:0 0 14px;padding:12px 14px;border-left:4px solid #f0a328;background:#171109;color:#f1d2a0;border-radius:6px;font-size:13px;line-height:1.5}
+.quote-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quote-actions button{min-height:50px;font-size:15px}
+.accept-quote{background:#18864b;color:#fff}
+.decline-quote{background:#622026;color:#fff}
+@media(max-width:600px){.quote-actions{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -81,7 +90,7 @@ function itemTable(items){
 }
 
 async function respondEstimate(id,response){
-  if(!confirm(`Are you sure you want to ${response==="Accepted"?"approve":"decline"} this estimate?`))return;
+  if(!confirm(response==="Accepted" ? "Accept this quote and authorize the listed work?" : "Decline this quote?"))return;
   const{data,error}=await db.rpc("respond_to_estimate_login",{p_job_number:loginPortal,p_phone_last4:loginPhone,p_estimate_id:id,p_response:response});
   if(error){alert(error.message);return}
   if(!data?.ok){alert(data?.message||"Unable to update estimate.");return}
@@ -91,7 +100,45 @@ async function respondEstimate(id,response){
 
 function estimateHtml(e){
   const can=["Draft","Sent"].includes(e.status);
-  return`<section class="document"><div class="doc-head"><div><p class="eyebrow">Estimate</p><h2>${esc(e.estimate_number)}</h2><p class="muted">${dateDisplay(e.quote_date)}${e.subject?" · "+esc(e.subject):""}</p></div><div><div class="money">${money(e.total)}</div><span class="status">${esc(e.status)}</span></div></div>${itemTable(e.items)}${can?`<div class="buttons"><button class="primary" onclick="respondEstimate(${e.id},'Accepted')">Approve Estimate</button><button class="secondary" onclick="respondEstimate(${e.id},'Declined')">Decline Estimate</button></div>`:""}</section>`
+
+  return`
+    <section class="document">
+      <div class="doc-head">
+        <div>
+          <p class="eyebrow">Quote / Estimate</p>
+          <h2>${esc(e.estimate_number)}</h2>
+          <p class="muted">${dateDisplay(e.quote_date)}${e.subject?" · "+esc(e.subject):""}</p>
+        </div>
+
+        <div>
+          <div class="money">${money(e.total)}</div>
+          <span class="status">${esc(e.status)}</span>
+        </div>
+      </div>
+
+      ${itemTable(e.items)}
+
+      <div class="quote-decision-box">
+        <div class="quote-policy">
+          <strong>Parts Payment Policy:</strong>
+          Parts must be paid for before they are ordered. Parts will not be ordered until the required parts payment is received.
+        </div>
+
+        ${
+          can
+            ? `<div class="quote-actions">
+                <button class="accept-quote" type="button" onclick="respondEstimate(${e.id},'Accepted')">
+                  ✓ Accept Quote
+                </button>
+                <button class="decline-quote" type="button" onclick="respondEstimate(${e.id},'Declined')">
+                  ✕ Decline Quote
+                </button>
+              </div>`
+            : `<p class="muted" style="margin:0;">Quote response: <strong>${esc(e.status)}</strong></p>`
+        }
+      </div>
+    </section>
+  `;
 }
 
 function invoiceHtml(i){

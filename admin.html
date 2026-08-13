@@ -2018,6 +2018,11 @@
 
           </div>
 
+          <div style="margin-top:14px;padding:12px 14px;border:1px solid #5a3a12;border-left:4px solid #f0a328;border-radius:6px;background:#171109;color:#f2d19a;font-size:13px;line-height:1.5;">
+            <strong style="color:#fff;">Parts Payment Policy:</strong>
+            Parts must be paid for before they are ordered. Parts will not be ordered until the required parts payment is received.
+          </div>
+
 
           <div class="button-row">
 
@@ -3048,6 +3053,7 @@ function documentTermsHtml() {
       <strong>Terms &amp; Conditions</strong>
       <ul>
         <li>Approval of an estimate authorizes Flores Small Engine Repair to perform the work listed.</li>
+        <li>Parts must be paid in advance before they are ordered. Parts orders will not be placed until the required parts payment has been received.</li>
         <li>Estimates may change if additional problems are discovered. Additional work will be discussed and approved before proceeding.</li>
         <li>Payment is due in full upon completion and is required before equipment is released or picked up.</li>
         <li>Labor performed by Flores Small Engine Repair is guaranteed for 30 days from completion. Manufacturer warranties apply to parts when available.</li>
@@ -10902,6 +10908,8 @@ async function emailEstimate(id) {
 
 Here is your repair estimate from Flores Small Engine Repair.
 
+Parts must be paid for before they are ordered. Parts orders are placed after the required parts payment is received.
+
 Estimate: ${estimate.estimate_number}
 Total: ${money(estimate.total)}
 
@@ -10973,6 +10981,8 @@ async function textEstimate(id) {
 `Hi ${contact.name}, this is Flores Small Engine Repair.
 
 Your estimate ${estimate.estimate_number} is ${money(estimate.total)}.
+
+Parts must be paid for before they are ordered. Parts will be ordered once the required parts payment is received.
 
 You can review your estimate and track your repair anytime in the Customer Portal:
 ${portalUrl}
