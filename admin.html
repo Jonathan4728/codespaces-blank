@@ -701,6 +701,43 @@
       text-align: right;
     }
 
+    .document-terms {
+      margin-top: 22px;
+      padding: 14px 16px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #0b0b0b;
+      color: #ddd;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .document-terms strong {
+      display: block;
+      margin-bottom: 7px;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .document-terms ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .document-terms li {
+      margin: 4px 0;
+    }
+
+    .invoice-print .document-terms {
+      background: #f7f7f7;
+      color: #333;
+      border-color: #ddd;
+    }
+
+    .invoice-print .document-terms strong {
+      color: #111;
+    }
+
     @media print {
 
       body * {
@@ -3001,6 +3038,24 @@ function escapeHtml(value) {
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+
+}
+
+function documentTermsHtml() {
+
+  return `
+    <div class="document-terms">
+      <strong>Terms &amp; Conditions</strong>
+      <ul>
+        <li>Approval of an estimate authorizes Flores Small Engine Repair to perform the work listed.</li>
+        <li>Estimates may change if additional problems are discovered. Additional work will be discussed and approved before proceeding.</li>
+        <li>Payment is due in full upon completion and is required before equipment is released or picked up.</li>
+        <li>Labor performed by Flores Small Engine Repair is guaranteed for 30 days from completion. Manufacturer warranties apply to parts when available.</li>
+        <li>Warranty does not cover misuse, neglect, abuse, unrelated failures, or damage occurring after the completed repair.</li>
+        <li>Equipment not picked up within 30 days of completion may be subject to storage fees and applicable abandoned-equipment procedures.</li>
+      </ul>
+    </div>
+  `;
 
 }
 
@@ -8586,7 +8641,11 @@ async function openEstimate(id) {
         Delete Estimate
       </button>
 
-    </div>
+    
+
+        ${documentTermsHtml()}
+
+</div>
   `;
 
 
@@ -9508,7 +9567,11 @@ async function openInvoice(id) {
         Delete Invoice
       </button>
 
-    </div>
+    
+
+        ${documentTermsHtml()}
+
+</div>
   `;
 
 
@@ -10774,10 +10837,7 @@ async function printEstimate(id) {
           }
         </p>
 
-        <p style="font-size:12px; color:#555;">
-          Manufacturer warranties apply to parts when available.
-          Labor is guaranteed for 30 days after completed repair.
-        </p>
+        ${documentTermsHtml()}
 
       </div>
     `;
@@ -10854,6 +10914,8 @@ Your permanent FSER portal number: ${estimate.customers?.portal_number || "Conta
 Use the last 4 digits of your phone number to sign in.
 
 You can use this same FSER number anytime to view current and past repairs, estimates, and invoices.
+
+By approving this estimate, you authorize the work listed. Additional work will be discussed before proceeding. Payment is due in full upon completion and before equipment is released. Labor is guaranteed for 30 days; manufacturer parts warranties apply when available.
 
 Please reply to approve the estimate or contact us with any questions.
 
@@ -11005,6 +11067,8 @@ Paid: ${money(invoice.amount_paid)}
 Balance Due: ${money(invoice.balance_due)}
 
 ${itemText}
+
+Payment is due in full upon completion and before equipment is released. Labor is guaranteed for 30 days from completion; manufacturer parts warranties apply when available.
 
 Thank you for your business.
 
@@ -11354,7 +11418,11 @@ async function printInvoice(id) {
           guaranteed for 30 days.
         </p>
 
-      </div>
+      
+
+        ${documentTermsHtml()}
+
+</div>
     `;
 
 
