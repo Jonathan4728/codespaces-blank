@@ -1212,6 +1212,13 @@
 
     <button
       class="nav-tab"
+      data-view="completedJobsView"
+    >
+      Completed Jobs
+    </button>
+
+    <button
+      class="nav-tab"
       data-view="estimatesView"
     >
       Estimates
@@ -1824,6 +1831,40 @@
 
       </div>
 
+    </section>
+
+
+    <!-- ==================================================
+         COMPLETED JOBS
+    =================================================== -->
+
+    <section
+      id="completedJobsView"
+      class="view"
+    >
+      <h1 class="page-title">Completed Jobs</h1>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 style="margin-bottom:6px;">Completed Repair History</h2>
+            <p style="margin:0;color:#999;">
+              Jobs move here automatically when their status is marked Completed.
+            </p>
+          </div>
+
+          <input
+            id="completedJobSearch"
+            class="search-box"
+            placeholder="Search completed jobs..."
+          >
+        </div>
+
+        <div
+          id="completedJobTableWrapper"
+          class="table-wrap"
+        ></div>
+      </div>
     </section>
 
 
@@ -3100,6 +3141,15 @@ async function loadViewData(viewId) {
   }
 
 
+  if (viewId === "completedJobsView") {
+
+    await loadJobs();
+
+    renderCompletedJobs();
+
+  }
+
+
   if (viewId === "estimatesView") {
 
     await loadEstimates();
@@ -3184,6 +3234,13 @@ document
 
   });
 
+
+
+$("completedJobSearch")
+  ?.addEventListener(
+    "input",
+    () => renderCompletedJobs()
+  );
 
 
 /* ==================================================
@@ -4938,6 +4995,8 @@ async function loadJobs() {
 
   renderJobs();
 
+  renderCompletedJobs();
+
   await calculateDashboardProfit();
 
   renderRecentJobs();
@@ -5011,12 +5070,19 @@ function jobEquipment(job) {
 
 function renderJobs() {
 
-  if (!jobs.length) {
+  const activeJobs =
+    jobs.filter(
+      job =>
+        job.status !== "Completed"
+    );
+
+
+  if (!activeJobs.length) {
 
     $("jobTableWrapper")
       .innerHTML =
         `<p class="empty">
-          No repair jobs.
+          No active repair jobs.
         </p>`;
 
     return;
@@ -5042,7 +5108,7 @@ function renderJobs() {
   `;
 
 
-  jobs.forEach(job => {
+  activeJobs.forEach(job => {
 
     const labor =
       Number(job.labor_hours || 0) *
@@ -5102,6 +5168,135 @@ function renderJobs() {
 
 }
 
+
+function renderCompletedJobs() {
+
+  const wrapper =
+    $("completedJobTableWrapper");
+
+  if (!wrapper) {
+    return;
+  }
+
+
+  const search =
+    ($("completedJobSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+
+  const completed =
+    jobs
+      .filter(
+        job =>
+          job.status === "Completed"
+      )
+      .filter(job => {
+
+        if (!search) {
+          return true;
+        }
+
+        const haystack = [
+          job.job_number,
+          customerName(job.customers),
+          jobEquipment(job),
+          job.date_completed,
+          job.created_at
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return haystack.includes(search);
+
+      });
+
+
+  if (!completed.length) {
+
+    wrapper.innerHTML =
+      `<p class="empty">
+        ${search
+          ? "No completed jobs match your search."
+          : "No completed jobs yet."}
+      </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Equipment</th>
+          <th>Completed</th>
+          <th>Labor</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  completed.forEach(job => {
+
+    const labor =
+      Number(job.labor_hours || 0) *
+      Number(job.labor_rate || 0);
+
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openJob(${job.id})"
+      >
+
+        <td>${escapeHtml(job.job_number)}</td>
+
+        <td>
+          ${escapeHtml(
+            customerName(job.customers)
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            jobEquipment(job)
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            job.date_completed
+              ? dateDisplay(job.date_completed)
+              : ""
+          )}
+        </td>
+
+        <td>${money(labor)}</td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  wrapper.innerHTML = html;
+
+}
 
 function renderRecentJobs() {
 
@@ -12469,6 +12664,7 @@ async function startAdmin() {
   loadedViews.add("customersView");
   loadedViews.add("itemsView");
   loadedViews.add("jobsView");
+  loadedViews.add("completedJobsView");
   loadedViews.add("invoicesView");
   loadedViews.add("paymentsView");
   loadedViews.add("expensesView");
