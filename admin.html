@@ -1170,6 +1170,35 @@
 
     }
 
+
+    /* FSER AI */
+    .fser-ai-hero{display:flex;align-items:center;justify-content:space-between;gap:25px;border-top:3px solid var(--red);background:radial-gradient(circle at top right,rgba(223,31,38,.14),transparent 35%),#111}
+    .fser-ai-kicker{margin:0 0 7px;color:var(--green);font-size:11px;font-weight:900;letter-spacing:1.3px}
+    .fser-ai-badge{min-width:125px;padding:14px;border:1px solid #354b3c;border-radius:8px;background:#0d1710;text-align:center}
+    .fser-ai-badge span{display:block;color:#8fc59f;font-size:9px;font-weight:bold;letter-spacing:1px}
+    .fser-ai-badge strong{display:block;margin-top:5px;color:var(--green);font-size:24px}
+    .fser-ai-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.75fr);gap:20px}
+    .fser-ai-safety{margin-bottom:14px;padding:11px 13px;border-left:4px solid #e6a82e;border-radius:5px;background:#1a1408;color:#edcf8d;font-size:12px;line-height:1.45}
+    .fser-ai-test-card{min-height:190px;padding:18px;border:1px solid #343434;border-radius:8px;background:#090909}
+    .fser-test-number{color:var(--red);font-size:11px;font-weight:900;letter-spacing:.9px;text-transform:uppercase}
+    .fser-test-title{margin:7px 0 10px;font-size:21px}
+    .fser-test-instructions{color:#ddd;line-height:1.6}
+    .fser-test-why{margin-top:13px;padding:10px 12px;border-radius:5px;background:#141414;color:#aaa;font-size:12px;line-height:1.5}
+    .fser-answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:16px}
+    .fser-answer-grid button{min-height:45px;border:1px solid #414141;border-radius:6px;background:#1b1b1b;color:#fff;font-weight:bold}
+    .fser-answer-grid button:hover{border-color:var(--red);background:#272727}
+    .fser-result-card{padding:14px;border:1px solid #333;border-radius:7px;background:#0a0a0a}
+    .fser-result-card h3{margin:0 0 7px}
+    .fser-evidence{margin:13px 0 0;padding-left:20px;color:#bbb;font-size:13px;line-height:1.55}
+    .fser-parts-advice{margin-top:16px;padding:12px 14px;border:1px solid #303030;border-left:4px solid var(--red);border-radius:6px;background:#0b0b0b;color:#bbb;font-size:12px;line-height:1.5}
+    .fser-accuracy-rules{display:grid;gap:10px}
+    .fser-accuracy-rules>div{display:grid;gap:4px;padding:12px;border:1px solid #303030;border-radius:6px;background:#0a0a0a}
+    .fser-accuracy-rules span{color:#aaa;font-size:12px;line-height:1.45}
+    .fser-verified-card{margin-top:8px;padding:12px;border:1px solid #31533b;border-radius:6px;background:#0b160e}
+    .fser-verified-card strong{color:var(--green)}
+    @media(max-width:1050px){.fser-ai-grid{grid-template-columns:1fr}}
+    @media(max-width:700px){.fser-ai-hero{align-items:stretch;flex-direction:column}.fser-ai-badge{width:100%}.fser-answer-grid{grid-template-columns:1fr}}
+
 </style>
 
 </head>
@@ -1266,6 +1295,13 @@
       data-view="invoicesView"
     >
       Invoices
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="fserAiView"
+    >
+      🔧 FSER AI
     </button>
 
     <button
@@ -2256,6 +2292,231 @@
     </section>
 
 
+
+    <!-- ==================================================
+         FSER AI DIAGNOSTIC + PARTS FINDER
+    =================================================== -->
+
+    <section id="fserAiView" class="view">
+
+      <h1 class="page-title">🔧 FSER Diagnostic AI</h1>
+
+      <div class="panel fser-ai-hero">
+        <div>
+          <p class="fser-ai-kicker">FREE • LOCAL • NO PAID AI API</p>
+          <h2 style="margin-bottom:8px;">Diagnose First. Replace Parts Second.</h2>
+          <p style="margin:0;color:#aaa;line-height:1.55;">
+            One test at a time. Conclusions are based on your actual test results.
+            FSER AI will not invent an OEM part number.
+          </p>
+        </div>
+        <div class="fser-ai-badge">
+          <span>ACCURACY MODE</span>
+          <strong>ON</strong>
+        </div>
+      </div>
+
+      <div class="fser-ai-grid">
+
+        <div>
+
+          <div class="panel">
+            <h2>Start Diagnosis</h2>
+
+            <div class="form-grid">
+
+              <label class="full-width">
+                Repair Job (optional)
+                <select id="fserAiJob">
+                  <option value="">No repair job selected</option>
+                </select>
+              </label>
+
+              <label>
+                Equipment
+                <select id="fserAiEquipment">
+                  <option value="mower">Lawn Mower / Zero-Turn</option>
+                  <option value="atv">ATV / UTV</option>
+                  <option value="generator">Generator</option>
+                  <option value="pressurewasher">Pressure Washer</option>
+                  <option value="chainsaw">Chainsaw</option>
+                  <option value="trimmer">Trimmer / Blower</option>
+                  <option value="other">Other Small Engine</option>
+                </select>
+              </label>
+
+              <label>
+                Brand
+                <input id="fserAiBrand" placeholder="Briggs, Honda, Kawasaki...">
+              </label>
+
+              <label>
+                Equipment Model
+                <input id="fserAiModel" placeholder="GX85, D110, Foreman 400...">
+              </label>
+
+              <label>
+                Engine Model
+                <input id="fserAiEngineModel" placeholder="31C707-3346-G6, GX160...">
+              </label>
+
+              <label class="full-width">
+                Main Symptom
+                <select id="fserAiSymptom">
+                  <option value="">Choose the closest symptom...</option>
+                  <option value="no_crank">Starter will not crank engine</option>
+                  <option value="crank_no_start">Cranks but will not start</option>
+                  <option value="starts_dies">Starts then dies</option>
+                  <option value="choke">Only runs / runs better with choke</option>
+                  <option value="bog">Bogs or dies when throttle/load is applied</option>
+                  <option value="surge">Surges / hunts</option>
+                  <option value="no_spark">No spark / intermittent spark</option>
+                  <option value="low_compression">Low compression / hard starting</option>
+                  <option value="smoke_oil">Smoking / oil in cylinder or exhaust</option>
+                  <option value="overheat">Overheating / running hot</option>
+                  <option value="charging">Battery not charging / electrical issue</option>
+                  <option value="belt">Drive/deck belt keeps coming off</option>
+                  <option value="no_move">Engine runs but machine will not move</option>
+                </select>
+              </label>
+
+              <label class="full-width">
+                Extra Symptoms / What You Already Know
+                <textarea id="fserAiComplaint" placeholder="Example: Bogs at full throttle. Applying choke brings power back."></textarea>
+              </label>
+
+            </div>
+
+            <div class="button-row">
+              <button id="startFserDiagnosis" class="action-button" type="button">Start Diagnostic</button>
+              <button id="resetFserDiagnosis" class="secondary-button" type="button">Reset</button>
+            </div>
+          </div>
+
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Diagnostic Test</h2>
+              <span id="fserAiStepCount" class="status">Not Started</span>
+            </div>
+
+            <div class="fser-ai-safety">
+              Engine-off tests first when practical. Keep hands, clothing, and tools clear of moving parts.
+            </div>
+
+            <div id="fserAiTestCard" class="fser-ai-test-card">
+              <p class="empty">Choose a symptom and tap <strong>Start Diagnostic</strong>.</p>
+            </div>
+          </div>
+
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>FSER AI Conclusion</h2>
+              <span id="fserAiConfidence" class="status">No Diagnosis</span>
+            </div>
+
+            <div id="fserAiConclusion">
+              <p class="empty">The conclusion will build as tests are completed.</p>
+            </div>
+
+            <div class="button-row">
+              <button id="saveFserDiagnosisToJob" class="action-button" type="button" disabled>Add Diagnosis to Repair Ticket</button>
+              <button id="copyFserDiagnosis" class="secondary-button" type="button" disabled>Copy Diagnosis</button>
+            </div>
+
+            <p id="fserAiMessage" class="message"></p>
+          </div>
+
+        </div>
+
+
+        <div>
+
+          <div class="panel">
+            <h2>🔎 FSER Parts Finder</h2>
+            <p style="color:#aaa;margin-top:-8px;line-height:1.5;">
+              Use the exact model/type/code or serial information whenever possible.
+              Verify the diagram before ordering.
+            </p>
+
+            <div class="form-grid">
+              <label>
+                Brand
+                <input id="fserPartsBrand" placeholder="Briggs & Stratton">
+              </label>
+
+              <label>
+                Model
+                <input id="fserPartsModel" placeholder="31C707-3346-G6">
+              </label>
+
+              <label class="full-width">
+                Part Needed
+                <input id="fserPartsNeed" placeholder="Carburetor, deck belt, ring gear...">
+              </label>
+            </div>
+
+            <div class="button-row">
+              <button id="fserPartsTreeButton" class="action-button" type="button">Open PartsTree Diagrams</button>
+              <button id="fserOfficialPartsButton" class="secondary-button" type="button">Official OEM Lookup</button>
+              <button id="fserWebPartsButton" class="secondary-button" type="button">Search Model + Part</button>
+            </div>
+
+            <div id="fserPartsAdvice" class="fser-parts-advice">
+              Enter the model and part needed. FSER will not guess an OEM number.
+            </div>
+          </div>
+
+
+          <div class="panel">
+            <h2>✅ Verified FSER Parts</h2>
+            <p style="color:#aaa;margin-top:-8px;line-height:1.5;">
+              Save parts only after you personally verify them from the exact diagram or confirmed fit.
+            </p>
+
+            <div class="form-grid">
+              <label>
+                Verified OEM Part #
+                <input id="fserVerifiedPartNumber" placeholder="OEM number">
+              </label>
+
+              <label>
+                Description
+                <input id="fserVerifiedPartDescription" placeholder="Carburetor assembly">
+              </label>
+
+              <label class="full-width">
+                Notes
+                <input id="fserVerifiedPartNotes" placeholder="Diagram ref, superseded number, fitment notes...">
+              </label>
+            </div>
+
+            <div class="button-row">
+              <button id="saveFserVerifiedPart" class="action-button" type="button">Save Verified Part</button>
+              <button id="clearFserPartsForm" class="secondary-button" type="button">Clear</button>
+            </div>
+
+            <div id="fserVerifiedMatches" style="margin-top:18px;"></div>
+          </div>
+
+
+          <div class="panel">
+            <h2>Accuracy Rules</h2>
+            <div class="fser-accuracy-rules">
+              <div><strong>🟢 VERIFIED</strong><span>Confirmed by measurement, direct test, or exact OEM diagram.</span></div>
+              <div><strong>🟡 LIKELY</strong><span>Evidence strongly points to the failure, but another confirmation is recommended.</span></div>
+              <div><strong>🔴 DO NOT ORDER</strong><span>Model/variant information or testing is not sufficient.</span></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
     <!-- ==================================================
          TIME CLOCK
     =================================================== -->
@@ -3221,6 +3482,14 @@ async function loadViewData(viewId) {
   if (viewId === "invoicesView") {
 
     await loadInvoices();
+
+  }
+
+
+  if (viewId === "fserAiView") {
+
+    populateFserAiJobs();
+    renderFserVerifiedMatches();
 
   }
 
@@ -5063,6 +5332,8 @@ async function loadJobs() {
   renderRecentJobs();
 
   populateJobSelects();
+
+  populateFserAiJobs();
 
 }
 
@@ -12385,6 +12656,323 @@ $("timeClockJob")
 /* ==================================================
    START
 =================================================== */
+
+
+/* ==================================================
+   FSER DIAGNOSTIC AI
+   Free deterministic diagnostic engine.
+=================================================== */
+
+let fserDiagState={symptom:"",flow:"",step:0,evidence:[],answers:{},conclusion:null,startedAt:null};
+
+const FSER_DIAG_FLOWS={
+no_crank:[
+{title:"Verify battery voltage at rest",text:"Measure battery voltage directly across the battery posts with the key off.",why:"A weak battery can make starter and solenoid diagnosis misleading.",answers:[["12.4V or higher","battery_good"],["Below 12.4V","battery_low"]]},
+{title:"Check voltage while attempting to crank",text:"Keep the meter on the battery posts and attempt to crank. Watch the lowest voltage.",why:"A battery can show normal voltage at rest but collapse under starter load.",answers:[["Stays above ~10V","crank_voltage_good"],["Drops below ~10V","crank_voltage_low"]]},
+{title:"Does the starter solenoid click?",text:"Turn the key to START and listen or feel for the solenoid engaging.",why:"This separates the control circuit from the high-current starter circuit.",answers:[["Yes, it clicks","solenoid_click"],["No click","no_solenoid_click"]]}
+],
+crank_no_start:[
+{title:"Verify spark",text:"Use a proper spark tester or a correctly grounded known-good plug. Crank at normal speed and verify strong repeating spark.",why:"Separate ignition from fuel and compression before carburetor work.",answers:[["Strong spark","spark_good"],["Weak / intermittent / none","spark_bad"]]},
+{title:"Does it fire briefly on a controlled fuel source?",text:"With spark confirmed, use a small controlled amount of appropriate starting fluid or carb cleaner at the intake and crank.",why:"A brief fire suggests the engine can ignite and normal fuel delivery needs attention.",answers:[["Yes, fires briefly","fires_external_fuel"],["No change","no_fire_external"]]},
+{title:"Check compression",text:"Use the correct compression procedure for the engine and record the result.",why:"Adequate compression is required before chasing carburetor details.",answers:[["Compression normal","compression_good"],["Low / uneven compression","compression_low"]]}
+],
+starts_dies:[
+{title:"Test fuel cap vent",text:"Run with the fuel cap safely loosened enough to vent. See if run time improves.",why:"A blocked tank vent can let it start normally and die as vacuum builds.",answers:[["Runs longer / stays running","vent_fault"],["No change","vent_ok"]]},
+{title:"Check steady fuel flow to carburetor",text:"With proper fire safety, verify a sustained fuel flow to the carburetor, not just an initial splash.",why:"A restriction can empty the bowl after startup.",answers:[["Strong steady flow","fuel_flow_good"],["Weak / stops flowing","fuel_flow_restricted"]]},
+{title:"Check spark immediately after it dies",text:"As soon as it dies, test spark before the engine cools.",why:"A failing ignition component can lose spark when hot.",answers:[["Spark still strong","hot_spark_good"],["Spark gone / weak","hot_spark_bad"]]}
+],
+choke:[
+{title:"Confirm enrichment improves the symptom",text:"Apply only enough choke to enrich the mixture and observe operation.",why:"Improvement with enrichment usually means too little fuel or too much air.",answers:[["Clearly improves","choke_improves"],["No improvement / worse","choke_no_help"]]},
+{title:"Check intake tract for an air leak",text:"Inspect carb-to-engine boot/gasket, intake manifold, clamps, vacuum lines and mounting surfaces.",why:"Unmetered air can mimic restricted carburetor fuel circuits.",answers:[["Leak / damage found","intake_leak"],["No leak found","intake_ok"]]},
+{title:"Verify main fuel circuit and bowl supply",text:"Confirm sustained fuel supply, then inspect the main jet, emulsion tube and passages appropriate to the carburetor.",why:"With enrichment helping and no intake leak, restricted metering becomes much more likely.",answers:[["Restriction found","main_restriction"],["Fuel circuit looks clear","main_clear"]]}
+],
+bog:[
+{title:"Does partial choke recover the bog?",text:"Reproduce the bog, then partially apply choke and note whether power returns.",why:"Recovery with choke strongly points toward a lean fuel/air condition.",answers:[["Yes, it recovers","bog_choke_recovers"],["No / gets worse","bog_choke_no"]]},
+{title:"Verify sustained fuel delivery under demand",text:"Inspect tank vent, filter/line, valve, pump if equipped, bowl fill and flow.",why:"An engine can idle on limited fuel flow but starve at higher demand.",answers:[["Fuel delivery restricted","high_demand_fuel_restricted"],["Fuel delivery strong","high_demand_fuel_good"]]},
+{title:"Inspect governor/throttle and main metering",text:"Verify throttle/governor movement and inspect the main jet/emulsion path. On diaphragm or slide carbs, inspect metering operation as applicable.",why:"If supply reaches the carburetor, the fault may be inside metering or air-control hardware.",answers:[["Fault found","metering_fault"],["No obvious fault","metering_uncertain"]]}
+],
+surge:[
+{title:"Does slight choke smooth the surging?",text:"Apply slight choke while it is surging and observe whether RPM stabilizes.",why:"A surge that improves with enrichment commonly indicates a lean mixture or restricted low-speed circuit.",answers:[["Yes, smooths out","surge_choke_help"],["No change / worse","surge_choke_no"]]},
+{title:"Rule out intake leaks and fuel restriction",text:"Inspect intake gaskets/boots, verify steady fuel flow and confirm the fuel cap vents.",why:"External air/fuel problems should be ruled out before governor adjustments or carb replacement.",answers:[["Problem found","surge_external_fault"],["Everything checks out","surge_external_ok"]]},
+{title:"Check carburetor idle/progression circuit",text:"Inspect and clean the pilot/idle/progression passages and verify any fuel solenoid opens fully.",why:"A restricted low-speed circuit can make the governor hunt.",answers:[["Restriction / solenoid fault found","surge_carb_fault"],["Circuit appears clear","surge_carb_clear"]]}
+],
+no_spark:[
+{title:"Eliminate the kill circuit",text:"Using safe procedures and the wiring diagram when needed, isolate the ignition kill circuit and retest spark.",why:"Switches, low-oil circuits and damaged wiring can ground ignition even with a good coil.",answers:[["Spark returns","kill_circuit_fault"],["Still no spark","kill_circuit_not_cause"]]},
+{title:"Verify cranking speed and coil air gap",text:"Confirm adequate cranking speed and inspect coil air gap, mounting and flywheel magnet condition.",why:"Slow cranking or incorrect air gap can reduce ignition output.",answers:[["Problem found","ignition_setup_fault"],["Checks good","ignition_setup_good"]]},
+{title:"Test with known-good plug / module",text:"Install a known-good correctly gapped plug. If still no spark with kill circuit isolated and setup correct, test the ignition module per manufacturer procedure.",why:"At this point the ignition module becomes the leading suspect.",answers:[["Spark returns with known-good component","ignition_module_confirmed"],["Still no spark","ignition_deeper"]]}
+],
+low_compression:[
+{title:"Confirm compression with a gauge",text:"Perform a repeatable compression test using the correct procedure for this engine.",why:"A measurement is better evidence than pull-cord feel alone.",answers:[["Reading acceptable / even","compression_verified_good"],["Reading low / uneven","compression_verified_low"]]},
+{title:"Check valve operation and lash",text:"Verify both valves move normally and check valve lash against the exact engine specification.",why:"Tight lash, stuck valves or damaged valvetrain parts can cause low compression.",answers:[["Valve/lash problem found","valve_fault"],["Valve train looks correct","valve_ok"]]},
+{title:"Leak-down / wet-test direction",text:"Perform a leak-down test if available, or an appropriate wet compression comparison. Listen for leakage at intake, exhaust, crankcase or head gasket.",why:"This localizes where compression is escaping.",answers:[["Leak source identified","compression_leak_identified"],["Still unclear","compression_unclear"]]}
+],
+smoke_oil:[
+{title:"Verify oil level and tipping history",text:"Check oil level and determine whether the machine was recently tipped incorrectly or overfilled.",why:"Overfill or tipping can put oil into the intake/cylinder and mimic internal engine failure.",answers:[["Overfilled / recently tipped","oil_ingestion_likely"],["Oil/orientation normal","oil_ingestion_not_obvious"]]},
+{title:"Inspect air box, breather and cylinder for oil",text:"Inspect the air box/breather path. Remove the plug and check for liquid oil before cranking.",why:"This separates oil ingestion from ongoing internal oil consumption.",answers:[["Oil contamination found","oil_path_found"],["No oil contamination","oil_path_clear"]]},
+{title:"Run after clearing oil and monitor smoke",text:"After safely clearing excess oil and correcting level, run and monitor whether smoke decreases.",why:"Smoke that clears after a tipping/overfill event differs from persistent oil burning.",answers:[["Smoke clears","temporary_oil_event"],["Smoke persists","persistent_oil_burn"]]}
+],
+overheat:[
+{title:"Inspect cooling airflow",text:"Engine off: inspect blower screen, cooling fins, shrouds and debris buildup.",why:"Air-cooled engines depend on unobstructed directed airflow.",answers:[["Cooling blockage found","cooling_blocked"],["Airflow path clean","cooling_clear"]]},
+{title:"Check mixture/load and oil",text:"Verify correct oil level/type, no sustained overload, and no obvious lean symptom such as improvement with choke.",why:"Low oil, overload and lean mixtures can raise operating temperature.",answers:[["Problem found","overheat_operating_cause"],["Checks good","overheat_operating_ok"]]}
+],
+charging:[
+{title:"Battery voltage engine off",text:"Measure voltage directly at the battery posts with the engine off.",why:"Charging diagnosis needs a known battery baseline.",answers:[["Battery voltage normal","charge_battery_base_good"],["Battery low","charge_battery_low"]]},
+{title:"Battery voltage at charging RPM",text:"Run at the manufacturer-recommended charging RPM and measure DC voltage across the battery.",why:"A functioning system should raise voltage above the engine-off baseline.",answers:[["Voltage rises","charging_present"],["No meaningful rise","charging_absent"]]},
+{title:"Check stator output / regulator connections",text:"Inspect connectors, grounds and fuse. Measure stator AC output or regulator input/output using the exact engine procedure.",why:"This separates stator generation from regulator/rectifier and wiring faults.",answers:[["Stator output good","regulator_or_wiring"],["Stator output low/none","stator_fault"]]}
+],
+belt:[
+{title:"Confirm exact belt and routing",text:"Verify belt part number/length and routing against the exact model/serial diagram. Check V-side and flat-side pulley contact.",why:"Wrong belt profile/length or routing is a common cause of repeated derailment.",answers:[["Wrong belt/routing found","belt_wrong"],["Belt/routing correct","belt_correct"]]},
+{title:"Inspect pulley alignment and bearings",text:"Engine off: spin and rock each idler, spindle and drive pulley. Look for wobble, roughness, bent brackets or loose shoulder bolts.",why:"A pulley that tilts under load can throw a correctly routed belt.",answers:[["Play/wobble/misalignment found","pulley_fault"],["All pulleys tight/aligned","pulley_ok"]]},
+{title:"Inspect tensioner travel and belt guides",text:"Move the tensioner through full travel. Verify spring, pivot, belt retainers and guides are present and correctly positioned.",why:"Loss of tension or bad keeper position lets the belt jump.",answers:[["Tensioner/guide fault found","tension_fault"],["Tension system good","tension_ok"]]}
+],
+no_move:[
+{title:"Verify bypass/freewheel position",text:"Confirm hydrostatic bypass/freewheel valves or rods are fully returned to DRIVE.",why:"A machine can run normally but not move if the hydro is bypassed.",answers:[["Bypass was open","hydro_bypass"],["Bypass is correct","hydro_bypass_ok"]]},
+{title:"Inspect drive belt and input pulley",text:"Engine off: inspect transmission drive belt, tensioner and input pulley/key/splines.",why:"The engine can run while no torque reaches the transmission.",answers:[["Drive fault found","hydro_drive_fault"],["Drive system turns correctly","hydro_drive_ok"]]},
+{title:"Check hydro fluid / axle engagement",text:"Check hydro fluid if serviceable, axle keys/hubs and whether the transmission input turns when commanded.",why:"This separates transmission-internal failure from external drive/axle issues.",answers:[["External/fluid issue found","hydro_external_fault"],["Likely internal hydro issue","hydro_internal"]]}
+]
+};
+
+const FSER_DIAG_CONCLUSIONS={
+battery_low:{level:"LIKELY",title:"Battery condition must be corrected first",text:"Charge and load-test the battery before condemning starter or solenoid components."},
+crank_voltage_low:{level:"LIKELY",title:"Battery or high-current connection problem",text:"Load-test the battery and voltage-drop test the high-current cables/connections before replacing the starter."},
+no_solenoid_click:{level:"LIKELY",title:"Starter control circuit fault",text:"Check fuse, key switch, brake/PTO/neutral interlocks, solenoid trigger voltage and grounds."},
+spark_bad:{level:"LIKELY",title:"Ignition system fault",text:"Move into kill-circuit/coil/module diagnosis before carburetor work."},
+fires_external_fuel:{level:"LIKELY",title:"Normal fuel delivery / carburetion fault",text:"Spark and basic ignition can fire. Verify fuel supply, bowl fill and carburetor metering before replacing parts."},
+compression_low:{level:"LIKELY",title:"Mechanical compression problem",text:"Stop fuel-system parts replacement and inspect valve train, head sealing and cylinder/ring leakage."},
+vent_fault:{level:"VERIFIED",title:"Fuel tank vent restriction",text:"Improvement with the cap vented confirms a tank-venting problem."},
+fuel_flow_restricted:{level:"VERIFIED",title:"Fuel supply restriction",text:"The carburetor is not receiving sustained fuel. Inspect tank outlet, valve, filter, line and pump."},
+hot_spark_bad:{level:"LIKELY",title:"Heat-related ignition failure",text:"Loss of spark immediately after shutdown strongly points to a heat-sensitive ignition or kill-circuit fault."},
+choke_improves:{level:"LIKELY",title:"Lean fuel/air condition",text:"Because enrichment improves operation, rule out intake leaks and restricted fuel metering."},
+intake_leak:{level:"VERIFIED",title:"Unmetered intake air leak",text:"Repair the identified intake leak before carburetor adjustment or replacement."},
+main_restriction:{level:"VERIFIED",title:"Carburetor fuel-metering restriction",text:"A restriction was physically found in the main fuel circuit. Clean/repair it and retest."},
+bog_choke_recovers:{level:"LIKELY",title:"Lean condition under load",text:"Power recovery with choke points toward insufficient fuel delivery or main metering."},
+high_demand_fuel_restricted:{level:"VERIFIED",title:"Fuel starvation under load",text:"Correct the upstream restriction, vent, pump or bowl-fill issue before carburetor replacement."},
+metering_fault:{level:"VERIFIED",title:"Throttle/governor/carburetor metering fault found",text:"Repair the specific failed component and retest under load."},
+surge_choke_help:{level:"LIKELY",title:"Lean low-speed / progression condition",text:"Choke stabilization supports a lean condition. Rule out intake/fuel supply, then service the low-speed circuit."},
+surge_external_fault:{level:"VERIFIED",title:"External lean-condition cause found",text:"Repair the intake leak, vent or fuel-supply problem and retest before governor adjustment."},
+surge_carb_fault:{level:"VERIFIED",title:"Carburetor low-speed circuit fault",text:"A restriction or solenoid fault was identified. Service that circuit/component and retest."},
+kill_circuit_fault:{level:"VERIFIED",title:"Kill circuit is grounding ignition",text:"Spark returning with the kill lead isolated points to switches, wiring, low-oil module or safety interlocks."},
+ignition_setup_fault:{level:"VERIFIED",title:"Ignition setup / cranking fault found",text:"Correct air gap, magnet, mounting, battery or cranking-speed issue and retest."},
+ignition_module_confirmed:{level:"VERIFIED",title:"Ignition module / coil failure confirmed",text:"Spark returned with the known-good ignition component after the kill circuit and setup were verified."},
+compression_verified_low:{level:"VERIFIED",title:"Low compression confirmed",text:"Proceed with valve/lash and leak-down diagnosis before quoting internal engine parts."},
+valve_fault:{level:"VERIFIED",title:"Valve-train fault found",text:"Correct the identified valve/lash/pushrod/seat issue, then repeat compression test."},
+compression_leak_identified:{level:"VERIFIED",title:"Compression leak source identified",text:"Repair according to the identified leak path: intake valve, exhaust valve, rings/crankcase or head sealing."},
+oil_ingestion_likely:{level:"LIKELY",title:"Oil ingestion from tipping / overfill",text:"Correct oil level, clear oil safely and monitor before condemning internal engine parts."},
+temporary_oil_event:{level:"VERIFIED",title:"Temporary oil-ingestion event",text:"Smoke clearing after correcting oil level supports a tipping/overfill event rather than ongoing internal failure."},
+persistent_oil_burn:{level:"LIKELY",title:"Ongoing internal oil consumption",text:"Inspect breather, cylinder/rings, valve guides/seals and head gasket as applicable."},
+cooling_blocked:{level:"VERIFIED",title:"Cooling airflow restriction",text:"Clean cooling fins/screens and reinstall required shrouds before further overheating diagnosis."},
+charging_present:{level:"VERIFIED",title:"Charging system is producing output",text:"If the battery still dies, focus on battery condition, parasitic draw or intermittent connections."},
+regulator_or_wiring:{level:"LIKELY",title:"Regulator/rectifier or charging wiring fault",text:"Stator output is present. Verify regulator ground/connectors and exact output spec."},
+stator_fault:{level:"LIKELY",title:"Stator / alternator output fault",text:"Low or absent stator output points upstream of the regulator. Verify exact output spec before ordering."},
+belt_wrong:{level:"VERIFIED",title:"Incorrect belt or routing",text:"Correct the belt number/profile/routing using the exact model/serial diagram."},
+pulley_fault:{level:"VERIFIED",title:"Pulley / bearing alignment fault",text:"Repair the loose, worn, bent or misaligned pulley/spindle/idler before installing another belt."},
+tension_fault:{level:"VERIFIED",title:"Belt tensioner / guide fault",text:"Correct spring, pivot, keeper or guide positioning, then verify belt tracking."},
+hydro_bypass:{level:"VERIFIED",title:"Hydrostatic bypass left open",text:"Return the bypass to DRIVE and verify normal movement."},
+hydro_drive_fault:{level:"VERIFIED",title:"External transmission drive fault",text:"Repair the drive belt, tensioner, input pulley/key/spline issue before condemning the transmission."},
+hydro_internal:{level:"LIKELY",title:"Possible internal hydrostatic transmission fault",text:"External drive and bypass checks passed. Verify fluid/service and manufacturer diagnostic procedure before replacement."}
+};
+
+function populateFserAiJobs(){
+  const select=$("fserAiJob");
+  if(!select)return;
+  const current=select.value;
+  select.innerHTML=`<option value="">No repair job selected</option>`;
+  jobs.forEach(job=>{
+    const option=document.createElement("option");
+    option.value=job.id;
+    option.textContent=`${job.job_number||"JOB"} — ${customerName(job.customers)} — ${jobEquipment(job)}`;
+    select.appendChild(option);
+  });
+  if(current&&jobs.some(job=>String(job.id)===String(current)))select.value=current;
+}
+
+function fserCurrentFlow(){return FSER_DIAG_FLOWS[fserDiagState.flow]||[]}
+
+function fserMakeSummary(){
+  const brand=$("fserAiBrand")?.value.trim()||"";
+  const model=$("fserAiModel")?.value.trim()||"";
+  const engine=$("fserAiEngineModel")?.value.trim()||"";
+  const complaint=$("fserAiComplaint")?.value.trim()||"";
+  const c=fserDiagState.conclusion;
+  return [
+    "FSER DIAGNOSTIC",
+    [brand,model,engine?`Engine ${engine}`:""].filter(Boolean).join(" — ")||"Equipment not fully identified",
+    complaint?`Complaint: ${complaint}`:"",
+    "",
+    c?`${c.level}: ${c.title}`:"No final diagnosis yet",
+    c?.text||"",
+    "",
+    "Evidence:",
+    ...(fserDiagState.evidence.length?fserDiagState.evidence.map(x=>`• ${x}`):["• No test results saved."])
+  ].join("\n");
+}
+
+function renderFserConclusion(){
+  const box=$("fserAiConclusion"),confidence=$("fserAiConfidence"),c=fserDiagState.conclusion;
+  if(!box||!confidence)return;
+  if(!c){
+    confidence.textContent=fserDiagState.evidence.length?"Testing":"No Diagnosis";
+    box.innerHTML=fserDiagState.evidence.length?`<div class="fser-result-card"><h3>Evidence Collected</h3><ul class="fser-evidence">${fserDiagState.evidence.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul></div>`:`<p class="empty">The conclusion will build as tests are completed.</p>`;
+    $("saveFserDiagnosisToJob").disabled=true;
+    $("copyFserDiagnosis").disabled=!fserDiagState.evidence.length;
+    return;
+  }
+  confidence.textContent=c.level;
+  const levelText=c.level==="VERIFIED"?"🟢 VERIFIED":c.level==="LIKELY"?"🟡 LIKELY":"🔴 DO NOT ORDER";
+  box.innerHTML=`<div class="fser-result-card"><h3>${levelText} — ${escapeHtml(c.title)}</h3><p style="color:#ccc;line-height:1.55;">${escapeHtml(c.text)}</p><ul class="fser-evidence">${fserDiagState.evidence.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul></div>`;
+  $("saveFserDiagnosisToJob").disabled=!$("fserAiJob")?.value;
+  $("copyFserDiagnosis").disabled=false;
+}
+
+function renderFserDiagStep(){
+  const flow=fserCurrentFlow(),card=$("fserAiTestCard"),counter=$("fserAiStepCount");
+  if(!flow.length){card.innerHTML=`<p class="empty">Choose a supported symptom to start.</p>`;counter.textContent="Not Started";return}
+  if(fserDiagState.step>=flow.length){
+    counter.textContent="Tests Complete";
+    card.innerHTML=`<div class="fser-result-card"><h3>Diagnostic path completed</h3><p style="color:#bbb;line-height:1.55;">Review the evidence below. A LIKELY result should still be verified with the exact manufacturer procedure before ordering parts.</p></div>`;
+    renderFserConclusion();
+    return;
+  }
+  const step=flow[fserDiagState.step];
+  counter.textContent=`Test ${fserDiagState.step+1} of ${flow.length}`;
+  card.innerHTML=`<div class="fser-test-number">Test ${fserDiagState.step+1}</div><h3 class="fser-test-title">${escapeHtml(step.title)}</h3><div class="fser-test-instructions">${escapeHtml(step.text)}</div><div class="fser-test-why"><strong>Why this test:</strong> ${escapeHtml(step.why)}</div><div class="fser-answer-grid">${step.answers.map(([label,value])=>`<button type="button" onclick="answerFserDiag('${value}',this.textContent.trim())">${escapeHtml(label)}</button>`).join("")}</div>`;
+  renderFserConclusion();
+}
+
+function answerFserDiag(value,label){
+  const step=fserCurrentFlow()[fserDiagState.step];
+  if(!step)return;
+  fserDiagState.answers[fserDiagState.step]=value;
+  fserDiagState.evidence.push(`${step.title}: ${label}`);
+  if(FSER_DIAG_CONCLUSIONS[value])fserDiagState.conclusion=FSER_DIAG_CONCLUSIONS[value];
+  fserDiagState.step++;
+  localStorage.setItem("fserLastDiagnostic",JSON.stringify(fserDiagState));
+  renderFserDiagStep();
+}
+
+$("startFserDiagnosis")?.addEventListener("click",()=>{
+  const symptom=$("fserAiSymptom").value;
+  if(!symptom){$("fserAiMessage").textContent="Choose the closest symptom first.";$("fserAiMessage").className="message error";return}
+  fserDiagState={symptom,flow:symptom,step:0,evidence:[],answers:{},conclusion:null,startedAt:new Date().toISOString()};
+  $("fserAiMessage").textContent="Diagnostic started. Follow one test at a time.";
+  $("fserAiMessage").className="message success";
+  renderFserDiagStep();
+});
+
+$("resetFserDiagnosis")?.addEventListener("click",()=>{
+  fserDiagState={symptom:"",flow:"",step:0,evidence:[],answers:{},conclusion:null,startedAt:null};
+  $("fserAiTestCard").innerHTML=`<p class="empty">Choose a symptom and tap <strong>Start Diagnostic</strong>.</p>`;
+  $("fserAiStepCount").textContent="Not Started";
+  $("fserAiMessage").textContent="";
+  renderFserConclusion();
+});
+
+$("copyFserDiagnosis")?.addEventListener("click",async()=>{
+  const summary=fserMakeSummary();
+  try{await navigator.clipboard.writeText(summary);$("fserAiMessage").textContent="Diagnosis copied."}
+  catch{prompt("Copy diagnosis:",summary)}
+});
+
+$("saveFserDiagnosisToJob")?.addEventListener("click",async()=>{
+  const jobId=Number($("fserAiJob").value);
+  if(!jobId){$("fserAiMessage").textContent="Select a repair job first.";$("fserAiMessage").className="message error";return}
+  const job=jobs.find(x=>Number(x.id)===jobId);
+  if(!job)return;
+  const existing=String(job.repair_notes||"").trim();
+  const updated=[existing,`--- ${new Date().toLocaleString()} ---`,fserMakeSummary()].filter(Boolean).join("\n\n");
+  const {error}=await db.from("repair_jobs").update({repair_notes:updated}).eq("id",jobId);
+  if(error){$("fserAiMessage").textContent=error.message;$("fserAiMessage").className="message error";return}
+  job.repair_notes=updated;
+  $("fserAiMessage").textContent=`Diagnosis added to ${job.job_number}.`;
+  $("fserAiMessage").className="message success";
+});
+
+$("fserAiJob")?.addEventListener("change",()=>{
+  const job=jobs.find(x=>String(x.id)===String($("fserAiJob").value));
+  if(!job)return;
+  if(!$("fserAiBrand").value)$("fserAiBrand").value=job.equipment?.brand||"";
+  if(!$("fserAiModel").value)$("fserAiModel").value=job.equipment?.model||"";
+  $("fserPartsBrand").value=$("fserAiBrand").value;
+  $("fserPartsModel").value=$("fserAiEngineModel").value||$("fserAiModel").value;
+  renderFserConclusion();
+});
+
+/* FSER Parts Finder */
+function fserPartsQuery(){
+  const brand=$("fserPartsBrand").value.trim(),model=$("fserPartsModel").value.trim(),need=$("fserPartsNeed").value.trim();
+  return {brand,model,need,full:[brand,model,need].filter(Boolean).join(" ")};
+}
+function fserOpenUrl(url){window.open(url,"_blank","noopener")}
+function fserOfficialUrl(brand,model,need){
+  const b=brand.toLowerCase();
+  if(b.includes("briggs"))return "https://shop.briggsandstratton.com/pages/parts-lookup";
+  if(b.includes("kawasaki"))return "https://www.kawasaki.com/en-us/owner-center/parts";
+  if(b.includes("honda"))return "https://publications.powerequipment.honda.com/";
+  if(b.includes("kohler")||b.includes("rehlko"))return "https://kohlerpower.com/en/engines/manuals";
+  return `https://www.google.com/search?q=${encodeURIComponent(`${brand} ${model} ${need} official OEM parts diagram`)}`;
+}
+
+$("fserPartsTreeButton")?.addEventListener("click",()=>{
+  const {full,model}=fserPartsQuery();
+  if(!model){$("fserPartsAdvice").textContent="Enter the exact model number first. Exact model/variant information is the safest way to use a parts diagram.";return}
+  fserOpenUrl(`https://www.partstree.com/search/?search=${encodeURIComponent(full)}&tab=models`);
+});
+
+$("fserOfficialPartsButton")?.addEventListener("click",()=>{
+  const {brand,model,need}=fserPartsQuery();
+  if(!brand){$("fserPartsAdvice").textContent="Enter the manufacturer/engine brand so FSER can choose the best official lookup.";return}
+  fserOpenUrl(fserOfficialUrl(brand,model,need));
+});
+
+$("fserWebPartsButton")?.addEventListener("click",()=>{
+  const {full}=fserPartsQuery();
+  if(full)fserOpenUrl(`https://www.google.com/search?q=${encodeURIComponent(`${full} OEM parts diagram`)}`);
+});
+
+function getFserVerifiedParts(){
+  try{return JSON.parse(localStorage.getItem("fserVerifiedParts")||"[]")}catch{return[]}
+}
+
+function renderFserVerifiedMatches(){
+  const target=$("fserVerifiedMatches");if(!target)return;
+  const parts=getFserVerifiedParts();
+  const brand=($("fserPartsBrand")?.value||"").trim().toLowerCase();
+  const model=($("fserPartsModel")?.value||"").trim().toLowerCase();
+  const need=($("fserPartsNeed")?.value||"").trim().toLowerCase();
+  const matches=parts.filter(part=>{
+    const h=[part.brand,part.model,part.description,part.partNumber,part.notes].join(" ").toLowerCase();
+    if(model&&!h.includes(model))return false;
+    if(need&&!h.includes(need))return false;
+    if(brand&&!h.includes(brand))return false;
+    return true;
+  }).slice(0,8);
+  if(!parts.length){target.innerHTML=`<p class="empty">No FSER-verified parts saved yet.</p>`;return}
+  if(!matches.length){target.innerHTML=`<p class="empty">No verified match for the current model/part search.</p>`;return}
+  target.innerHTML=matches.map(part=>`<div class="fser-verified-card"><strong>🟢 ${escapeHtml(part.partNumber)}</strong><div style="margin-top:4px;">${escapeHtml(part.description)}</div><div style="margin-top:5px;color:#aaa;font-size:12px;">${escapeHtml([part.brand,part.model].filter(Boolean).join(" — "))}</div>${part.notes?`<div style="margin-top:5px;color:#888;font-size:11px;">${escapeHtml(part.notes)}</div>`:""}</div>`).join("");
+}
+
+$("saveFserVerifiedPart")?.addEventListener("click",()=>{
+  const {brand,model}=fserPartsQuery();
+  const partNumber=$("fserVerifiedPartNumber").value.trim(),description=$("fserVerifiedPartDescription").value.trim(),notes=$("fserVerifiedPartNotes").value.trim();
+  if(!model||!partNumber||!description){$("fserPartsAdvice").textContent="To save a VERIFIED part, enter the model, OEM part number, and description.";return}
+  const parts=getFserVerifiedParts();
+  parts.unshift({brand,model,partNumber,description,notes,verifiedAt:new Date().toISOString()});
+  localStorage.setItem("fserVerifiedParts",JSON.stringify(parts));
+  $("fserPartsAdvice").textContent=`🟢 VERIFIED saved: ${partNumber} for ${model}.`;
+  renderFserVerifiedMatches();
+});
+
+["fserPartsBrand","fserPartsModel","fserPartsNeed"].forEach(id=>$(id)?.addEventListener("input",renderFserVerifiedMatches));
+
+$("clearFserPartsForm")?.addEventListener("click",()=>{
+  ["fserPartsBrand","fserPartsModel","fserPartsNeed","fserVerifiedPartNumber","fserVerifiedPartDescription","fserVerifiedPartNotes"].forEach(id=>$(id).value="");
+  renderFserVerifiedMatches();
+});
+
+$("fserAiBrand")?.addEventListener("input",()=>{$("fserPartsBrand").value=$("fserAiBrand").value});
+$("fserAiEngineModel")?.addEventListener("input",()=>{$("fserPartsModel").value=$("fserAiEngineModel").value||$("fserAiModel").value;renderFserVerifiedMatches()});
+$("fserAiModel")?.addEventListener("input",()=>{if(!$("fserAiEngineModel").value)$("fserPartsModel").value=$("fserAiModel").value;renderFserVerifiedMatches()});
+
 
 /* ==================================================
    EXPENSES
