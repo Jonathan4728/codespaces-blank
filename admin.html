@@ -12711,6 +12711,13 @@ $("timeClockJob")
 let fserDiagState={symptom:"",flow:"",equipmentProfile:"general",step:0,evidence:[],answers:{},conclusion:null,conclusionKey:"",startedAt:null};
 
 const FSER_DIAG_FLOWS={
+
+general_triage:[
+{title:"Does the engine crank or pull over normally?",text:"Use the starter or recoil and confirm the engine actually turns through compression at normal speed.",why:"This first separates a cranking/mechanical problem from a true crank-but-won't-start problem.",answers:[["Yes — engine turns normally","triage_turns"],["No — does not turn normally","triage_no_turn"]]},
+{title:"Will the engine start and run at all?",text:"Try a normal start using the correct choke/throttle procedure for the equipment.",why:"This separates a complete no-start from a starts-then-dies or running-performance problem.",answers:[["No — will not start","triage_no_start"],["Starts but dies / runs poorly","triage_runs_poorly"]]},
+{title:"What system has already been verified?",text:"Choose the strongest fact you already know from testing.",why:"Using what you already proved prevents repeating unnecessary tests.",answers:[["Has strong spark","triage_has_spark"],["Fires on added fuel","fires_external_fuel"],["No spark / weak spark","spark_bad"],["Compression is low","compression_low"]]}
+],
+
 no_crank:[
 {title:"Verify battery voltage at rest",text:"Measure battery voltage directly across the battery posts with the key off.",why:"A weak battery can make starter and solenoid diagnosis misleading.",answers:[["12.4V or higher","battery_good"],["Below 12.4V","battery_low"]]},
 {title:"Check voltage while attempting to crank",text:"Keep the meter on the battery posts and attempt to crank. Watch the lowest voltage.",why:"A battery can show normal voltage at rest but collapse under starter load.",answers:[["Stays above ~10V","crank_voltage_good"],["Drops below ~10V","crank_voltage_low"]]},
@@ -12780,6 +12787,13 @@ no_move:[
 };
 
 const FSER_DIAG_CONCLUSIONS={
+
+triage_turns:{level:"LIKELY",title:"Engine cranks normally — continue no-start diagnosis",text:"Because the engine turns through compression normally, continue with spark, fuel-delivery, and compression checks rather than starter-circuit diagnosis."},
+triage_no_turn:{level:"LIKELY",title:"Cranking / mechanical problem",text:"The engine is not turning normally. Check battery/starter/recoil load, seized driven equipment, hydro-lock, or internal mechanical binding before fuel diagnosis."},
+triage_no_start:{level:"LIKELY",title:"True crank-but-no-start condition",text:"The engine turns but will not start. Continue by separating ignition, fuel delivery, and compression."},
+triage_runs_poorly:{level:"LIKELY",title:"Engine starts — move to running-performance diagnosis",text:"Because the engine starts, focus on the exact running symptom such as dying, bogging, surging, choke dependence, overheating, or load response."},
+triage_has_spark:{level:"LIKELY",title:"Spark is present — fuel delivery and compression move higher",text:"Strong spark makes a basic no-spark failure less likely. Continue with added-fuel response, bowl/fuel delivery, and compression rather than repeating ignition checks."},
+
 battery_low:{level:"LIKELY",title:"Battery condition must be corrected first",text:"Charge and load-test the battery before condemning starter or solenoid components."},
 crank_voltage_low:{level:"LIKELY",title:"Battery or high-current connection problem",text:"Load-test the battery and voltage-drop test the high-current cables/connections before replacing the starter."},
 no_solenoid_click:{level:"LIKELY",title:"Starter control circuit fault",text:"Check fuse, key switch, brake/PTO/neutral interlocks, solenoid trigger voltage and grounds."},
@@ -13662,31 +13676,188 @@ function answerFserDiag(value,label){
 
 function classifyFserSymptom(rawText){
 
-  const s=String(rawText||"").toLowerCase();
+  const original=String(rawText||"").toLowerCase();
 
-  const has=(...phrases)=>phrases.some(p=>s.includes(p));
+  const s=original
+    .replace(/[’']/g,"")
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
 
-  if(has("belt keeps coming off","belt comes off","throws belt","deck belt","drive belt","belt slips")) return "belt";
-  if(has("no spark","weak spark","intermittent spark","lost spark")) return "no_spark";
-  if(has("low compression","no compression","compression low")) return "low_compression";
-  if(has("smoking","smokes","oil out exhaust","oil in exhaust","oil in cylinder","hydrolock","hydro locked","burning oil")) return "smoke_oil";
-  if(has("not charging","battery not charging","charging issue","stator","keeps killing battery")) return "charging";
-  if(has("overheating","over heats","runs hot","too hot")) return "overheat";
-  if(has("wont move","won't move","will not move","no movement","hydro not moving","transmission not moving")) return "no_move";
-  if(has("wont crank","won't crank","will not crank","no crank","starter wont turn","starter won't turn")) return "no_crank";
-  if(has("starts then dies","starts and dies","runs then dies","dies after","dies when hot","shuts off after")) return "starts_dies";
-  if(has("bogs","bogging","dies on throttle","dies when giving gas","full throttle","under load","falls on its face","loses power","won't take throttle","wont take throttle")) return "bog";
-  if(has("only runs on choke","runs better with choke","choke helps","needs choke","runs on choke")) return "choke";
-  if(has("surges","surging","hunts","hunting","rpm goes up and down")) return "surge";
-  if(has("cranks but wont start","cranks but won't start","turns over but wont start","turns over but won't start","crank no start","wont start","won't start","no start")) return "crank_no_start";
+  const has=(...phrases)=>phrases.some(p=>s.includes(
+    String(p)
+      .toLowerCase()
+      .replace(/[’']/g,"")
+      .replace(/[^a-z0-9\s]/g," ")
+      .replace(/\s+/g," ")
+      .trim()
+  ));
 
-  return "";
+  const scores={
+    no_crank:0,
+    crank_no_start:0,
+    starts_dies:0,
+    choke:0,
+    bog:0,
+    surge:0,
+    no_spark:0,
+    low_compression:0,
+    smoke_oil:0,
+    overheat:0,
+    charging:0,
+    belt:0,
+    no_move:0
+  };
+
+  // Strong direct phrases.
+  if(has("wont crank","will not crank","no crank","starter wont turn","starter just clicks","starter clicks but")) scores.no_crank+=10;
+
+  if(has(
+    "cranks but wont start","turns over but wont start","pulls but wont start",
+    "pull it and nothing happens","pulling it nothing happens","wont start",
+    "will not start","wont run","will not run","doesnt run","does not run",
+    "wont fire","will not fire","no start"
+  )) scores.crank_no_start+=8;
+
+  if(has(
+    "starts then dies","starts and dies","runs then dies","dies after",
+    "shuts off after","starts but shuts off","dies when hot"
+  )) scores.starts_dies+=10;
+
+  if(has(
+    "only runs on choke","runs better with choke","choke helps",
+    "needs choke","runs on choke"
+  )) scores.choke+=10;
+
+  if(has(
+    "bogs","bogging","falls on its face","dies on throttle",
+    "dies when giving gas","dies when i give gas","full throttle",
+    "under load","loses power"
+  )) scores.bog+=8;
+
+  if(has("surges","surging","hunts","hunting","rpm goes up and down","revs up and down")) scores.surge+=10;
+
+  if(has("no spark","weak spark","intermittent spark","lost spark")) scores.no_spark+=10;
+
+  if(has("low compression","no compression","compression low","compression is low")) scores.low_compression+=10;
+
+  if(has(
+    "smoking","smokes","burning oil","oil out exhaust","oil in exhaust",
+    "oil in cylinder","hydrolock","hydro locked"
+  )) scores.smoke_oil+=10;
+
+  if(has("overheating","over heats","runs hot","too hot")) scores.overheat+=10;
+
+  if(has("not charging","battery not charging","charging issue","stator","keeps killing battery")) scores.charging+=10;
+
+  if(has("belt keeps coming off","belt comes off","throws belt","deck belt comes off","drive belt comes off")) scores.belt+=10;
+
+  if(has(
+    "wont move","will not move","no movement","hydro not moving",
+    "transmission not moving","engine runs but wont move"
+  )) scores.no_move+=10;
+
+
+  // Context clues make natural shop wording work.
+  const saysHasSpark=has(
+    "has spark","getting spark","good spark","strong spark",
+    "spark is good","spark good"
+  );
+
+  const saysGettingFuel=has(
+    "getting fuel","has fuel","fuel is getting to carb",
+    "fuel to carb","bowl has fuel"
+  );
+
+  const saysNoFuelCylinder=has(
+    "not getting gas to cylinder","not getting fuel to cylinder",
+    "no gas to cylinder","no fuel to cylinder","plug is dry","dry plug"
+  );
+
+  const saysCleanedCarb=has(
+    "cleaned carb","cleaned the carb","carb cleaned",
+    "cleaned jets","jets cleaned","rebuilt carb"
+  );
+
+  const saysChokeNoHelp=has(
+    "choke dont help","choke doesnt help","choke does not help",
+    "choke no help","choke makes no difference"
+  );
+
+  const saysPulling=has(
+    "as you pull it","when you pull it","pull cord","pulling it",
+    "pull start","recoil"
+  );
+
+  const saysCranking=has(
+    "cranking","cranks","turns over","starter turns"
+  );
+
+  const saysNothing=has(
+    "nothing happens","does nothing","no fire","not firing"
+  );
+
+
+  // If user says it HAS spark, don't accidentally classify "no spark".
+  if(saysHasSpark){
+    scores.no_spark-=12;
+    scores.crank_no_start+=3;
+  }
+
+  // Fuel is present somewhere but machine won't run = no-start path.
+  if(saysGettingFuel && (has("wont run","wont start","nothing happens","no fire") || saysNoFuelCylinder)){
+    scores.crank_no_start+=5;
+  }
+
+  // Dry cylinder/plug with spark is classic no-start fuel-delivery context.
+  if(saysNoFuelCylinder && saysHasSpark){
+    scores.crank_no_start+=8;
+  }
+
+  // Already cleaned carb is evidence, not a symptom.
+  if(saysCleanedCarb){
+    scores.crank_no_start+=2;
+  }
+
+  // "Choke doesn't help" should NOT send it to the choke/lean path.
+  if(saysChokeNoHelp){
+    scores.choke-=10;
+    if(has("wont run","wont start","nothing happens")) scores.crank_no_start+=3;
+  }
+
+  // Recoil/pulling context + won't run/no response = crank-no-start.
+  if((saysPulling || saysCranking) && (saysNothing || has("wont run","wont start","will not start"))){
+    scores.crank_no_start+=7;
+  }
+
+  // "Engine runs but..." should reduce crank-no-start unless explicitly saying it won't start.
+  if(has("engine runs","it runs","runs fine","starts and runs")){
+    if(!has("wont start","will not start")) scores.crank_no_start-=4;
+  }
+
+
+  let bestFlow="general_triage";
+  let bestScore=0;
+
+  for(const [flow,score] of Object.entries(scores)){
+    if(score>bestScore){
+      bestScore=score;
+      bestFlow=flow;
+    }
+  }
+
+  // A weak/uncertain match starts triage instead of rejecting the user.
+  if(bestScore<3){
+    return "general_triage";
+  }
+
+  return bestFlow;
 }
-
 
 function fserSymptomLabel(flow){
 
   const labels={
+    general_triage:"General Diagnostic Triage",
     no_crank:"No Crank",
     crank_no_start:"Cranks But Won't Start",
     starts_dies:"Starts Then Dies",
