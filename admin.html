@@ -2334,15 +2334,10 @@
 
               <label>
                 Equipment
-                <select id="fserAiEquipment">
-                  <option value="mower">Lawn Mower / Zero-Turn</option>
-                  <option value="atv">ATV / UTV</option>
-                  <option value="generator">Generator</option>
-                  <option value="pressurewasher">Pressure Washer</option>
-                  <option value="chainsaw">Chainsaw</option>
-                  <option value="trimmer">Trimmer / Blower</option>
-                  <option value="other">Other Small Engine</option>
-                </select>
+                <input
+                  id="fserAiEquipment"
+                  placeholder="Type it: riding mower, weed eater, ATV, generator..."
+                >
               </label>
 
               <label>
@@ -2362,27 +2357,15 @@
 
               <label class="full-width">
                 Main Symptom
-                <select id="fserAiSymptom">
-                  <option value="">Choose the closest symptom...</option>
-                  <option value="no_crank">Starter will not crank engine</option>
-                  <option value="crank_no_start">Cranks but will not start</option>
-                  <option value="starts_dies">Starts then dies</option>
-                  <option value="choke">Only runs / runs better with choke</option>
-                  <option value="bog">Bogs or dies when throttle/load is applied</option>
-                  <option value="surge">Surges / hunts</option>
-                  <option value="no_spark">No spark / intermittent spark</option>
-                  <option value="low_compression">Low compression / hard starting</option>
-                  <option value="smoke_oil">Smoking / oil in cylinder or exhaust</option>
-                  <option value="overheat">Overheating / running hot</option>
-                  <option value="charging">Battery not charging / electrical issue</option>
-                  <option value="belt">Drive/deck belt keeps coming off</option>
-                  <option value="no_move">Engine runs but machine will not move</option>
-                </select>
+                <input
+                  id="fserAiSymptom"
+                  placeholder="Type it your way: cranks but won't start, bogs at full throttle, belt keeps coming off..."
+                >
               </label>
 
               <label class="full-width">
-                Extra Symptoms / What You Already Know
-                <textarea id="fserAiComplaint" placeholder="Example: Bogs at full throttle. Applying choke brings power back."></textarea>
+                Extra Details / Tests Already Done
+                <textarea id="fserAiComplaint" placeholder="Type anything you already know: has spark, fires on carb cleaner, compression 90 PSI, choke helps, new carb installed, etc."></textarea>
               </label>
 
             </div>
@@ -2405,7 +2388,7 @@
             </div>
 
             <div id="fserAiTestCard" class="fser-ai-test-card">
-              <p class="empty">Choose a symptom and tap <strong>Start Diagnostic</strong>.</p>
+              <p class="empty">Type the problem and tap <strong>Start Diagnostic</strong>.</p>
             </div>
           </div>
 
@@ -2505,6 +2488,7 @@
             <h2>Accuracy Rules</h2>
             <div class="fser-accuracy-rules">
               <div><strong>🟢 VERIFIED</strong><span>Confirmed by measurement, direct test, or exact OEM diagram.</span></div>
+              <div><strong>🟢 HIGH CONFIDENCE</strong><span>Multiple tests point to the same failure after competing causes were ruled out; replacement is justified but the final confirmation is the successful repair.</span></div>
               <div><strong>🟡 LIKELY</strong><span>Evidence strongly points to the failure, but another confirmation is recommended.</span></div>
               <div><strong>🔴 DO NOT ORDER</strong><span>Model/variant information or testing is not sufficient.</span></div>
             </div>
@@ -12684,12 +12668,14 @@ starts_dies:[
 choke:[
 {title:"Confirm enrichment improves the symptom",text:"Apply only enough choke to enrich the mixture and observe operation.",why:"Improvement with enrichment usually means too little fuel or too much air.",answers:[["Clearly improves","choke_improves"],["No improvement / worse","choke_no_help"]]},
 {title:"Check intake tract for an air leak",text:"Inspect carb-to-engine boot/gasket, intake manifold, clamps, vacuum lines and mounting surfaces.",why:"Unmetered air can mimic restricted carburetor fuel circuits.",answers:[["Leak / damage found","intake_leak"],["No leak found","intake_ok"]]},
-{title:"Verify main fuel circuit and bowl supply",text:"Confirm sustained fuel supply, then inspect the main jet, emulsion tube and passages appropriate to the carburetor.",why:"With enrichment helping and no intake leak, restricted metering becomes much more likely.",answers:[["Restriction found","main_restriction"],["Fuel circuit looks clear","main_clear"]]}
+{title:"Verify main fuel circuit and bowl supply",text:"Confirm sustained fuel supply, then inspect the main jet, emulsion tube and passages appropriate to the carburetor.",why:"With enrichment helping and no intake leak, restricted metering becomes much more likely.",answers:[["Restriction found","main_restriction"],["Fuel circuit looks clear","main_clear"]]},
+{title:"Has the carburetor already been thoroughly serviced and the lean condition still remains?",text:"Answer YES only if the carburetor has been properly cleaned/serviced, jets and passages were verified clear, fuel supply is strong, intake leaks were ruled out, and the engine still improves with choke.",why:"When enrichment still fixes the symptom after the external causes and normal carb service are ruled out, an internal carburetor fault can remain even when no blockage is obvious.",answers:[["Yes — serviced and symptom remains","carb_replacement_justified"],["Not yet — service/verify carb first","carb_service_first"]]}
 ],
 bog:[
 {title:"Does partial choke recover the bog?",text:"Reproduce the bog, then partially apply choke and note whether power returns.",why:"Recovery with choke strongly points toward a lean fuel/air condition.",answers:[["Yes, it recovers","bog_choke_recovers"],["No / gets worse","bog_choke_no"]]},
 {title:"Verify sustained fuel delivery under demand",text:"Inspect tank vent, filter/line, valve, pump if equipped, bowl fill and flow.",why:"An engine can idle on limited fuel flow but starve at higher demand.",answers:[["Fuel delivery restricted","high_demand_fuel_restricted"],["Fuel delivery strong","high_demand_fuel_good"]]},
-{title:"Inspect governor/throttle and main metering",text:"Verify throttle/governor movement and inspect the main jet/emulsion path. On diaphragm or slide carbs, inspect metering operation as applicable.",why:"If supply reaches the carburetor, the fault may be inside metering or air-control hardware.",answers:[["Fault found","metering_fault"],["No obvious fault","metering_uncertain"]]}
+{title:"Inspect governor/throttle and main metering",text:"Verify throttle/governor movement and inspect the main jet/emulsion path. On diaphragm or slide carbs, inspect metering operation as applicable.",why:"If supply reaches the carburetor, the fault may be inside metering or air-control hardware. A carb can still have an internal metering problem even when nothing obvious is visible.",answers:[["Fault found","metering_fault"],["No obvious fault","metering_uncertain"]]},
+{title:"Has the carburetor already been thoroughly serviced and the lean bog still remains?",text:"Answer YES only if the carburetor has already been removed and properly cleaned/serviced, jets and passages were verified clear, fuel supply is strong, and the symptom still returns. If those checks have not been completed, choose NOT YET.",why:"A carburetor can have an internal restriction, worn metering component, incorrect fuel level, damaged passage, or other fault that is not visible during normal inspection. Persistent recovery with choke after fuel supply and cleaning are verified makes internal carburetor failure much more likely.",answers:[["Yes — cleaned/verified and still bogs","carb_replacement_justified"],["Not yet — service/verify carb first","carb_service_first"]]}
 ],
 surge:[
 {title:"Does slight choke smooth the surging?",text:"Apply slight choke while it is surging and observe whether RPM stabilizes.",why:"A surge that improves with enrichment commonly indicates a lean mixture or restricted low-speed circuit.",answers:[["Yes, smooths out","surge_choke_help"],["No change / worse","surge_choke_no"]]},
@@ -12748,6 +12734,9 @@ main_restriction:{level:"VERIFIED",title:"Carburetor fuel-metering restriction",
 bog_choke_recovers:{level:"LIKELY",title:"Lean condition under load",text:"Power recovery with choke points toward insufficient fuel delivery or main metering."},
 high_demand_fuel_restricted:{level:"VERIFIED",title:"Fuel starvation under load",text:"Correct the upstream restriction, vent, pump or bowl-fill issue before carburetor replacement."},
 metering_fault:{level:"VERIFIED",title:"Throttle/governor/carburetor metering fault found",text:"Repair the specific failed component and retest under load."},
+metering_uncertain:{level:"LIKELY",title:"Internal carburetor metering fault still suspected",text:"No obvious external or visible fault was found, but a lean bog that improves with choke while fuel delivery remains strong still points inside the carburetor. Continue to the final carb-service verification before ruling the carburetor out."},
+carb_service_first:{level:"LIKELY",title:"Carburetor service/verification needed before replacement",text:"The symptom pattern still points toward a lean metering problem, but the carburetor has not yet been fully verified. Clean/service it thoroughly, confirm all jets/passages and fuel level operation, then retest before ordering a replacement."},
+carb_replacement_justified:{level:"HIGH CONFIDENCE",title:"Internal carburetor failure — replacement justified",text:"The engine recovers with choke, fuel delivery to the carburetor is strong, external air/fuel causes have been ruled out, and the carburetor has already been properly cleaned/verified but the lean bog remains. This makes an internal carburetor metering failure highly likely. Carburetor replacement is justified, then retest to confirm the repair."},
 surge_choke_help:{level:"LIKELY",title:"Lean low-speed / progression condition",text:"Choke stabilization supports a lean condition. Rule out intake/fuel supply, then service the low-speed circuit."},
 surge_external_fault:{level:"VERIFIED",title:"External lean-condition cause found",text:"Repair the intake leak, vent or fuel-supply problem and retest before governor adjustment."},
 surge_carb_fault:{level:"VERIFIED",title:"Carburetor low-speed circuit fault",text:"A restriction or solenoid fault was identified. Service that circuit/component and retest."},
@@ -12789,6 +12778,7 @@ function populateFserAiJobs(){
 function fserCurrentFlow(){return FSER_DIAG_FLOWS[fserDiagState.flow]||[]}
 
 function fserMakeSummary(){
+  const equipment=$("fserAiEquipment")?.value.trim()||"";
   const brand=$("fserAiBrand")?.value.trim()||"";
   const model=$("fserAiModel")?.value.trim()||"";
   const engine=$("fserAiEngineModel")?.value.trim()||"";
@@ -12796,7 +12786,7 @@ function fserMakeSummary(){
   const c=fserDiagState.conclusion;
   return [
     "FSER DIAGNOSTIC",
-    [brand,model,engine?`Engine ${engine}`:""].filter(Boolean).join(" — ")||"Equipment not fully identified",
+    [equipment,brand,model,engine?`Engine ${engine}`:""].filter(Boolean).join(" — ")||"Equipment not fully identified",
     complaint?`Complaint: ${complaint}`:"",
     "",
     c?`${c.level}: ${c.title}`:"No final diagnosis yet",
@@ -12818,7 +12808,14 @@ function renderFserConclusion(){
     return;
   }
   confidence.textContent=c.level;
-  const levelText=c.level==="VERIFIED"?"🟢 VERIFIED":c.level==="LIKELY"?"🟡 LIKELY":"🔴 DO NOT ORDER";
+  const levelText=
+    c.level==="VERIFIED"
+      ? "🟢 VERIFIED"
+      : c.level==="HIGH CONFIDENCE"
+        ? "🟢 HIGH CONFIDENCE"
+        : c.level==="LIKELY"
+          ? "🟡 LIKELY"
+          : "🔴 DO NOT ORDER";
   box.innerHTML=`<div class="fser-result-card"><h3>${levelText} — ${escapeHtml(c.title)}</h3><p style="color:#ccc;line-height:1.55;">${escapeHtml(c.text)}</p><ul class="fser-evidence">${fserDiagState.evidence.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul></div>`;
   $("saveFserDiagnosisToJob").disabled=!$("fserAiJob")?.value;
   $("copyFserDiagnosis").disabled=false;
@@ -12826,42 +12823,196 @@ function renderFserConclusion(){
 
 function renderFserDiagStep(){
   const flow=fserCurrentFlow(),card=$("fserAiTestCard"),counter=$("fserAiStepCount");
-  if(!flow.length){card.innerHTML=`<p class="empty">Choose a supported symptom to start.</p>`;counter.textContent="Not Started";return}
+
+  if(!flow.length){
+    card.innerHTML=`<p class="empty">Type what the machine is doing and start the diagnostic.</p>`;
+    counter.textContent="Not Started";
+    return;
+  }
+
   if(fserDiagState.step>=flow.length){
     counter.textContent="Tests Complete";
     card.innerHTML=`<div class="fser-result-card"><h3>Diagnostic path completed</h3><p style="color:#bbb;line-height:1.55;">Review the evidence below. A LIKELY result should still be verified with the exact manufacturer procedure before ordering parts.</p></div>`;
     renderFserConclusion();
     return;
   }
+
   const step=flow[fserDiagState.step];
   counter.textContent=`Test ${fserDiagState.step+1} of ${flow.length}`;
-  card.innerHTML=`<div class="fser-test-number">Test ${fserDiagState.step+1}</div><h3 class="fser-test-title">${escapeHtml(step.title)}</h3><div class="fser-test-instructions">${escapeHtml(step.text)}</div><div class="fser-test-why"><strong>Why this test:</strong> ${escapeHtml(step.why)}</div><div class="fser-answer-grid">${step.answers.map(([label,value])=>`<button type="button" onclick="answerFserDiag('${value}',this.textContent.trim())">${escapeHtml(label)}</button>`).join("")}</div>`;
+
+  card.innerHTML=`
+    <div class="fser-test-number">Test ${fserDiagState.step+1}</div>
+
+    <h3 class="fser-test-title">${escapeHtml(step.title)}</h3>
+
+    <div class="fser-test-instructions">${escapeHtml(step.text)}</div>
+
+    <div class="fser-test-why">
+      <strong>Why this test:</strong> ${escapeHtml(step.why)}
+    </div>
+
+    <label style="display:block;margin-top:16px;">
+      Type Your Reading / Result
+      <input
+        id="fserTypedResult"
+        placeholder="Example: 9.6V while cranking, strong blue spark, fuel flow weak..."
+      >
+    </label>
+
+    <div class="fser-answer-grid">
+      ${step.answers.map(([label,value])=>`
+        <button
+          type="button"
+          onclick="answerFserDiag('${value}',this.textContent.trim())"
+        >
+          ${escapeHtml(label)}
+        </button>
+      `).join("")}
+    </div>
+  `;
+
   renderFserConclusion();
 }
 
 function answerFserDiag(value,label){
   const step=fserCurrentFlow()[fserDiagState.step];
   if(!step)return;
+
+  const typedResult=
+    $("fserTypedResult")?.value.trim()||"";
+
   fserDiagState.answers[fserDiagState.step]=value;
-  fserDiagState.evidence.push(`${step.title}: ${label}`);
-  if(FSER_DIAG_CONCLUSIONS[value])fserDiagState.conclusion=FSER_DIAG_CONCLUSIONS[value];
+
+  fserDiagState.evidence.push(
+    `${step.title}: ${label}${typedResult?` — Reading/Note: ${typedResult}`:""}`
+  );
+
+  if(FSER_DIAG_CONCLUSIONS[value]){
+    fserDiagState.conclusion=FSER_DIAG_CONCLUSIONS[value];
+  }
+
   fserDiagState.step++;
-  localStorage.setItem("fserLastDiagnostic",JSON.stringify(fserDiagState));
+
+  localStorage.setItem(
+    "fserLastDiagnostic",
+    JSON.stringify(fserDiagState)
+  );
+
   renderFserDiagStep();
 }
 
+
+function classifyFserSymptom(rawText){
+
+  const s=String(rawText||"").toLowerCase();
+
+  const has=(...phrases)=>phrases.some(p=>s.includes(p));
+
+  if(has("belt keeps coming off","belt comes off","throws belt","deck belt","drive belt","belt slips")) return "belt";
+  if(has("no spark","weak spark","intermittent spark","lost spark")) return "no_spark";
+  if(has("low compression","no compression","compression low")) return "low_compression";
+  if(has("smoking","smokes","oil out exhaust","oil in exhaust","oil in cylinder","hydrolock","hydro locked","burning oil")) return "smoke_oil";
+  if(has("not charging","battery not charging","charging issue","stator","keeps killing battery")) return "charging";
+  if(has("overheating","over heats","runs hot","too hot")) return "overheat";
+  if(has("wont move","won't move","will not move","no movement","hydro not moving","transmission not moving")) return "no_move";
+  if(has("wont crank","won't crank","will not crank","no crank","starter wont turn","starter won't turn")) return "no_crank";
+  if(has("starts then dies","starts and dies","runs then dies","dies after","dies when hot","shuts off after")) return "starts_dies";
+  if(has("only runs on choke","runs better with choke","choke helps","needs choke","runs on choke")) return "choke";
+  if(has("bogs","bogging","dies on throttle","dies when giving gas","full throttle","under load","falls on its face")) return "bog";
+  if(has("surges","surging","hunts","hunting","rpm goes up and down")) return "surge";
+  if(has("cranks but wont start","cranks but won't start","turns over but wont start","turns over but won't start","crank no start","wont start","won't start","no start")) return "crank_no_start";
+
+  return "";
+}
+
+
+function fserSymptomLabel(flow){
+
+  const labels={
+    no_crank:"No Crank",
+    crank_no_start:"Cranks But Won't Start",
+    starts_dies:"Starts Then Dies",
+    choke:"Runs Better With Choke / Lean",
+    bog:"Bogs Under Throttle / Load",
+    surge:"Surging / Hunting",
+    no_spark:"No Spark",
+    low_compression:"Low Compression",
+    smoke_oil:"Smoking / Oil",
+    overheat:"Overheating",
+    charging:"Charging / Electrical",
+    belt:"Belt Keeps Coming Off",
+    no_move:"Runs But Won't Move"
+  };
+
+  return labels[flow]||flow;
+}
+
+
 $("startFserDiagnosis")?.addEventListener("click",()=>{
-  const symptom=$("fserAiSymptom").value;
-  if(!symptom){$("fserAiMessage").textContent="Choose the closest symptom first.";$("fserAiMessage").className="message error";return}
-  fserDiagState={symptom,flow:symptom,step:0,evidence:[],answers:{},conclusion:null,startedAt:new Date().toISOString()};
-  $("fserAiMessage").textContent="Diagnostic started. Follow one test at a time.";
-  $("fserAiMessage").className="message success";
+
+  const symptomText=
+    $("fserAiSymptom").value.trim();
+
+  const extra=
+    $("fserAiComplaint").value.trim();
+
+  if(!symptomText){
+
+    $("fserAiMessage").textContent=
+      "Type what the machine is doing first.";
+
+    $("fserAiMessage").className=
+      "message error";
+
+    return;
+  }
+
+
+  const flow=
+    classifyFserSymptom(
+      `${symptomText} ${extra}`
+    );
+
+
+  if(!flow){
+
+    $("fserAiMessage").textContent=
+      "I couldn't match that wording yet. Try describing the main symptom more directly, like: cranks but won't start, only runs with choke, bogs at full throttle, no spark, low compression, smoking, belt keeps coming off, or won't move.";
+
+    $("fserAiMessage").className=
+      "message error";
+
+    return;
+  }
+
+
+  fserDiagState={
+    symptom:symptomText,
+    flow,
+    step:0,
+    evidence:[
+      `Symptom entered: ${symptomText}`,
+      `Diagnostic path: ${fserSymptomLabel(flow)}`
+    ],
+    answers:{},
+    conclusion:null,
+    startedAt:new Date().toISOString()
+  };
+
+
+  $("fserAiMessage").textContent=
+    `Matched to: ${fserSymptomLabel(flow)}. Follow one test at a time.`;
+
+  $("fserAiMessage").className=
+    "message success";
+
   renderFserDiagStep();
+
 });
 
 $("resetFserDiagnosis")?.addEventListener("click",()=>{
   fserDiagState={symptom:"",flow:"",step:0,evidence:[],answers:{},conclusion:null,startedAt:null};
-  $("fserAiTestCard").innerHTML=`<p class="empty">Choose a symptom and tap <strong>Start Diagnostic</strong>.</p>`;
+  $("fserAiTestCard").innerHTML=`<p class="empty">Type the problem and tap <strong>Start Diagnostic</strong>.</p>`;
   $("fserAiStepCount").textContent="Not Started";
   $("fserAiMessage").textContent="";
   renderFserConclusion();
