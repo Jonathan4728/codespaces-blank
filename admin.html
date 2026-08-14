@@ -2371,7 +2371,7 @@
             </div>
 
             <div class="button-row">
-              <button id="startFserDiagnosis" class="action-button" type="button">Start Diagnostic</button>
+              <button id="startFserDiagnosis" class="action-button" type="button" onclick="startFserDiagnosisNow()">Start Diagnostic</button>
               <button id="resetFserDiagnosis" class="secondary-button" type="button">Reset</button>
             </div>
           </div>
@@ -12893,10 +12893,14 @@ function answerFserDiag(value,label){
 
   fserDiagState.step++;
 
-  localStorage.setItem(
-    "fserLastDiagnostic",
-    JSON.stringify(fserDiagState)
-  );
+  try {
+    localStorage.setItem(
+      "fserLastDiagnostic",
+      JSON.stringify(fserDiagState)
+    );
+  } catch (error) {
+    console.warn("FSER AI could not save local diagnostic state:", error);
+  }
 
   renderFserDiagStep();
 }
@@ -12917,8 +12921,8 @@ function classifyFserSymptom(rawText){
   if(has("wont move","won't move","will not move","no movement","hydro not moving","transmission not moving")) return "no_move";
   if(has("wont crank","won't crank","will not crank","no crank","starter wont turn","starter won't turn")) return "no_crank";
   if(has("starts then dies","starts and dies","runs then dies","dies after","dies when hot","shuts off after")) return "starts_dies";
+  if(has("bogs","bogging","dies on throttle","dies when giving gas","full throttle","under load","falls on its face","loses power","won't take throttle","wont take throttle")) return "bog";
   if(has("only runs on choke","runs better with choke","choke helps","needs choke","runs on choke")) return "choke";
-  if(has("bogs","bogging","dies on throttle","dies when giving gas","full throttle","under load","falls on its face")) return "bog";
   if(has("surges","surging","hunts","hunting","rpm goes up and down")) return "surge";
   if(has("cranks but wont start","cranks but won't start","turns over but wont start","turns over but won't start","crank no start","wont start","won't start","no start")) return "crank_no_start";
 
@@ -12948,67 +12952,93 @@ function fserSymptomLabel(flow){
 }
 
 
-$("startFserDiagnosis")?.addEventListener("click",()=>{
+function showFserStartMessage(message,isError=false){
+  const card=$("fserAiTestCard");
+  const msg=$("fserAiMessage");
+  const counter=$("fserAiStepCount");
 
-  const symptomText=
-    $("fserAiSymptom").value.trim();
-
-  const extra=
-    $("fserAiComplaint").value.trim();
-
-  if(!symptomText){
-
-    $("fserAiMessage").textContent=
-      "Type what the machine is doing first.";
-
-    $("fserAiMessage").className=
-      "message error";
-
-    return;
+  if(msg){
+    msg.textContent=message;
+    msg.className=isError?"message error":"message success";
   }
 
+  if(isError&&card){
+    card.innerHTML=`
+      <div class="fser-result-card" style="border-color:#7b2929;">
+        <h3 style="color:#ff8d8d;">Can't Start Diagnostic Yet</h3>
+        <p style="color:#ddd;line-height:1.55;margin-bottom:0;">${escapeHtml(message)}</p>
+      </div>
+    `;
+  }
 
-  const flow=
-    classifyFserSymptom(
-      `${symptomText} ${extra}`
+  if(isError&&counter){
+    counter.textContent="Needs Symptom";
+  }
+}
+
+
+function startFserDiagnosisNow(){
+  try{
+    const symptomField=$("fserAiSymptom");
+    const complaintField=$("fserAiComplaint");
+    const equipmentField=$("fserAiEquipment");
+
+    const symptomText=String(symptomField?.value||"").trim();
+    const extra=String(complaintField?.value||"").trim();
+    const equipment=String(equipmentField?.value||"").trim();
+
+    // Give immediate visible feedback so the button never appears dead.
+    if($("fserAiStepCount")) $("fserAiStepCount").textContent="Starting...";
+
+    if(!symptomText){
+      showFserStartMessage(
+        "Type the main problem first — for example: bogs at full throttle, cranks but won't start, runs better with choke, no spark, or belt keeps coming off.",
+        true
+      );
+      symptomField?.focus();
+      return;
+    }
+
+    const flow=classifyFserSymptom(`${equipment} ${symptomText} ${extra}`);
+
+    if(!flow){
+      showFserStartMessage(
+        `I couldn't match “${symptomText}” to a diagnostic path yet. Add a little more detail about exactly what it does — such as when it dies, whether choke helps, whether it cranks, whether it has spark, or whether it moves.`,
+        true
+      );
+      return;
+    }
+
+    fserDiagState={
+      symptom:symptomText,
+      flow,
+      step:0,
+      evidence:[
+        `Symptom entered: ${symptomText}`,
+        `Diagnostic path: ${fserSymptomLabel(flow)}`
+      ],
+      answers:{},
+      conclusion:null,
+      startedAt:new Date().toISOString()
+    };
+
+    showFserStartMessage(
+      `Matched to: ${fserSymptomLabel(flow)}. Follow one test at a time.`
     );
 
-
-  if(!flow){
-
-    $("fserAiMessage").textContent=
-      "I couldn't match that wording yet. Try describing the main symptom more directly, like: cranks but won't start, only runs with choke, bogs at full throttle, no spark, low compression, smoking, belt keeps coming off, or won't move.";
-
-    $("fserAiMessage").className=
-      "message error";
-
-    return;
+    renderFserDiagStep();
+  }catch(error){
+    console.error("FSER AI start error:",error);
+    showFserStartMessage(
+      `FSER AI hit an error starting the diagnostic: ${error?.message||error}`,
+      true
+    );
   }
+}
 
+// Make the function available to the button even if browser event binding behaves differently.
+window.startFserDiagnosisNow=startFserDiagnosisNow;
 
-  fserDiagState={
-    symptom:symptomText,
-    flow,
-    step:0,
-    evidence:[
-      `Symptom entered: ${symptomText}`,
-      `Diagnostic path: ${fserSymptomLabel(flow)}`
-    ],
-    answers:{},
-    conclusion:null,
-    startedAt:new Date().toISOString()
-  };
-
-
-  $("fserAiMessage").textContent=
-    `Matched to: ${fserSymptomLabel(flow)}. Follow one test at a time.`;
-
-  $("fserAiMessage").className=
-    "message success";
-
-  renderFserDiagStep();
-
-});
 
 $("resetFserDiagnosis")?.addEventListener("click",()=>{
   fserDiagState={symptom:"",flow:"",step:0,evidence:[],answers:{},conclusion:null,startedAt:null};
@@ -13108,7 +13138,12 @@ $("saveFserVerifiedPart")?.addEventListener("click",()=>{
   if(!model||!partNumber||!description){$("fserPartsAdvice").textContent="To save a VERIFIED part, enter the model, OEM part number, and description.";return}
   const parts=getFserVerifiedParts();
   parts.unshift({brand,model,partNumber,description,notes,verifiedAt:new Date().toISOString()});
-  localStorage.setItem("fserVerifiedParts",JSON.stringify(parts));
+  try {
+    localStorage.setItem("fserVerifiedParts",JSON.stringify(parts));
+  } catch (error) {
+    $("fserPartsAdvice").textContent="Browser storage is blocked, so this verified part could not be saved on this device.";
+    return;
+  }
   $("fserPartsAdvice").textContent=`🟢 VERIFIED saved: ${partNumber} for ${model}.`;
   renderFserVerifiedMatches();
 });
