@@ -373,6 +373,7 @@
 
           <select
             name="serviceType"
+            id="repairServiceType"
             required
           >
 
@@ -396,14 +397,18 @@
         </label>
 
 
-        <label>
-          Equipment Location
+        <label
+          id="equipmentAddressField"
+          hidden
+        >
+          Equipment Address
 
           <input
             type="text"
             name="location"
-            placeholder="City / area"
-            autocomplete="address-level2"
+            id="equipmentAddress"
+            placeholder="Street address, city, state, ZIP"
+            autocomplete="street-address"
           >
         </label>
 
@@ -614,6 +619,57 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const serviceType =
+    document.getElementById("repairServiceType");
+
+  const addressField =
+    document.getElementById("equipmentAddressField");
+
+  const addressInput =
+    document.getElementById("equipmentAddress");
+
+
+  function updateEquipmentAddress() {
+
+    if (!serviceType || !addressField || !addressInput) {
+      return;
+    }
+
+
+    const showAddress =
+      serviceType.value === "Mobile Service" ||
+      serviceType.value === "Pickup / Delivery";
+
+
+    addressField.hidden =
+      !showAddress;
+
+
+    addressInput.required =
+      showAddress;
+
+
+    if (!showAddress) {
+      addressInput.value = "";
+    }
+
+  }
+
+
+  serviceType.addEventListener(
+    "change",
+    updateEquipmentAddress
+  );
+
+
+  updateEquipmentAddress();
+
+});
+</script>
 
 </body>
 </html>
