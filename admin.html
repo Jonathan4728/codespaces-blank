@@ -1690,6 +1690,25 @@
     }
 
 
+
+    /* Repair Job List full ticket total */
+    #jobTableWrapper td:last-child strong {
+      color: #fff;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 700px) {
+      #jobTableWrapper th:last-child,
+      #jobTableWrapper td:last-child {
+        text-align: right;
+      }
+
+      #jobTableWrapper td:last-child strong {
+        font-size: 12px;
+      }
+    }
+
 </style>
 
 </head>
@@ -3758,6 +3777,7 @@ let serviceRequests = [];
 let customers = [];
 let items = [];
 let jobs = [];
+let jobPartsRevenueByJob = {};
 let estimates = [];
 let editingEstimateId = null;
 let invoices = [];
@@ -6022,6 +6042,9 @@ async function loadJobs() {
   jobs = data || [];
 
 
+  await loadJobPartsRevenueTotals();
+
+
   $("openJobCount")
     .textContent =
       jobs.filter(
@@ -6108,6 +6131,113 @@ function jobEquipment(job) {
 }
 
 
+async function loadJobPartsRevenueTotals() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("job_parts")
+      .select(
+        "repair_job_id, quantity, sell_price_each"
+      );
+
+
+  if (error) {
+
+    console.error(
+      "Could not load repair ticket part totals:",
+      error
+    );
+
+    jobPartsRevenueByJob = {};
+    return;
+
+  }
+
+
+  const totals = {};
+
+
+  (data || [])
+    .forEach(
+      part => {
+
+        const jobId =
+          Number(
+            part.repair_job_id
+          );
+
+
+        if (!jobId) {
+          return;
+        }
+
+
+        totals[jobId] =
+          Number(
+            totals[jobId] || 0
+          ) +
+          (
+            Number(
+              part.quantity || 0
+            ) *
+            Number(
+              part.sell_price_each || 0
+            )
+          );
+
+      }
+    );
+
+
+  jobPartsRevenueByJob =
+    totals;
+
+}
+
+
+function repairTicketTotal(job) {
+
+  const labor =
+    Number(
+      job?.labor_hours || 0
+    ) *
+    Number(
+      job?.labor_rate || 0
+    );
+
+
+  const fees =
+    Number(
+      job?.service_fee || 0
+    ) +
+    Number(
+      job?.travel_fee || 0
+    ) +
+    Number(
+      job?.pickup_delivery_fee || 0
+    );
+
+
+  const parts =
+    Number(
+      jobPartsRevenueByJob[
+        Number(job?.id)
+      ] || 0
+    );
+
+
+  return (
+    labor +
+    fees +
+    parts
+  );
+
+}
+
+
 function renderJobs() {
 
   const activeJobs =
@@ -6140,7 +6270,7 @@ function renderJobs() {
           <th>Customer</th>
           <th>Equipment</th>
           <th>Status</th>
-          <th>Labor</th>
+          <th>Total</th>
         </tr>
       </thead>
 
@@ -6150,9 +6280,10 @@ function renderJobs() {
 
   activeJobs.forEach(job => {
 
-    const labor =
-      Number(job.labor_hours || 0) *
-      Number(job.labor_rate || 0);
+    const ticketTotal =
+      repairTicketTotal(
+        job
+      );
 
 
     html += `
@@ -6187,7 +6318,9 @@ function renderJobs() {
         </td>
 
         <td>
-          ${money(labor)}
+          <strong>
+            ${money(ticketTotal)}
+          </strong>
         </td>
 
       </tr>
@@ -6706,6 +6839,15 @@ async function loadJobParts(jobId) {
           ),
         0
       );
+
+
+  jobPartsRevenueByJob[
+    Number(jobId)
+  ] =
+    partsRevenue;
+
+
+  renderJobs();
 
 
   const estimatedProfit =
