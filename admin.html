@@ -1562,6 +1562,134 @@
     }
 
 
+
+    /* ==================================================
+       CLEAN MOBILE DASHBOARD
+       Desktop dashboard remains unchanged
+    =================================================== */
+
+    .mobile-dashboard-toggle {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+
+      #dashboardView .page-title {
+        margin-bottom: 14px;
+        font-size: 25px;
+      }
+
+      #dashboardView .stats-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+        gap: 9px !important;
+        margin-bottom: 12px !important;
+      }
+
+      #dashboardView .stat-card {
+        min-width: 0;
+        padding: 13px 12px !important;
+        border-top-width: 2px;
+      }
+
+      #dashboardView .stat-card span {
+        min-height: 27px;
+        font-size: 9px !important;
+        line-height: 1.3;
+      }
+
+      #dashboardView .stat-card strong {
+        margin-top: 5px !important;
+        overflow: hidden;
+        font-size: 21px !important;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+      }
+
+      #dashboardView .dashboard-mobile-secondary {
+        display: none;
+      }
+
+      #dashboardView.mobile-dashboard-expanded .dashboard-mobile-secondary {
+        display: block;
+      }
+
+      .mobile-dashboard-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+
+        width: 100%;
+        min-height: 45px;
+
+        margin: 0 0 14px;
+        padding: 10px 13px;
+
+        border: 1px solid #343434;
+        border-radius: 7px;
+
+        background: #151515;
+        color: #ddd;
+
+        font-size: 12px;
+        font-weight: 900;
+        text-align: left;
+      }
+
+      .mobile-dashboard-toggle strong {
+        color: var(--red);
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      #dashboardView .panel {
+        margin-bottom: 13px !important;
+        padding: 14px !important;
+      }
+
+      #dashboardView .panel h2 {
+        margin-bottom: 12px;
+        font-size: 17px;
+      }
+
+      #dashboardView .dashboard-mobile-extra {
+        display: none;
+      }
+
+      #dashboardView.mobile-dashboard-expanded .dashboard-mobile-extra {
+        display: block;
+      }
+
+      #dashboardView .dashboard-recent-jobs {
+        margin-top: 0;
+      }
+
+      #dashboardView .table-wrap {
+        font-size: 12px;
+      }
+
+      #dashboardView table th,
+      #dashboardView table td {
+        padding: 9px 8px;
+        font-size: 11px;
+      }
+
+    }
+
+    @media (max-width: 390px) {
+
+      #dashboardView .stat-card strong {
+        font-size: 19px !important;
+      }
+
+      #dashboardView .stat-card span {
+        font-size: 8.5px !important;
+      }
+
+    }
+
+
 </style>
 
 </head>
@@ -1753,67 +1881,67 @@
 
       <div class="stats-grid">
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Customers</span>
           <strong id="customerCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>New Requests</span>
           <strong id="requestCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Open Jobs</span>
           <strong id="openJobCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Invoices</span>
           <strong id="invoiceCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Balance Due</span>
           <strong id="balanceDue">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Made This Month</span>
           <strong id="monthRevenue">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Made This Year</span>
           <strong id="yearRevenue">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Estimated Profit This Month</span>
           <strong id="monthProfit">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Estimated Profit This Year</span>
           <strong id="yearProfit">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Expenses This Month</span>
           <strong id="monthExpenses">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Expenses This Year</span>
           <strong id="yearExpenses">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Net Profit This Month</span>
           <strong id="monthNetProfit">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Net Profit This Year</span>
           <strong id="yearNetProfit">$0.00</strong>
         </div>
@@ -1821,7 +1949,18 @@
       </div>
 
 
-      <div class="panel">
+      <button
+        id="mobileDashboardToggle"
+        class="mobile-dashboard-toggle"
+        type="button"
+        aria-expanded="false"
+      >
+        <span>More Dashboard</span>
+        <strong id="mobileDashboardToggleIcon">＋</strong>
+      </button>
+
+
+      <div class="panel dashboard-recent-jobs">
 
         <h2>Recent Repair Jobs</h2>
 
@@ -1833,7 +1972,7 @@
       </div>
 
 
-      <div class="panel">
+      <div class="panel dashboard-mobile-extra">
 
         <h2>Recent Invoices</h2>
 
@@ -1845,7 +1984,7 @@
       </div>
 
 
-      <div class="panel">
+      <div class="panel dashboard-mobile-extra">
 
         <h2>Monthly Revenue</h2>
 
@@ -1861,7 +2000,7 @@
       </div>
 
 
-      <div class="panel">
+      <div class="panel dashboard-mobile-extra">
 
         <h2>Yearly Revenue</h2>
 
@@ -3904,6 +4043,89 @@ async function loadViewData(viewId) {
 
 }
 
+
+
+
+/* ==================================================
+   MOBILE DASHBOARD CLEANUP
+=================================================== */
+
+function setMobileDashboardExpanded(expanded) {
+
+  const dashboard =
+    $("dashboardView");
+
+  const toggle =
+    $("mobileDashboardToggle");
+
+  const icon =
+    $("mobileDashboardToggleIcon");
+
+
+  if (!dashboard || !toggle) {
+    return;
+  }
+
+
+  dashboard
+    .classList
+    .toggle(
+      "mobile-dashboard-expanded",
+      expanded
+    );
+
+
+  toggle.setAttribute(
+    "aria-expanded",
+    expanded
+      ? "true"
+      : "false"
+  );
+
+
+  const label =
+    toggle.querySelector("span");
+
+  if (label) {
+    label.textContent =
+      expanded
+        ? "Less Dashboard"
+        : "More Dashboard";
+  }
+
+
+  if (icon) {
+    icon.textContent =
+      expanded
+        ? "−"
+        : "＋";
+  }
+
+}
+
+
+$("mobileDashboardToggle")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const dashboard =
+        $("dashboardView");
+
+      const expanded =
+        dashboard
+          ?.classList
+          .contains(
+            "mobile-dashboard-expanded"
+          ) || false;
+
+
+      setMobileDashboardExpanded(
+        !expanded
+      );
+
+    }
+  );
 
 
 /* ==================================================
