@@ -4667,16 +4667,13 @@ async function convertRequest(id) {
 
 
   /* ------------------------------------------
-     FIND EXISTING CUSTOMER BY PHONE
+     REUSE EXISTING CUSTOMER BY PHONE OR EMAIL
   ------------------------------------------ */
 
   let customer =
-    customers.find(
-      existing =>
-        String(existing.phone || "")
-          .replace(/\D/g, "") ===
-        String(request.phone || "")
-          .replace(/\D/g, "")
+    findExistingCustomer(
+      request.phone || "",
+      request.email || ""
     );
 
 
@@ -5369,12 +5366,139 @@ $("customerSearch")
   );
 
 
+
+function normalizedCustomerPhone(
+  value
+) {
+
+  let digits =
+    String(value || "")
+      .replace(/\D/g, "");
+
+
+  if (
+    digits.length === 11 &&
+    digits.startsWith("1")
+  ) {
+    digits =
+      digits.slice(1);
+  }
+
+
+  return digits;
+
+}
+
+
+function normalizedCustomerEmail(
+  value
+) {
+
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+
+}
+
+
+function findExistingCustomer(
+  phone,
+  email
+) {
+
+  const phoneKey =
+    normalizedCustomerPhone(
+      phone
+    );
+
+  const emailKey =
+    normalizedCustomerEmail(
+      email
+    );
+
+
+  return customers.find(
+    customer => {
+
+      const existingPhone =
+        normalizedCustomerPhone(
+          customer.phone
+        );
+
+      const existingEmail =
+        normalizedCustomerEmail(
+          customer.email
+        );
+
+
+      const samePhone =
+        phoneKey &&
+        existingPhone &&
+        phoneKey ===
+          existingPhone;
+
+
+      const sameEmail =
+        emailKey &&
+        existingEmail &&
+        emailKey ===
+          existingEmail;
+
+
+      return (
+        samePhone ||
+        sameEmail
+      );
+
+    }
+  ) || null;
+
+}
+
+
 $("customerForm")
   .addEventListener(
     "submit",
     async event => {
 
       event.preventDefault();
+
+
+      const phone =
+        $("customerPhone")
+          .value.trim();
+
+      const email =
+        $("customerEmail")
+          .value.trim();
+
+
+      const existing =
+        findExistingCustomer(
+          phone,
+          email
+        );
+
+
+      if (existing) {
+
+        $("customerMessage")
+          .textContent =
+            `Customer already exists: ${
+              customerName(existing) ||
+              "Existing customer"
+            } — ${
+              existing.portal_number ||
+              "FSER account"
+            }. No duplicate was created.`;
+
+        $("customerMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
 
 
       const {
@@ -5395,13 +5519,9 @@ $("customerForm")
               $("customerLastName")
                 .value.trim(),
 
-            phone:
-              $("customerPhone")
-                .value.trim(),
+            phone,
 
-            email:
-              $("customerEmail")
-                .value.trim(),
+            email,
 
             address:
               $("customerAddress")

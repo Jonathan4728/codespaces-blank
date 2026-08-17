@@ -120,53 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "13373268324";
 
   const businessEmail =
-    "flores.smallenginerepair@gmail.com";
-
-
-  // WEB3FORMS - OWNER EMAIL NOTIFICATIONS
-  const WEB3FORMS_ACCESS_KEY =
-    "671bb045-cad7-4505-988d-53451853ea59";
-
-
-  async function sendOwnerNotification(request) {
-    try {
-      const response = await fetch(
-        "https://api.web3forms.com/submit",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({
-            access_key: WEB3FORMS_ACCESS_KEY,
-            subject: `New Repair Request - ${request.equipment || "Equipment"}`,
-            from_name: "Flores Small Engine Repair Website",
-            name: request.name,
-            phone: request.phone,
-            email: request.email || "Not provided",
-            equipment: request.equipment,
-            model: request.model || "Not provided",
-            service_type: request.serviceType || "Not selected",
-            location: request.location || "Not provided",
-            message: request.problem
-          })
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        console.error("Email notification failed:", result);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Email notification error:", error);
-      return false;
-    }
-  }
+    "floressenginerepair@gmail.com";
 
 
   // ========================================
@@ -184,6 +138,324 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const formMessage =
     document.getElementById("formMessage");
+
+
+  const repairRequestPhone =
+    document.getElementById(
+      "repairRequestPhone"
+    );
+
+  const repairEquipment =
+    document.getElementById(
+      "repairEquipment"
+    );
+
+  const repairProblem =
+    document.getElementById(
+      "repairProblem"
+    );
+
+  const equipmentQuickPicks =
+    document.querySelectorAll(
+      ".equipment-quick-picks button"
+    );
+
+  const problemQuickPicks =
+    document.querySelectorAll(
+      ".problem-quick-picks button"
+    );
+
+
+  function formatRepairPhone(value) {
+
+    const digits =
+      String(value || "")
+        .replace(/\D/g, "")
+        .slice(0, 10);
+
+
+    if (digits.length <= 3) {
+      return digits;
+    }
+
+
+    if (digits.length <= 6) {
+
+      return `(${
+        digits.slice(0, 3)
+      }) ${
+        digits.slice(3)
+      }`;
+
+    }
+
+
+    return `(${
+      digits.slice(0, 3)
+    }) ${
+      digits.slice(3, 6)
+    }-${
+      digits.slice(6)
+    }`;
+
+  }
+
+
+  repairRequestPhone
+    ?.addEventListener(
+      "input",
+      function () {
+
+        repairRequestPhone.value =
+          formatRepairPhone(
+            repairRequestPhone.value
+          );
+
+      }
+    );
+
+
+  equipmentQuickPicks
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          function () {
+
+            if (!repairEquipment) {
+              return;
+            }
+
+
+            repairEquipment.value =
+              button.dataset.equipment || "";
+
+
+            equipmentQuickPicks
+              .forEach(
+                item =>
+                  item.classList.remove(
+                    "selected"
+                  )
+              );
+
+
+            button.classList.add(
+              "selected"
+            );
+
+
+            repairEquipment.focus();
+
+          }
+        );
+
+      }
+    );
+
+
+  problemQuickPicks
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          function () {
+
+            if (!repairProblem) {
+              return;
+            }
+
+
+            const problem =
+              button.dataset.problem || "";
+
+
+            if (!problem) {
+              return;
+            }
+
+
+            const current =
+              repairProblem.value.trim();
+
+
+            if (
+              current
+                .toLowerCase()
+                .includes(
+                  problem.toLowerCase()
+                )
+            ) {
+              return;
+            }
+
+
+            repairProblem.value =
+              current
+                ? `${
+                    current
+                  }${
+                    /[.!?]$/.test(current)
+                      ? ""
+                      : "."
+                  } ${problem}.`
+                : `${problem}.`;
+
+
+            button.classList.add(
+              "selected"
+            );
+
+
+            repairProblem.focus();
+
+          }
+        );
+
+      }
+    );
+
+
+  function repairRequestFingerprint(
+    request
+  ) {
+
+    const normalizedPhone =
+      String(request.phone || "")
+        .replace(/\D/g, "")
+        .replace(/^1(?=\d{10}$)/, "");
+
+
+    return JSON.stringify({
+
+      name:
+        String(request.name || "")
+          .trim()
+          .toLowerCase(),
+
+      phone:
+        normalizedPhone,
+
+      email:
+        String(request.email || "")
+          .trim()
+          .toLowerCase(),
+
+      equipment:
+        String(request.equipment || "")
+          .trim()
+          .toLowerCase(),
+
+      model:
+        String(request.model || "")
+          .trim()
+          .toLowerCase(),
+
+      serviceType:
+        String(request.serviceType || "")
+          .trim()
+          .toLowerCase(),
+
+      location:
+        String(request.location || "")
+          .trim()
+          .toLowerCase(),
+
+      problem:
+        String(request.problem || "")
+          .trim()
+          .toLowerCase()
+
+    });
+
+  }
+
+
+  function websiteRequestWasJustSaved(
+    request
+  ) {
+
+    try {
+
+      const saved =
+        JSON.parse(
+          sessionStorage.getItem(
+            "fserLastWebsiteRequest"
+          ) || "null"
+        );
+
+
+      if (!saved) {
+        return false;
+      }
+
+
+      return (
+        saved.fingerprint ===
+          repairRequestFingerprint(
+            request
+          ) &&
+        Date.now() -
+          Number(saved.savedAt || 0) <
+          15 * 60 * 1000
+      );
+
+    } catch {
+
+      return false;
+
+    }
+
+  }
+
+
+  function rememberWebsiteRequest(
+    request
+  ) {
+
+    try {
+
+      sessionStorage.setItem(
+        "fserLastWebsiteRequest",
+        JSON.stringify({
+
+          fingerprint:
+            repairRequestFingerprint(
+              request
+            ),
+
+          savedAt:
+            Date.now()
+
+        })
+      );
+
+    } catch {
+      // Request can still work if browser storage is unavailable.
+    }
+
+  }
+
+
+  function disableRequestButtons(
+    disabled
+  ) {
+
+    if (textRequest) {
+      textRequest.disabled =
+        disabled;
+    }
+
+
+    if (emailRequest) {
+      emailRequest.disabled =
+        disabled;
+    }
+
+  }
+
 
 
   function getRepairRequest() {
@@ -253,6 +525,20 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
 
   async function saveWebsiteRequest(request) {
 
+    if (
+      websiteRequestWasJustSaved(
+        request
+      )
+    ) {
+
+      return {
+        ok: true,
+        duplicateSkipped: true
+      };
+
+    }
+
+
     if (!supabaseClient) {
 
       console.error(
@@ -315,8 +601,14 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
     }
 
 
+    rememberWebsiteRequest(
+      request
+    );
+
+
     return {
-      ok: true
+      ok: true,
+      duplicateSkipped: false
     };
 
   }
@@ -340,7 +632,7 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
         }
 
 
-        textRequest.disabled = true;
+        disableRequestButtons(true);
 
 
         if (formMessage) {
@@ -370,14 +662,12 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
 
           }
 
-        } else {
+        } else if (formMessage) {
 
-          await sendOwnerNotification(request);
-
-          if (formMessage) {
-            formMessage.textContent =
-              "Request saved. Opening your text message...";
-          }
+          formMessage.textContent =
+            saved.duplicateSkipped
+              ? "This request is already saved. Opening your text message..."
+              : "Request saved. Opening your text message...";
 
         }
 
@@ -388,7 +678,7 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
           );
 
 
-        textRequest.disabled = false;
+        disableRequestButtons(false);
 
 
         window.location.href =
@@ -418,7 +708,7 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
         }
 
 
-        emailRequest.disabled = true;
+        disableRequestButtons(true);
 
 
         if (formMessage) {
@@ -448,14 +738,12 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
 
           }
 
-        } else {
+        } else if (formMessage) {
 
-          await sendOwnerNotification(request);
-
-          if (formMessage) {
-            formMessage.textContent =
-              "Request saved. Opening your email app...";
-          }
+          formMessage.textContent =
+            saved.duplicateSkipped
+              ? "This request is already saved. Opening your email app..."
+              : "Request saved. Opening your email app...";
 
         }
 
@@ -472,7 +760,7 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
           );
 
 
-        emailRequest.disabled = false;
+        disableRequestButtons(false);
 
 
         window.location.href =
