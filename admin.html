@@ -1709,6 +1709,43 @@
       }
     }
 
+
+
+    /* ==================================================
+       MILEAGE LOG
+    =================================================== */
+
+    .mileage-summary-grid {
+      margin-bottom: 18px;
+    }
+
+    #mileageRate,
+    #mileageDeduction {
+      font-weight: 800;
+    }
+
+    #mileageTableWrapper td strong {
+      white-space: nowrap;
+    }
+
+    @media (max-width:700px) {
+
+      .mileage-summary-grid {
+        grid-template-columns:
+          repeat(2,minmax(0,1fr));
+      }
+
+      #mileageTableWrapper {
+        overflow-x: auto;
+      }
+
+      #mileageTableWrapper table {
+        min-width: 850px;
+      }
+
+    }
+
+
 </style>
 
 </head>
@@ -1872,6 +1909,13 @@
       Expenses
     </button>
 
+    <button
+      class="nav-tab"
+      data-view="mileageView"
+    >
+      Mileage Log
+    </button>
+
   </aside>
 
   <div
@@ -1953,6 +1997,16 @@
         <div class="stat-card" dashboard-mobile-secondary">
           <span>Expenses This Year</span>
           <strong id="yearExpenses">$0.00</strong>
+        </div>
+
+        <div class="stat-card" dashboard-mobile-secondary">
+          <span>Business Miles This Year</span>
+          <strong id="yearBusinessMiles">0.0 mi</strong>
+        </div>
+
+        <div class="stat-card" dashboard-mobile-secondary">
+          <span>Mileage Deduction This Year</span>
+          <strong id="yearMileageDeduction">$0.00</strong>
         </div>
 
         <div class="stat-card" dashboard-mobile-primary">
@@ -3272,6 +3326,271 @@
 
 
     <!-- ==================================================
+         MILEAGE LOG
+    =================================================== -->
+
+    <section
+      id="mileageView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Mileage Log
+      </h1>
+
+
+      <div class="stats-grid mileage-summary-grid">
+
+        <div class="stat-card">
+          <span>Business Miles This Year</span>
+          <strong id="mileageYearMiles">0.0 mi</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Estimated Mileage Deduction</span>
+          <strong id="mileageYearDeduction">$0.00</strong>
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>
+          Log Business Trip
+        </h2>
+
+        <p class="small-note">
+          Log business-only vehicle trips. The IRS mileage rate is selected automatically from the trip date.
+        </p>
+
+
+        <form id="mileageForm">
+
+          <input
+            type="hidden"
+            id="mileageId"
+          >
+
+
+          <div class="form-grid">
+
+            <label>
+              Date
+
+              <input
+                id="mileageDate"
+                type="date"
+                required
+              >
+            </label>
+
+
+            <label>
+              Customer
+
+              <select id="mileageCustomerId">
+
+                <option value="">
+                  No customer / general business
+                </option>
+
+              </select>
+            </label>
+
+
+            <label>
+              Repair Job
+
+              <select id="mileageJobId">
+
+                <option value="">
+                  No repair job
+                </option>
+
+              </select>
+            </label>
+
+
+            <label>
+              Business Purpose
+
+              <select id="mileagePurpose" required>
+
+                <option value="Mobile Repair">
+                  Mobile Repair
+                </option>
+
+                <option value="Pickup / Delivery">
+                  Pickup / Delivery
+                </option>
+
+                <option value="Parts Pickup">
+                  Parts Pickup
+                </option>
+
+                <option value="Supply Run">
+                  Supply Run
+                </option>
+
+                <option value="Customer Estimate / Diagnosis">
+                  Customer Estimate / Diagnosis
+                </option>
+
+                <option value="Business Errand">
+                  Business Errand
+                </option>
+
+                <option value="Other Business">
+                  Other Business
+                </option>
+
+              </select>
+            </label>
+
+
+            <label>
+              Starting Location
+
+              <input
+                id="mileageStartLocation"
+                placeholder="Example: Shop / Home"
+                required
+              >
+            </label>
+
+
+            <label>
+              Destination
+
+              <input
+                id="mileageDestination"
+                placeholder="Customer address, parts store, etc."
+                required
+              >
+            </label>
+
+
+            <label>
+              Business Miles
+
+              <input
+                id="mileageMiles"
+                type="number"
+                min="0"
+                step="0.1"
+                placeholder="Total business miles driven"
+                required
+              >
+            </label>
+
+
+            <label>
+              IRS Rate
+
+              <input
+                id="mileageRate"
+                type="number"
+                step="0.001"
+                readonly
+              >
+            </label>
+
+
+            <label>
+              Estimated Deduction
+
+              <input
+                id="mileageDeduction"
+                type="text"
+                value="$0.00"
+                readonly
+              >
+            </label>
+
+
+            <label class="full-width">
+              Notes
+
+              <textarea
+                id="mileageNotes"
+                placeholder="Optional notes about the trip"
+              ></textarea>
+            </label>
+
+          </div>
+
+
+          <div class="button-row">
+
+            <button
+              class="action-button"
+              type="submit"
+              id="mileageSaveButton"
+            >
+              Save Mileage
+            </button>
+
+            <button
+              class="small-button"
+              type="button"
+              id="clearMileageButton"
+            >
+              Clear
+            </button>
+
+          </div>
+
+
+          <p id="mileageMessage"></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-title-row">
+
+          <h2>
+            Mileage History
+          </h2>
+
+          <button
+            class="small-button"
+            type="button"
+            id="exportMileageButton"
+          >
+            Export CSV
+          </button>
+
+        </div>
+
+
+        <input
+          id="mileageSearch"
+          class="table-search"
+          placeholder="Search customer, job, destination, purpose..."
+        >
+
+
+        <div
+          id="mileageTableWrapper"
+          class="table-wrap"
+        >
+          <p class="empty">
+            No mileage logged yet.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
          EXPENSES
     =================================================== -->
 
@@ -3783,6 +4102,7 @@ let editingEstimateId = null;
 let invoices = [];
 let payments = [];
 let expenses = [];
+let mileageLogs = [];
 let timeEntries = [];
 let activeTimeEntry = null;
 let timeClockInterval = null;
@@ -4055,6 +4375,13 @@ async function loadViewData(viewId) {
   if (viewId === "expensesView") {
 
     await loadExpenses();
+
+  }
+
+
+  if (viewId === "mileageView") {
+
+    await loadMileageLogs();
 
   }
 
@@ -4667,13 +4994,16 @@ async function convertRequest(id) {
 
 
   /* ------------------------------------------
-     REUSE EXISTING CUSTOMER BY PHONE OR EMAIL
+     FIND EXISTING CUSTOMER BY PHONE
   ------------------------------------------ */
 
   let customer =
-    findExistingCustomer(
-      request.phone || "",
-      request.email || ""
+    customers.find(
+      existing =>
+        String(existing.phone || "")
+          .replace(/\D/g, "") ===
+        String(request.phone || "")
+          .replace(/\D/g, "")
     );
 
 
@@ -5366,139 +5696,12 @@ $("customerSearch")
   );
 
 
-
-function normalizedCustomerPhone(
-  value
-) {
-
-  let digits =
-    String(value || "")
-      .replace(/\D/g, "");
-
-
-  if (
-    digits.length === 11 &&
-    digits.startsWith("1")
-  ) {
-    digits =
-      digits.slice(1);
-  }
-
-
-  return digits;
-
-}
-
-
-function normalizedCustomerEmail(
-  value
-) {
-
-  return String(value || "")
-    .trim()
-    .toLowerCase();
-
-}
-
-
-function findExistingCustomer(
-  phone,
-  email
-) {
-
-  const phoneKey =
-    normalizedCustomerPhone(
-      phone
-    );
-
-  const emailKey =
-    normalizedCustomerEmail(
-      email
-    );
-
-
-  return customers.find(
-    customer => {
-
-      const existingPhone =
-        normalizedCustomerPhone(
-          customer.phone
-        );
-
-      const existingEmail =
-        normalizedCustomerEmail(
-          customer.email
-        );
-
-
-      const samePhone =
-        phoneKey &&
-        existingPhone &&
-        phoneKey ===
-          existingPhone;
-
-
-      const sameEmail =
-        emailKey &&
-        existingEmail &&
-        emailKey ===
-          existingEmail;
-
-
-      return (
-        samePhone ||
-        sameEmail
-      );
-
-    }
-  ) || null;
-
-}
-
-
 $("customerForm")
   .addEventListener(
     "submit",
     async event => {
 
       event.preventDefault();
-
-
-      const phone =
-        $("customerPhone")
-          .value.trim();
-
-      const email =
-        $("customerEmail")
-          .value.trim();
-
-
-      const existing =
-        findExistingCustomer(
-          phone,
-          email
-        );
-
-
-      if (existing) {
-
-        $("customerMessage")
-          .textContent =
-            `Customer already exists: ${
-              customerName(existing) ||
-              "Existing customer"
-            } — ${
-              existing.portal_number ||
-              "FSER account"
-            }. No duplicate was created.`;
-
-        $("customerMessage")
-          .className =
-            "message error";
-
-        return;
-
-      }
 
 
       const {
@@ -5519,9 +5722,13 @@ $("customerForm")
               $("customerLastName")
                 .value.trim(),
 
-            phone,
+            phone:
+              $("customerPhone")
+                .value.trim(),
 
-            email,
+            email:
+              $("customerEmail")
+                .value.trim(),
 
             address:
               $("customerAddress")
@@ -13708,6 +13915,1012 @@ $("clearFserPartsForm")?.addEventListener("click",()=>{
 
 
 /* ==================================================
+   MILEAGE LOG
+=================================================== */
+
+function businessMileageRateForDate(
+  dateValue
+) {
+
+  if (!dateValue) {
+    return 0.76;
+  }
+
+
+  const date =
+    new Date(
+      `${dateValue}T00:00:00`
+    );
+
+
+  const julyFirst2026 =
+    new Date(
+      "2026-07-01T00:00:00"
+    );
+
+
+  const janFirst2026 =
+    new Date(
+      "2026-01-01T00:00:00"
+    );
+
+
+  if (
+    date >= janFirst2026 &&
+    date < julyFirst2026
+  ) {
+    return 0.725;
+  }
+
+
+  if (
+    date >= julyFirst2026
+  ) {
+    return 0.76;
+  }
+
+
+  // Older trips can still be edited manually in Supabase if needed.
+  // Current app is configured for 2026 business mileage.
+  return 0;
+}
+
+
+function updateMileageCalculation() {
+
+  const dateValue =
+    $("mileageDate")?.value || "";
+
+  const miles =
+    Number(
+      $("mileageMiles")?.value || 0
+    );
+
+  const rate =
+    businessMileageRateForDate(
+      dateValue
+    );
+
+
+  if ($("mileageRate")) {
+    $("mileageRate").value =
+      rate
+        ? rate.toFixed(3)
+        : "";
+  }
+
+
+  if ($("mileageDeduction")) {
+
+    $("mileageDeduction").value =
+      money(
+        miles *
+        rate
+      );
+
+  }
+
+}
+
+
+function populateMileageCustomerOptions() {
+
+  const select =
+    $("mileageCustomerId");
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const selected =
+    select.value;
+
+
+  select.innerHTML =
+    `<option value="">
+      No customer / general business
+    </option>` +
+    customers
+      .slice()
+      .sort(
+        (a,b) =>
+          customerName(a)
+            .localeCompare(
+              customerName(b)
+            )
+      )
+      .map(
+        customer => `
+          <option value="${customer.id}">
+            ${escapeHtml(
+              customerName(customer)
+            )}
+            ${customer.portal_number
+              ? ` — ${escapeHtml(customer.portal_number)}`
+              : ""}
+          </option>
+        `
+      )
+      .join("");
+
+
+  if (
+    selected &&
+    customers.some(
+      customer =>
+        String(customer.id) ===
+        String(selected)
+    )
+  ) {
+    select.value =
+      selected;
+  }
+
+}
+
+
+function populateMileageJobOptions() {
+
+  const select =
+    $("mileageJobId");
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const selectedCustomerId =
+    Number(
+      $("mileageCustomerId")?.value || 0
+    );
+
+  const currentValue =
+    select.value;
+
+
+  const availableJobs =
+    jobs.filter(
+      job =>
+        !selectedCustomerId ||
+        Number(job.customer_id) ===
+          selectedCustomerId
+    );
+
+
+  select.innerHTML =
+    `<option value="">
+      No repair job
+    </option>` +
+    availableJobs
+      .map(
+        job => `
+          <option value="${job.id}">
+            ${escapeHtml(job.job_number || "")}
+            ${jobEquipment(job)
+              ? ` — ${escapeHtml(jobEquipment(job))}`
+              : ""}
+          </option>
+        `
+      )
+      .join("");
+
+
+  if (
+    currentValue &&
+    availableJobs.some(
+      job =>
+        String(job.id) ===
+        String(currentValue)
+    )
+  ) {
+    select.value =
+      currentValue;
+  }
+
+}
+
+
+function clearMileageForm() {
+
+  if (!$("mileageForm")) {
+    return;
+  }
+
+
+  $("mileageId").value =
+    "";
+
+  $("mileageDate").value =
+    today();
+
+  $("mileageCustomerId").value =
+    "";
+
+  populateMileageJobOptions();
+
+  $("mileageJobId").value =
+    "";
+
+  $("mileagePurpose").value =
+    "Mobile Repair";
+
+  $("mileageStartLocation").value =
+    "";
+
+  $("mileageDestination").value =
+    "";
+
+  $("mileageMiles").value =
+    "";
+
+  $("mileageNotes").value =
+    "";
+
+  $("mileageSaveButton").textContent =
+    "Save Mileage";
+
+  $("mileageMessage").textContent =
+    "";
+
+
+  updateMileageCalculation();
+
+}
+
+
+async function loadMileageLogs() {
+
+  if (
+    !customers.length
+  ) {
+    await loadCustomers();
+  }
+
+
+  if (
+    !jobs.length
+  ) {
+    await loadJobs();
+  }
+
+
+  populateMileageCustomerOptions();
+  populateMileageJobOptions();
+
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("mileage_logs")
+      .select(`
+        *,
+        customers (
+          id,
+          first_name,
+          last_name,
+          portal_number
+        ),
+        repair_jobs (
+          id,
+          job_number
+        )
+      `)
+      .order(
+        "trip_date",
+        { ascending:false }
+      )
+      .order(
+        "created_at",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    $("mileageTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          ${escapeHtml(error.message)}
+        </p>`;
+
+    return;
+
+  }
+
+
+  mileageLogs =
+    data || [];
+
+
+  renderMileageLogs();
+  updateMileageDashboard();
+
+
+  if (
+    !$("mileageDate").value
+  ) {
+    clearMileageForm();
+  }
+
+}
+
+
+function renderMileageLogs() {
+
+  const wrapper =
+    $("mileageTableWrapper");
+
+
+  if (!wrapper) {
+    return;
+  }
+
+
+  const q =
+    ($("mileageSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+
+  const rows =
+    mileageLogs.filter(
+      trip => {
+
+        const customer =
+          customerName(
+            trip.customers
+          );
+
+        return [
+          trip.trip_date,
+          customer,
+          trip.customers?.portal_number,
+          trip.repair_jobs?.job_number,
+          trip.business_purpose,
+          trip.start_location,
+          trip.destination,
+          trip.notes
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+
+      }
+    );
+
+
+  if (!rows.length) {
+
+    wrapper.innerHTML =
+      `<p class="empty">
+        No mileage found.
+      </p>`;
+
+    return;
+
+  }
+
+
+  wrapper.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Customer / Job</th>
+          <th>Purpose</th>
+          <th>Route</th>
+          <th>Miles</th>
+          <th>Rate</th>
+          <th>Deduction</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${rows.map(
+          trip => {
+
+            const customer =
+              customerName(
+                trip.customers
+              );
+
+            const job =
+              trip.repair_jobs
+                ?.job_number || "";
+
+            return `
+              <tr>
+
+                <td>
+                  ${escapeHtml(
+                    dateDisplay(
+                      trip.trip_date
+                    )
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    customer ||
+                    "General business"
+                  )}
+
+                  ${job
+                    ? `<div class="small-note">
+                        ${escapeHtml(job)}
+                       </div>`
+                    : ""}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    trip.business_purpose || ""
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    trip.start_location || ""
+                  )}
+                  →
+                  ${escapeHtml(
+                    trip.destination || ""
+                  )}
+                </td>
+
+                <td>
+                  ${Number(
+                    trip.business_miles || 0
+                  ).toFixed(1)}
+                </td>
+
+                <td>
+                  $${Number(
+                    trip.mileage_rate || 0
+                  ).toFixed(3)}
+                </td>
+
+                <td>
+                  <strong>
+                    ${money(
+                      trip.deduction_amount
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+
+                  <button
+                    class="small-button"
+                    type="button"
+                    onclick="editMileage(${trip.id})"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    class="small-button red"
+                    type="button"
+                    onclick="deleteMileage(${trip.id})"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+            `;
+
+          }
+        ).join("")}
+
+      </tbody>
+    </table>
+  `;
+
+}
+
+
+function updateMileageDashboard() {
+
+  const year =
+    new Date()
+      .getFullYear();
+
+
+  let miles =
+    0;
+
+  let deduction =
+    0;
+
+
+  mileageLogs
+    .forEach(
+      trip => {
+
+        const tripYear =
+          Number(
+            String(
+              trip.trip_date || ""
+            )
+              .slice(0,4)
+          );
+
+
+        if (
+          tripYear === year
+        ) {
+
+          miles +=
+            Number(
+              trip.business_miles || 0
+            );
+
+          deduction +=
+            Number(
+              trip.deduction_amount || 0
+            );
+
+        }
+
+      }
+    );
+
+
+  if ($("mileageYearMiles")) {
+    $("mileageYearMiles")
+      .textContent =
+        `${miles.toFixed(1)} mi`;
+  }
+
+
+  if ($("mileageYearDeduction")) {
+    $("mileageYearDeduction")
+      .textContent =
+        money(deduction);
+  }
+
+
+  if ($("yearBusinessMiles")) {
+    $("yearBusinessMiles")
+      .textContent =
+        `${miles.toFixed(1)} mi`;
+  }
+
+
+  if ($("yearMileageDeduction")) {
+    $("yearMileageDeduction")
+      .textContent =
+        money(deduction);
+  }
+
+}
+
+
+function editMileage(id) {
+
+  const trip =
+    mileageLogs.find(
+      row =>
+        Number(row.id) ===
+        Number(id)
+    );
+
+
+  if (!trip) {
+    return;
+  }
+
+
+  $("mileageId").value =
+    trip.id;
+
+  $("mileageDate").value =
+    trip.trip_date || today();
+
+  $("mileageCustomerId").value =
+    trip.customer_id || "";
+
+  populateMileageJobOptions();
+
+  $("mileageJobId").value =
+    trip.repair_job_id || "";
+
+  $("mileagePurpose").value =
+    trip.business_purpose ||
+    "Other Business";
+
+  $("mileageStartLocation").value =
+    trip.start_location || "";
+
+  $("mileageDestination").value =
+    trip.destination || "";
+
+  $("mileageMiles").value =
+    Number(
+      trip.business_miles || 0
+    );
+
+  $("mileageNotes").value =
+    trip.notes || "";
+
+  $("mileageSaveButton").textContent =
+    "Save Changes";
+
+
+  updateMileageCalculation();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+}
+
+
+async function deleteMileage(id) {
+
+  if (
+    !confirm(
+      "Delete this mileage entry?"
+    )
+  ) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from("mileage_logs")
+      .delete()
+      .eq(
+        "id",
+        Number(id)
+      );
+
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+
+  await loadMileageLogs();
+
+}
+
+
+$("mileageDate")
+  ?.addEventListener(
+    "change",
+    updateMileageCalculation
+  );
+
+
+$("mileageMiles")
+  ?.addEventListener(
+    "input",
+    updateMileageCalculation
+  );
+
+
+$("mileageCustomerId")
+  ?.addEventListener(
+    "change",
+    populateMileageJobOptions
+  );
+
+
+$("mileageForm")
+  ?.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const id =
+        Number(
+          $("mileageId").value || 0
+        );
+
+
+      const dateValue =
+        $("mileageDate").value;
+
+      const miles =
+        Number(
+          $("mileageMiles").value || 0
+        );
+
+      const rate =
+        businessMileageRateForDate(
+          dateValue
+        );
+
+
+      if (!rate) {
+
+        $("mileageMessage")
+          .textContent =
+            "This app currently auto-calculates IRS business mileage for 2026 trips.";
+
+        $("mileageMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      const payload = {
+
+        trip_date:
+          dateValue,
+
+        customer_id:
+          Number(
+            $("mileageCustomerId").value || 0
+          ) || null,
+
+        repair_job_id:
+          Number(
+            $("mileageJobId").value || 0
+          ) || null,
+
+        business_purpose:
+          $("mileagePurpose").value,
+
+        start_location:
+          $("mileageStartLocation")
+            .value
+            .trim(),
+
+        destination:
+          $("mileageDestination")
+            .value
+            .trim(),
+
+        business_miles:
+          miles,
+
+        mileage_rate:
+          rate,
+
+        deduction_amount:
+          Math.round(
+            miles *
+            rate *
+            100
+          ) / 100,
+
+        notes:
+          $("mileageNotes")
+            .value
+            .trim()
+
+      };
+
+
+      let result;
+
+
+      if (id) {
+
+        result =
+          await db
+            .from("mileage_logs")
+            .update(payload)
+            .eq(
+              "id",
+              id
+            );
+
+      } else {
+
+        result =
+          await db
+            .from("mileage_logs")
+            .insert(payload);
+
+      }
+
+
+      if (result.error) {
+
+        $("mileageMessage")
+          .textContent =
+            result.error.message;
+
+        $("mileageMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      clearMileageForm();
+
+
+      $("mileageMessage")
+        .textContent =
+          id
+            ? "Mileage updated."
+            : "Mileage saved.";
+
+      $("mileageMessage")
+        .className =
+          "message success";
+
+
+      await loadMileageLogs();
+
+    }
+  );
+
+
+$("clearMileageButton")
+  ?.addEventListener(
+    "click",
+    clearMileageForm
+  );
+
+
+$("mileageSearch")
+  ?.addEventListener(
+    "input",
+    renderMileageLogs
+  );
+
+
+$("exportMileageButton")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      if (!mileageLogs.length) {
+
+        alert(
+          "There is no mileage to export."
+        );
+
+        return;
+
+      }
+
+
+      const rows = [
+        [
+          "Date",
+          "Customer",
+          "FSER Number",
+          "Repair Job",
+          "Business Purpose",
+          "Starting Location",
+          "Destination",
+          "Business Miles",
+          "IRS Rate",
+          "Estimated Deduction",
+          "Notes"
+        ]
+      ];
+
+
+      mileageLogs
+        .forEach(
+          trip => {
+
+            rows.push([
+              trip.trip_date || "",
+              customerName(
+                trip.customers
+              ),
+              trip.customers
+                ?.portal_number || "",
+              trip.repair_jobs
+                ?.job_number || "",
+              trip.business_purpose || "",
+              trip.start_location || "",
+              trip.destination || "",
+              Number(
+                trip.business_miles || 0
+              ).toFixed(1),
+              Number(
+                trip.mileage_rate || 0
+              ).toFixed(3),
+              Number(
+                trip.deduction_amount || 0
+              ).toFixed(2),
+              trip.notes || ""
+            ]);
+
+          }
+        );
+
+
+      const csv =
+        rows
+          .map(
+            row =>
+              row
+                .map(
+                  value =>
+                    `"${String(value)
+                      .replaceAll(
+                        '"',
+                        '""'
+                      )}"`
+                )
+                .join(",")
+          )
+          .join("\n");
+
+
+      const blob =
+        new Blob(
+          [csv],
+          {
+            type:
+              "text/csv;charset=utf-8;"
+          }
+        );
+
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+
+      link.href =
+        url;
+
+      link.download =
+        `fser-mileage-${new Date().getFullYear()}.csv`;
+
+
+      document.body
+        .appendChild(
+          link
+        );
+
+
+      link.click();
+
+
+      link.remove();
+
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    }
+  );
+
+
+
+/* ==================================================
    EXPENSES
 =================================================== */
 
@@ -14056,6 +15269,7 @@ async function startAdmin() {
     loadInvoices(),
     loadPayments(),
     loadExpenses(),
+    loadMileageLogs(),
     loadRequestCount()
   ]);
 
@@ -14067,6 +15281,7 @@ async function startAdmin() {
   loadedViews.add("invoicesView");
   loadedViews.add("paymentsView");
   loadedViews.add("expensesView");
+  loadedViews.add("mileageView");
 
 }
 
