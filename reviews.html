@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Reviews | Flores Small Engine Repair</title>
+  <meta name="description" content="Read customer reviews for Flores Small Engine Repair in Abbeville, Louisiana and surrounding areas.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://floressmallenginerepair.com/reviews.html">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .reviews-page { min-height: 70vh; padding: 120px 20px 70px; background: linear-gradient(180deg,#080808,#151515); }
+    .reviews-page .container { max-width: 1050px; margin: 0 auto; }
+    .reviews-hero { text-align:center; margin-bottom: 34px; }
+    .reviews-hero h1 { margin: 8px 0 10px; }
+    .reviews-summary { color:#aaa; margin:0 auto 24px; max-width:650px; }
+    .reviews-grid-live { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; }
+    .review-card-live { background:#171717; border:1px solid #333; border-top:4px solid #df1f26; border-radius:16px; padding:24px; box-shadow:0 12px 32px rgba(0,0,0,.25); }
+    .review-stars { color:#ffc107; letter-spacing:2px; font-size:20px; margin-bottom:12px; }
+    .review-text { line-height:1.65; margin:0 0 18px; white-space:pre-wrap; }
+    .review-footer { border-top:1px solid #333; padding-top:14px; display:flex; justify-content:space-between; gap:12px; align-items:flex-end; }
+    .review-name { display:block; }
+    .review-meta { color:#aaa; font-size:13px; }
+    .review-date { color:#888; font-size:12px; white-space:nowrap; }
+    .reviews-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:30px 0 8px; }
+    .reviews-loading, .reviews-empty, .reviews-error { text-align:center; color:#aaa; padding:32px; border:1px solid #333; border-radius:14px; background:#151515; }
+    @media (max-width:700px){
+      .reviews-page{padding-top:100px}
+      .review-footer{align-items:flex-start; flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html#home" class="brand">
+        <strong class="top-flores">FLORES</strong>
+        <span class="top-subtitle">Small Engine Repair</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+      <div class="nav-links">
+        <a href="index.html#home">Home</a>
+        <a href="index.html#services">Services</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="index.html#about">About Us</a>
+        <a href="reviews.html">Reviews</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="portal.html">CUSTOMER PORTAL</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="reviews-page">
+    <div class="container">
+      <div class="reviews-hero">
+        <p class="red-label">REAL CUSTOMERS • REAL REPAIRS</p>
+        <h1>Customer Reviews</h1>
+        <p class="reviews-summary">See what local customers are saying about Flores Small Engine Repair.</p>
+        <div class="reviews-actions">
+          <a class="button button-red" href="https://g.page/r/CVPS3WL6jDtSECE/review" target="_blank" rel="noopener">★ Leave a Google Review</a>
+          <a class="button button-dark" href="https://www.facebook.com/p/Flores-Small-Engine-Repair-61577731540440/" target="_blank" rel="noopener">Leave a Facebook Review</a>
+        </div>
+      </div>
+
+      <div id="reviewsList" class="reviews-grid-live">
+        <div class="reviews-loading">Loading customer reviews…</div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="contact">
+    <div class="container footer-grid">
+      <img src="logo.png" alt="Flores Small Engine Repair">
+      <div><strong>Call or Text</strong><a href="tel:+13373268324">(337) 326-8324</a></div>
+      <div><strong>Email</strong><a href="mailto:floressenginerepair@gmail.com">floressenginerepair@gmail.com</a></div>
+      <div><strong>Hours</strong><span>By appointment</span></div>
+    </div>
+    <div class="copyright">© <span id="year"></span> Flores Small Engine Repair</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://ykqbjqiujnqljwwyxrre.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_CmCfIvZJJwMNV0QzQwrEsw_W0X8XOvj';
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function escapeHtml(value = '') {
+      return String(value)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#039;');
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const d = new Date(dateString + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+
+    async function loadReviews() {
+      const list = document.getElementById('reviewsList');
+      const { data, error } = await client
+        .from('reviews')
+        .select('reviewer_name,rating,review_text,review_date,source')
+        .eq('is_published', true)
+        .order('review_date', { ascending:false });
+
+      if (error) {
+        console.error(error);
+        list.innerHTML = '<div class="reviews-error">Reviews are temporarily unavailable. Please check back soon.</div>';
+        return;
+      }
+
+      if (!data || !data.length) {
+        list.innerHTML = '<div class="reviews-empty">No reviews have been added yet.</div>';
+        return;
+      }
+
+      list.innerHTML = data.map(review => {
+        const stars = '★'.repeat(Math.max(1, Math.min(5, review.rating || 5)));
+        const text = review.review_text ? `<p class="review-text">“${escapeHtml(review.review_text)}”</p>` : '<p class="review-text">5-star Google rating</p>';
+        return `
+          <article class="review-card-live">
+            <div class="review-stars" aria-label="${review.rating || 5} out of 5 stars">${stars}</div>
+            ${text}
+            <div class="review-footer">
+              <div>
+                <strong class="review-name">${escapeHtml(review.reviewer_name)}</strong>
+                <span class="review-meta">${escapeHtml(review.source || 'Google')} Review</span>
+              </div>
+              <span class="review-date">${formatDate(review.review_date)}</span>
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    loadReviews();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

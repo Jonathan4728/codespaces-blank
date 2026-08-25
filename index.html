@@ -136,8 +136,8 @@
         About Us
       </a>
 
-      <a href="#reviews">
-        Why Choose Us
+      <a href="reviews.html">
+        Reviews
       </a>
 
       <a href="#contact">
@@ -521,7 +521,7 @@
 
 <section
   class="reviews-area"
-  id="reviews"
+  id="why-choose-us"
 >
 
   <div class="container reviews-grid">
@@ -571,136 +571,6 @@
 </section>
 
 
-<!-- CUSTOMER REVIEW -->
-<section id="customer-reviews" style="padding:70px 20px;background:linear-gradient(180deg,#080808,#151515);overflow:hidden;">
-  <div class="container" style="max-width:850px;margin:auto;text-align:center;">
-    <p class="red-label">REAL CUSTOMERS • REAL REPAIRS</p>
-    <h2 style="margin-bottom:8px;">What Our Customers Say 🔧</h2>
-    <p style="color:#aaa;margin:0 auto 28px;max-width:600px;">A few words from customers who trusted Flores Small Engine Repair.</p>
-
-    <div class="review-slider" style="position:relative;max-width:700px;margin:auto;">
-      <div id="reviewTrack" style="display:flex;transition:transform .55s ease;touch-action:pan-y;">
-
-        <div class="review-slide" style="min-width:100%;padding:0 8px;box-sizing:border-box;">
-          <article style="position:relative;padding:30px;background:#171717;border:1px solid #333;border-top:4px solid #df1f26;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.3);text-align:left;">
-            <div style="position:absolute;right:22px;top:18px;font-size:34px;opacity:.15;">🔧</div>
-            <div style="font-size:23px;color:#ffc107;letter-spacing:3px;margin-bottom:14px;">★★★★★</div>
-            <p style="font-size:18px;line-height:1.7;margin:0 0 22px;">“Very responsive, very fast to provide service. Fair pricing, convenient and great work. Will use again!!”</p>
-            <div style="border-top:1px solid #333;padding-top:15px;">
-              <strong style="display:block;font-size:17px;">Lacey David</strong>
-              <span style="font-size:13px;color:#aaa;">Google Review</span>
-            </div>
-          </article>
-        </div>
-
-        <div class="review-slide" style="min-width:100%;padding:0 8px;box-sizing:border-box;">
-          <article style="position:relative;padding:30px;background:#171717;border:1px solid #333;border-top:4px solid #df1f26;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.3);text-align:left;">
-            <div style="position:absolute;right:22px;top:18px;font-size:34px;opacity:.15;">⚙️</div>
-            <div style="font-size:23px;color:#ffc107;letter-spacing:3px;margin-bottom:14px;">★★★★★</div>
-            <p style="font-size:18px;line-height:1.7;margin:0 0 22px;">“Very prompt and professional service. Communicated with me on part delivery every step of the way.”</p>
-            <div style="border-top:1px solid #333;padding-top:15px;">
-              <strong style="display:block;font-size:17px;">Kacie Piazza</strong>
-              <span style="font-size:13px;color:#aaa;">Google Review</span>
-            </div>
-          </article>
-        </div>
-
-        <div class="review-slide" style="min-width:100%;padding:0 8px;box-sizing:border-box;">
-          <article style="position:relative;padding:30px;background:#171717;border:1px solid #333;border-top:4px solid #df1f26;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.3);text-align:left;">
-            <div style="position:absolute;right:22px;top:18px;font-size:34px;opacity:.15;">🛠️</div>
-            <div style="font-size:23px;color:#ffc107;letter-spacing:3px;margin-bottom:14px;">★★★★★</div>
-            <p style="font-size:18px;line-height:1.7;margin:0 0 22px;">“I have a self propel lawnmower I had a problem with it and I called his number and he came out the very next day and had...”</p>
-            <div style="border-top:1px solid #333;padding-top:15px;">
-              <strong style="display:block;font-size:17px;">Robert Holt</strong>
-              <span style="font-size:13px;color:#aaa;">Google Review</span>
-            </div>
-          </article>
-        </div>
-
-      </div>
-
-      <button id="reviewPrev" type="button" aria-label="Previous review" style="position:absolute;left:-14px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid #444;background:#111;color:#fff;font-size:25px;cursor:pointer;">‹</button>
-      <button id="reviewNext" type="button" aria-label="Next review" style="position:absolute;right:-14px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid #444;background:#111;color:#fff;font-size:25px;cursor:pointer;">›</button>
-    </div>
-
-    <div id="reviewDots" style="display:flex;justify-content:center;gap:9px;margin-top:20px;">
-      <button type="button" aria-label="Review 1" style="width:10px;height:10px;padding:0;border:0;border-radius:50%;background:#df1f26;cursor:pointer;"></button>
-      <button type="button" aria-label="Review 2" style="width:10px;height:10px;padding:0;border:0;border-radius:50%;background:#555;cursor:pointer;"></button>
-      <button type="button" aria-label="Review 3" style="width:10px;height:10px;padding:0;border:0;border-radius:50%;background:#555;cursor:pointer;"></button>
-    </div>
-  </div>
-</section>
-
-<script>
-(() => {
-  const track = document.getElementById("reviewTrack");
-  const dots = Array.from(document.querySelectorAll("#reviewDots button"));
-  const slider = document.querySelector(".review-slider");
-  if (!track || !slider || !dots.length) return;
-
-  let current = 0;
-  let timer;
-  let startX = 0;
-
-  function showReview(index) {
-    current = (index + dots.length) % dots.length;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dots.forEach((dot, i) => dot.style.background = i === current ? "#df1f26" : "#555");
-  }
-
-  function restart() {
-    clearInterval(timer);
-    timer = setInterval(() => showReview(current + 1), 5000);
-  }
-
-  document.getElementById("reviewPrev")?.addEventListener("click", () => {
-    showReview(current - 1);
-    restart();
-  });
-
-  document.getElementById("reviewNext")?.addEventListener("click", () => {
-    showReview(current + 1);
-    restart();
-  });
-
-  dots.forEach((dot, i) => dot.addEventListener("click", () => {
-    showReview(i);
-    restart();
-  }));
-
-  slider.addEventListener("touchstart", e => startX = e.touches[0].clientX, {passive:true});
-  slider.addEventListener("touchend", e => {
-    const distance = e.changedTouches[0].clientX - startX;
-    if (Math.abs(distance) > 45) {
-      showReview(current + (distance < 0 ? 1 : -1));
-      restart();
-    }
-  }, {passive:true});
-
-  slider.addEventListener("mouseenter", () => clearInterval(timer));
-  slider.addEventListener("mouseleave", restart);
-
-  showReview(0);
-  restart();
-})();
-</script>
-
-
-<!-- LEAVE A REVIEW -->
-<section id="leave-review" style="padding:55px 20px;text-align:center;background:#111;">
-  <div class="container" style="max-width:760px;margin:auto;">
-    <p class="red-label">Customer Reviews</p>
-    <h2>Happy With Your Repair?</h2>
-    <p style="max-width:600px;margin:0 auto 24px;">
-      Your review helps other local customers find Flores Small Engine Repair.
-      Choose where you would like to leave a review.
-    </p>
-    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
-      <a class="button button-red" href="https://g.page/r/CVPS3WL6jDtSECE/review" target="_blank" rel="noopener">★ Leave a Google Review</a>
-      <a class="button button-dark" href="https://www.facebook.com/p/Flores-Small-Engine-Repair-61577731540440/" target="_blank" rel="noopener">Leave a Facebook Review</a>
-    </div>
-  </div>
-</section>
 </main>
 
 
