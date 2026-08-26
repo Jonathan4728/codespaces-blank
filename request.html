@@ -1,684 +1,478 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18408534612"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18408534612"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-18408534612');
+  </script>
 
-  gtag('config', 'AW-18408534612');
-</script>
   <meta charset="utf-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>Request a Repair | Flores Small Engine Repair</title>
-
-  <meta
-    name="description"
-    content="Request mobile, pickup/delivery, or drop-off small engine repair from Flores Small Engine Repair."
-  >
-
+  <title>Request Service | Flores Small Engine Repair</title>
+  <meta name="description" content="Request residential or commercial small engine repair service from Flores Small Engine Repair.">
   <meta name="robots" content="index, follow">
-
-  <link
-    rel="canonical"
-    href="https://floressmallenginerepair.com/request.html"
-  >
-
+  <link rel="canonical" href="https://floressmallenginerepair.com/request.html">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
-
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    .request-page{min-height:75vh;padding:115px 20px 70px;background:linear-gradient(180deg,#090909,#151515)}
+    .request-container{max-width:920px;margin:0 auto}
+    .request-intro{text-align:center;max-width:720px;margin:0 auto 32px}
+    .request-intro h1{margin:8px 0 12px}
+    .request-intro p{color:#aaa;line-height:1.65}
+    .request-card{background:#171717;border:1px solid #333;border-top:4px solid #df1f26;border-radius:16px;padding:28px;box-shadow:0 16px 40px rgba(0,0,0,.3)}
+    .customer-type-box{padding:18px;margin-bottom:24px;background:#101010;border:1px solid #3b3b3b;border-radius:12px}
+    .customer-type-box label{margin:0}
+    .customer-type-help{display:block;color:#999;font-size:13px;margin-top:8px}
+    .request-card label{display:flex;flex-direction:column;gap:7px;font-weight:700;color:#f4f4f4;margin-bottom:16px}
+    .request-card input,.request-card select,.request-card textarea{width:100%;box-sizing:border-box;background:#0d0d0d;color:#fff;border:1px solid #444;border-radius:9px;padding:13px 14px;font:inherit;outline:none}
+    .request-card input:focus,.request-card select:focus,.request-card textarea:focus{border-color:#df1f26;box-shadow:0 0 0 2px rgba(223,31,38,.15)}
+    .request-card textarea{resize:vertical;min-height:130px}
+    .two-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .field-section-title{font-size:13px;letter-spacing:1.6px;text-transform:uppercase;color:#df1f26;font-weight:800;margin:8px 0 18px}
+    .commercial-note{padding:14px 16px;margin:0 0 20px;border-left:3px solid #df1f26;background:#101010;color:#bbb;line-height:1.55}
+    .attach-note{display:flex;flex-direction:column;gap:5px;padding:14px 16px;background:#101010;border:1px solid #333;border-radius:10px;margin:4px 0 20px}
+    .attach-note span{color:#aaa;line-height:1.5;font-size:14px}
+    .repair-send-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .repair-send-options .button{width:100%;border:0;cursor:pointer}
+    #formMessage{min-height:24px;margin:14px 0 0;color:#ddd;text-align:center}
+    [hidden]{display:none!important}
+    @media(max-width:700px){
+      .request-page{padding:95px 14px 50px}
+      .request-card{padding:20px 16px}
+      .two-fields,.repair-send-options{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-
-
 <body>
 
-
 <nav class="nav">
-
   <div class="container nav-inner">
-
-    <a
-      href="index.html"
-      class="brand"
-    >
-      <strong class="top-flores">
-        FLORES
-      </strong>
-
-      <span class="top-subtitle">
-        Small Engine Repair
-      </span>
+    <a href="index.html#home" class="brand">
+      <strong class="top-flores">FLORES</strong>
+      <span class="top-subtitle">Small Engine Repair</span>
     </a>
 
-
-    <button
-      class="menu-toggle"
-      type="button"
-      aria-label="Open menu"
-      aria-expanded="false"
-    >
-      ☰
-    </button>
-
+    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
 
     <div class="nav-links">
-
-      <a href="index.html">
-        Home
-      </a>
-
-      <a href="index.html#services">
-        Services
-      </a>
-
-      <a href="gallery.html">
-        Gallery
-      </a>
-
-      <a href="pricing.html">
-        Pricing
-      </a>
-
-      <a href="index.html#about">
-        About Us
-      </a>
-
-      <a href="index.html#reviews">
-        Why Choose Us
-      </a>
-
-      <a href="index.html#contact">
-        Contact
-      </a>
-
-      <a href="portal.html">
-        CUSTOMER PORTAL
-      </a>
-
+      <a href="index.html#home">Home</a>
+      <a href="index.html#services">Services</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="commercial.html">Commercial</a>
+      <a href="index.html#about">About Us</a>
+      <a href="reviews.html">Reviews</a>
+      <a href="index.html#contact">Contact</a>
+      <a href="portal.html">CUSTOMER PORTAL</a>
     </div>
-
   </div>
-
 </nav>
 
-
-<main>
-
-
-<section class="request-page-hero">
-
-  <div class="container">
-
-    <p class="eyebrow">
-      Repair Request
-    </p>
-
-    <h1>
-      Tell Us About
-      <span>Your Equipment</span>
-    </h1>
-
-    <p>
-      Fill this out once and we will review the request.
-      Returning customer? Use the same phone number or email you used before.
-    </p>
-
-  </div>
-
-</section>
-
-
-<section class="quote-section request-page-section">
-
-  <div class="container request-page-grid">
-
-
-    <div class="request-page-info">
-
-      <p class="red-label">
-        Before You Send It
-      </p>
-
-      <h2>
-        The More We Know, The Faster We Can Help
-      </h2>
-
-      <div class="request-info-list">
-
-        <div>
-          <strong>1</strong>
-
-          <span>
-            Use the exact equipment and engine model number if you have it.
-          </span>
-        </div>
-
-        <div>
-          <strong>2</strong>
-
-          <span>
-            Tell us what happens when you try to start or operate it.
-          </span>
-        </div>
-
-        <div>
-          <strong>3</strong>
-
-          <span>
-            After Text or Email opens, attach a clear picture of the model tag if possible.
-          </span>
-        </div>
-
-      </div>
-
-
-      <a
-        class="large-phone"
-        href="tel:+13373268324"
-      >
-        (337) 326-8324
-      </a>
-
+<main class="request-page">
+  <div class="request-container">
+    <div class="request-intro">
+      <p class="red-label">REQUEST SERVICE</p>
+      <h1>Tell Us About Your Equipment</h1>
+      <p>Choose the type of customer first. Homeowner requests will keep the regular form, while commercial customers will see fields made for business equipment and fleet service.</p>
     </div>
 
-
-    <form
-      id="quoteForm"
-      class="quote-form customer-intake-form"
-    >
-
-      <div class="intake-form-heading">
-
-        <span class="intake-step-number">
-          1
-        </span>
-
-        <div>
-
-          <strong>
-            Your Information
-          </strong>
-
-          <small>
-            Returning customer? Use the same phone number or email so we can match your request.
-          </small>
-
-        </div>
-
-      </div>
-
-
-      <div class="two-fields">
-
+    <form id="quoteForm" class="request-card">
+      <div class="customer-type-box">
         <label>
-          Name
-
-          <input
-            type="text"
-            name="name"
-            placeholder="First and last name"
-            autocomplete="name"
-            required
-          >
-        </label>
-
-
-        <label>
-          Phone
-
-          <input
-            type="tel"
-            name="phone"
-            id="repairRequestPhone"
-            placeholder="(337) 000-0000"
-            autocomplete="tel"
-            inputmode="tel"
-            required
-          >
-        </label>
-
-      </div>
-
-
-      <label>
-        Email
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Optional"
-          autocomplete="email"
-        >
-      </label>
-
-
-      <div class="intake-form-heading">
-
-        <span class="intake-step-number">
-          2
-        </span>
-
-        <div>
-
-          <strong>
-            Your Equipment
-          </strong>
-
-          <small>
-            Tap a common type or enter your own.
-          </small>
-
-        </div>
-
-      </div>
-
-
-      <div class="equipment-quick-picks">
-
-        <button
-          type="button"
-          data-equipment="Riding mower / lawn tractor"
-        >
-          Riding Mower
-        </button>
-
-        <button
-          type="button"
-          data-equipment="Zero-turn mower"
-        >
-          Zero-Turn
-        </button>
-
-        <button
-          type="button"
-          data-equipment="ATV / UTV"
-        >
-          ATV / UTV
-        </button>
-
-        <button
-          type="button"
-          data-equipment="Generator"
-        >
-          Generator
-        </button>
-
-        <button
-          type="button"
-          data-equipment="Pressure washer"
-        >
-          Pressure Washer
-        </button>
-
-        <button
-          type="button"
-          data-equipment="Chainsaw / trimmer / blower"
-        >
-          Handheld
-        </button>
-
-      </div>
-
-
-      <div class="two-fields">
-
-        <label>
-          Equipment
-
-          <input
-            type="text"
-            name="equipment"
-            id="repairEquipment"
-            placeholder="Example: Generac portable generator"
-            required
-          >
-        </label>
-
-
-        <label>
-          Brand / Model
-
-          <input
-            type="text"
-            name="model"
-            placeholder="Example: GP6500 / GX160"
-          >
-        </label>
-
-      </div>
-
-
-      <div class="intake-form-heading">
-
-        <span class="intake-step-number">
-          3
-        </span>
-
-        <div>
-
-          <strong>
-            Service
-          </strong>
-
-          <small>
-            Choose how you want the equipment handled.
-          </small>
-
-        </div>
-
-      </div>
-
-
-      <div class="two-fields">
-
-        <label>
-          Service Type
-
-          <select
-            name="serviceType"
-            id="repairServiceType"
-            required
-          >
-
-            <option value="">
-              Select service type
-            </option>
-
-            <option value="Drop-Off Repair">
-              Drop-Off Repair
-            </option>
-
-            <option value="Mobile Service">
-              Mobile Service
-            </option>
-
-            <option value="Pickup / Delivery">
-              Pickup / Delivery
-            </option>
-
+          Customer Type
+          <select id="customerType" name="customerType" required>
+            <option value="residential">Homeowner / Residential</option>
+            <option value="commercial">Commercial</option>
           </select>
+          <span class="customer-type-help">Select Commercial if the equipment is used for a lawn care, property maintenance, or other business operation.</span>
         </label>
-
-
-        <label
-          id="equipmentAddressField"
-          hidden
-        >
-         Equipment Address (Mobile Service or Pickup/Delivery Only)
-
-          <input
-            type="text"
-            name="location"
-            id="equipmentAddress"
-            placeholder="Street address, city, state, ZIP"
-            autocomplete="street-address"
-          >
-        </label>
-
       </div>
 
+      <!-- RESIDENTIAL: keep the regular request form -->
+      <div id="residentialFields">
+        <div class="field-section-title">Homeowner / Residential Request</div>
 
-      <div class="intake-form-heading">
+        <div class="two-fields">
+          <label>
+            Name
+            <input type="text" name="residential_name" autocomplete="name" data-required="true">
+          </label>
 
-        <span class="intake-step-number">
-          4
-        </span>
-
-        <div>
-
-          <strong>
-            What's It Doing?
-          </strong>
-
-          <small>
-            Tap a common problem if it fits, then add details.
-          </small>
-
+          <label>
+            Phone
+            <input type="tel" name="residential_phone" autocomplete="tel" placeholder="(337) 000-0000" data-required="true">
+          </label>
         </div>
 
+        <div class="two-fields">
+          <label>
+            Equipment
+            <input type="text" name="residential_equipment" placeholder="Example: Generac generator" data-required="true">
+          </label>
+
+          <label>
+            Brand / Model
+            <input type="text" name="residential_model" placeholder="Example: Honda GX160">
+          </label>
+        </div>
+
+        <div class="two-fields">
+          <label>
+            Service Type
+            <select name="residential_service_type" data-required="true">
+              <option value="">Select service type</option>
+              <option value="Drop-Off Repair">Drop-Off Repair</option>
+              <option value="Mobile Service">Mobile Service</option>
+              <option value="Pickup / Delivery">Pickup / Delivery</option>
+            </select>
+          </label>
+
+          <label>
+            Equipment Location
+            <input type="text" name="residential_location" placeholder="Example: Abbeville, LA">
+          </label>
+        </div>
+
+        <label>
+          Describe the Problem
+          <textarea name="residential_problem" rows="5" placeholder="Tell us what the equipment is doing..." data-required="true"></textarea>
+        </label>
       </div>
 
+      <!-- COMMERCIAL: text-entry fields, no extra dropdowns -->
+      <div id="commercialFields" hidden>
+        <div class="field-section-title">Commercial Service Request</div>
 
-      <div class="problem-quick-picks">
+        <div class="commercial-note">
+          Commercial scheduling is based on availability. Larger riding mowers and zero-turns must be dropped off or scheduled for on-site service. Small-equipment pickup may be available by arrangement.
+        </div>
 
-        <button
-          type="button"
-          data-problem="Will not start"
-        >
-          Won't Start
-        </button>
+        <div class="two-fields">
+          <label>
+            Business Name
+            <input type="text" name="commercial_company_name" autocomplete="organization" placeholder="Example: ABC Lawn Care" data-required="true">
+          </label>
 
-        <button
-          type="button"
-          data-problem="Starts then dies"
-        >
-          Starts Then Dies
-        </button>
+          <label>
+            Contact Person
+            <input type="text" name="commercial_contact_name" autocomplete="name" placeholder="Your name" data-required="true">
+          </label>
+        </div>
 
-        <button
-          type="button"
-          data-problem="Bogs or loses power"
-        >
-          Bogs / Loses Power
-        </button>
+        <div class="two-fields">
+          <label>
+            Phone
+            <input type="tel" name="commercial_phone" autocomplete="tel" placeholder="(337) 000-0000" data-required="true">
+          </label>
 
-        <button
-          type="button"
-          data-problem="No spark or electrical issue"
-        >
-          No Spark / Electrical
-        </button>
+          <label>
+            Email
+            <input type="email" name="commercial_email" autocomplete="email" placeholder="name@company.com">
+          </label>
+        </div>
 
-        <button
-          type="button"
-          data-problem="Belt or drive issue"
-        >
-          Belt / Drive
-        </button>
+        <div class="two-fields">
+          <label>
+            Equipment
+            <input type="text" name="commercial_equipment" placeholder="Example: 60-inch zero-turn mower" data-required="true">
+          </label>
 
-        <button
-          type="button"
-          data-problem="Needs maintenance or tune-up"
-        >
-          Maintenance
-        </button>
+          <label>
+            Brand / Model
+            <input type="text" name="commercial_model" placeholder="Example: Exmark Lazer Z">
+          </label>
+        </div>
 
+        <div class="two-fields">
+          <label>
+            Number of Units
+            <input type="number" name="commercial_unit_count" min="1" step="1" placeholder="Example: 3">
+          </label>
+
+          <label>
+            Service Needed
+            <input type="text" name="commercial_service_type" placeholder="Example: repair, maintenance, blades, belt issue" data-required="true">
+          </label>
+        </div>
+
+        <label>
+          Business Address / Equipment Location
+          <input type="text" name="commercial_location" placeholder="Where is the equipment located?">
+        </label>
+
+        <label>
+          Describe the Issue / Service Needed
+          <textarea name="commercial_problem" rows="5" placeholder="Tell us what is going on with the equipment and any other equipment you need serviced..." data-required="true"></textarea>
+        </label>
       </div>
-
-
-      <label>
-        Describe the Problem
-
-        <textarea
-          name="problem"
-          id="repairProblem"
-          rows="5"
-          placeholder="Example: It cranks but won't start. I already changed the spark plug..."
-          required
-        ></textarea>
-      </label>
-
-
-      <div class="request-next-step">
-
-        <strong>
-          What happens next?
-        </strong>
-
-        <span>
-          Your request is saved for review. We will contact you about the next step.
-          Sending this request does not authorize repairs or parts purchases.
-        </span>
-
-      </div>
-
 
       <div class="attach-note">
-
-        <strong>
-          📸 Have pictures?
-        </strong>
-
-        <span>
-          After Text or Email opens, attach equipment photos and a clear picture of the model-number tag.
-        </span>
-
+        <strong>Have pictures?</strong>
+        <span>Photos are welcome. After you tap Text or Email, attach equipment pictures, model tags, or problem areas before sending the message.</span>
       </div>
-
 
       <div class="repair-send-options">
-
-        <button
-          type="button"
-          id="textRequest"
-          class="button button-red full"
-        >
-          Text Repair Request
-        </button>
-
-
-        <button
-          type="button"
-          id="emailRequest"
-          class="button button-dark full"
-        >
-          Email Repair Request
-        </button>
-
+        <button type="button" id="textRequest" class="button button-red full">Text Repair Request</button>
+        <button type="button" id="emailRequest" class="button button-dark full">Email Repair Request</button>
       </div>
 
-
       <p id="formMessage"></p>
-
     </form>
-
-
   </div>
-
-</section>
-
-
 </main>
 
-
 <footer id="contact">
-
   <div class="container footer-grid">
-
-    <img
-      src="logo.png"
-      alt="Flores Small Engine Repair"
-    >
-
-
-    <div>
-
-      <strong>
-        Call or Text
-      </strong>
-
-      <a href="tel:+13373268324">
-        (337) 326-8324
-      </a>
-
-    </div>
-
-
-    <div>
-
-      <strong>
-        Email
-      </strong>
-
-      <a href="mailto:floressenginerepair@gmail.com">
-        floressenginerepair@gmail.com
-      </a>
-
-    </div>
-
-
-    <div>
-
-      <strong>
-        Hours
-      </strong>
-
-      <span>
-        By appointment
-      </span>
-
-    </div>
-
+    <img src="logo.png" alt="Flores Small Engine Repair">
+    <div><strong>Call or Text</strong><a href="tel:+13373268324">(337) 326-8324</a></div>
+    <div><strong>Email</strong><a href="mailto:floressenginerepair@gmail.com">floressenginerepair@gmail.com</a></div>
+    <div><strong>Hours</strong><span>By appointment</span></div>
   </div>
-
-
-  <div class="copyright">
-    © <span id="year"></span>
-    Flores Small Engine Repair
-  </div>
-
+  <div class="copyright">© <span id="year"></span> Flores Small Engine Repair</div>
 </footer>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  const SUPABASE_URL = "https://ykqbjqiujnqljwwyxrre.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_CmCfIvZJJwMNV0QzQwrEsw_W0X8XOvj";
+  const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  const businessPhone = "13373268324";
+  const businessEmail = "floressenginerepair@gmail.com";
+  const WEB3FORMS_ACCESS_KEY = "b73caad4-d07d-4823-9c29-9aa93cd5476b";
 
-  const serviceType =
-    document.getElementById("repairServiceType");
-
-  const addressField =
-    document.getElementById("equipmentAddressField");
-
-  const addressInput =
-    document.getElementById("equipmentAddress");
-
-
-  function updateEquipmentAddress() {
-
-    if (!serviceType || !addressField || !addressInput) {
-      return;
-    }
-
-
-    const showAddress =
-      serviceType.value === "Mobile Service" ||
-      serviceType.value === "Pickup / Delivery";
-
-
-    addressField.hidden =
-      !showAddress;
-
-
-    addressInput.required =
-      showAddress;
-
-
-    if (!showAddress) {
-      addressInput.value = "";
-    }
-
+  const menuButton = document.querySelector(".menu-toggle");
+  const navLinks = document.querySelector(".nav-links");
+  if (menuButton && navLinks) {
+    menuButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      navLinks.classList.toggle("open");
+      menuButton.setAttribute("aria-expanded", navLinks.classList.contains("open") ? "true" : "false");
+    });
+    navLinks.querySelectorAll("a").forEach(link => link.addEventListener("click", function () {
+      navLinks.classList.remove("open");
+      menuButton.setAttribute("aria-expanded", "false");
+    }));
   }
 
+  const year = document.getElementById("year");
+  if (year) year.textContent = new Date().getFullYear();
 
-  serviceType.addEventListener(
-    "change",
-    updateEquipmentAddress
-  );
+  const form = document.getElementById("quoteForm");
+  const typeSelect = document.getElementById("customerType");
+  const residentialFields = document.getElementById("residentialFields");
+  const commercialFields = document.getElementById("commercialFields");
+  const textButton = document.getElementById("textRequest");
+  const emailButton = document.getElementById("emailRequest");
+  const formMessage = document.getElementById("formMessage");
 
+  function setSectionState(section, active) {
+    section.hidden = !active;
+    section.querySelectorAll("input, select, textarea").forEach(field => {
+      field.disabled = !active;
+      field.required = active && field.dataset.required === "true";
+    });
+  }
 
-  updateEquipmentAddress();
+  function updateCustomerType() {
+    const isCommercial = typeSelect.value === "commercial";
+    setSectionState(residentialFields, !isCommercial);
+    setSectionState(commercialFields, isCommercial);
+  }
 
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("type") === "commercial") typeSelect.value = "commercial";
+  updateCustomerType();
+  typeSelect.addEventListener("change", updateCustomerType);
+
+  function getRepairRequest() {
+    const data = new FormData(form);
+    const isCommercial = data.get("customerType") === "commercial";
+
+    if (isCommercial) {
+      const unitValue = String(data.get("commercial_unit_count") || "").trim();
+      return {
+        customerType: "commercial",
+        companyName: String(data.get("commercial_company_name") || "").trim(),
+        name: String(data.get("commercial_contact_name") || "").trim(),
+        phone: String(data.get("commercial_phone") || "").trim(),
+        email: String(data.get("commercial_email") || "").trim(),
+        equipment: String(data.get("commercial_equipment") || "").trim(),
+        model: String(data.get("commercial_model") || "").trim(),
+        unitCount: unitValue ? Number(unitValue) : null,
+        serviceType: String(data.get("commercial_service_type") || "").trim(),
+        location: String(data.get("commercial_location") || "").trim(),
+        problem: String(data.get("commercial_problem") || "").trim()
+      };
+    }
+
+    return {
+      customerType: "residential",
+      companyName: "",
+      name: String(data.get("residential_name") || "").trim(),
+      phone: String(data.get("residential_phone") || "").trim(),
+      email: "",
+      equipment: String(data.get("residential_equipment") || "").trim(),
+      model: String(data.get("residential_model") || "").trim(),
+      unitCount: null,
+      serviceType: String(data.get("residential_service_type") || "").trim(),
+      location: String(data.get("residential_location") || "").trim(),
+      problem: String(data.get("residential_problem") || "").trim()
+    };
+  }
+
+  function buildMessage(request) {
+    if (request.customerType === "commercial") {
+      return `NEW COMMERCIAL SERVICE REQUEST
+
+Customer Type: Commercial
+Business Name: ${request.companyName}
+Contact Person: ${request.name}
+Phone: ${request.phone}
+Email: ${request.email || "Not provided"}
+
+Equipment:
+${request.equipment}
+
+Brand / Model:
+${request.model || "Not provided"}
+
+Number of Units:
+${request.unitCount || "Not provided"}
+
+Service Needed:
+${request.serviceType}
+
+Business Address / Equipment Location:
+${request.location || "Not provided"}
+
+Issue / Service Details:
+${request.problem}
+
+PHOTOS:
+Photos are welcome. Please attach any equipment pictures before sending this message.`;
+    }
+
+    return `NEW REPAIR REQUEST
+
+Customer Type: Homeowner / Residential
+Name: ${request.name}
+Phone: ${request.phone}
+
+Equipment:
+${request.equipment}
+
+Brand / Model:
+${request.model || "Not provided"}
+
+Service Type:
+${request.serviceType || "Not selected"}
+
+Equipment Location:
+${request.location || "Not provided"}
+
+Problem:
+${request.problem}
+
+PHOTOS:
+Photos are welcome. Please attach any equipment pictures before sending this message.`;
+  }
+
+  async function saveWebsiteRequest(request) {
+    if (!db) return { ok:false, error:"Request system did not load." };
+
+    const { error } = await db.from("service_requests").insert({
+      customer_type: request.customerType,
+      company_name: request.companyName || null,
+      name: request.name,
+      phone: request.phone,
+      email: request.email || null,
+      equipment: request.equipment,
+      model: request.model || null,
+      unit_count: request.unitCount,
+      service_type: request.serviceType || null,
+      location: request.location || null,
+      problem: request.problem
+    });
+
+    return error ? { ok:false, error:error.message } : { ok:true };
+  }
+
+  async function sendOwnerNotification(request) {
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type":"application/json", "Accept":"application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `${request.customerType === "commercial" ? "New Commercial Request" : "New Repair Request"} - ${request.equipment || "Equipment"}`,
+          from_name: "Flores Small Engine Repair Website",
+          customer_type: request.customerType === "commercial" ? "Commercial" : "Homeowner / Residential",
+          business_name: request.companyName || "Not applicable",
+          contact_name: request.name,
+          phone: request.phone,
+          email: request.email || "Not provided",
+          equipment: request.equipment,
+          model: request.model || "Not provided",
+          number_of_units: request.unitCount || "Not provided",
+          service_type: request.serviceType || "Not provided",
+          location: request.location || "Not provided",
+          message: request.problem
+        })
+      });
+      const result = await response.json();
+      return response.ok && result.success;
+    } catch (error) {
+      console.error("Owner notification error:", error);
+      return false;
+    }
+  }
+
+  async function handleSend(method) {
+    if (!form.reportValidity()) return;
+
+    const request = getRepairRequest();
+    const button = method === "text" ? textButton : emailButton;
+    button.disabled = true;
+    formMessage.textContent = "Saving your request...";
+
+    const saved = await saveWebsiteRequest(request);
+    if (saved.ok) {
+      await sendOwnerNotification(request);
+      formMessage.textContent = method === "text"
+        ? "Request saved. Opening your text message..."
+        : "Request saved. Opening your email app...";
+    } else {
+      console.error(saved.error);
+      formMessage.textContent = method === "text"
+        ? "We couldn't save the request online, but you can still send the text."
+        : "We couldn't save the request online, but you can still send the email.";
+    }
+
+    const message = buildMessage(request);
+    button.disabled = false;
+
+    if (method === "text") {
+      window.location.href = `sms:${businessPhone}?body=${encodeURIComponent(message)}`;
+    } else {
+      const subject = request.customerType === "commercial"
+        ? `Commercial Service Request - ${request.companyName}`
+        : `Repair Request - ${request.equipment}`;
+      window.location.href = `mailto:${businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    }
+  }
+
+  textButton.addEventListener("click", () => handleSend("text"));
+  emailButton.addEventListener("click", () => handleSend("email"));
 });
 </script>
-
 </body>
 </html>

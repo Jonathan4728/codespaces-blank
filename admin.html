@@ -1471,15 +1471,28 @@
             </p>
           </div>
 
-          <select
-            id="requestStatusFilter"
-            class="search-box"
-          >
-            <option value="New">New</option>
-            <option value="All">All</option>
-            <option value="Converted">Converted</option>
-            <option value="Archived">Archived</option>
-          </select>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select
+              id="requestCustomerTypeFilter"
+              class="search-box"
+              aria-label="Filter requests by customer type"
+            >
+              <option value="all">All Customer Types</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+            </select>
+
+            <select
+              id="requestStatusFilter"
+              class="search-box"
+              aria-label="Filter requests by status"
+            >
+              <option value="New">New</option>
+              <option value="All">All Statuses</option>
+              <option value="Converted">Converted</option>
+              <option value="Archived">Archived</option>
+            </select>
+          </div>
 
         </div>
 
@@ -3346,18 +3359,34 @@ async function loadServiceRequests() {
 
 function renderServiceRequests() {
 
-  const filter =
+  const statusFilter =
     $("requestStatusFilter")
       ?.value || "New";
 
+  const customerTypeFilter =
+    $("requestCustomerTypeFilter")
+      ?.value || "all";
 
   const list =
-    filter === "All"
-      ? serviceRequests
-      : serviceRequests.filter(
-          request =>
-            request.status === filter
-        );
+    serviceRequests.filter(request => {
+
+      const requestType =
+        request.customer_type === "commercial"
+          ? "commercial"
+          : "residential";
+
+      const matchesStatus =
+        statusFilter === "All" ||
+        request.status === statusFilter;
+
+      const matchesCustomerType =
+        customerTypeFilter === "all" ||
+        requestType === customerTypeFilter;
+
+      return matchesStatus &&
+        matchesCustomerType;
+
+    });
 
 
   if (!list.length) {
@@ -3365,7 +3394,7 @@ function renderServiceRequests() {
     $("requestTableWrapper")
       .innerHTML =
         `<p class="empty">
-          No ${filter.toLowerCase()} requests.
+          No requests match these filters.
         </p>`;
 
     return;
@@ -3380,10 +3409,11 @@ function renderServiceRequests() {
       <thead>
         <tr>
           <th>Date</th>
-          <th>Portal #</th>
-          <th>Name</th>
+          <th>Type</th>
+          <th>Customer / Business</th>
           <th>Phone</th>
           <th>Equipment</th>
+          <th>Units</th>
           <th>Service</th>
           <th>Problem</th>
           <th>Status</th>
@@ -3404,6 +3434,20 @@ function renderServiceRequests() {
           ).toLocaleDateString()
         : "";
 
+    const requestType =
+      request.customer_type === "commercial"
+        ? "commercial"
+        : "residential";
+
+    const typeLabel =
+      requestType === "commercial"
+        ? "Commercial"
+        : "Residential";
+
+    const customerDisplay =
+      requestType === "commercial"
+        ? `<strong>${escapeHtml(request.company_name || "Commercial Business")}</strong><br><span style="color:#aaa;font-size:12px;">Contact: ${escapeHtml(request.name || "")}</span>`
+        : escapeHtml(request.name || "");
 
     html += `
 
@@ -3414,7 +3458,13 @@ function renderServiceRequests() {
         </td>
 
         <td>
-          ${escapeHtml(request.name)}
+          <span class="customer-type-badge ${requestType}">
+            ${typeLabel}
+          </span>
+        </td>
+
+        <td>
+          ${customerDisplay}
         </td>
 
         <td>
@@ -3430,6 +3480,10 @@ function renderServiceRequests() {
               .filter(Boolean)
               .join(" — ")
           )}
+        </td>
+
+        <td>
+          ${escapeHtml(request.unit_count || "")}
         </td>
 
         <td>
@@ -3497,6 +3551,13 @@ function renderServiceRequests() {
 
 
 $("requestStatusFilter")
+  ?.addEventListener(
+    "change",
+    renderServiceRequests
+  );
+
+
+$("requestCustomerTypeFilter")
   ?.addEventListener(
     "change",
     renderServiceRequests
@@ -3597,8 +3658,17 @@ async function convertRequest(id) {
   }
 
 
+  const isCommercial =
+    request.customer_type === "commercial";
+
+  const requestLabel =
+    isCommercial
+      ? (request.company_name || request.name || "this commercial request")
+      : (request.name || "this request");
+
+
   if (!confirm(
-    `Convert ${request.name || "this request"} into a customer and repair job?`
+    `Convert ${requestLabel} into a customer and repair job?`
   )) {
     return;
   }
@@ -3637,6 +3707,14 @@ async function convertRequest(id) {
 
   if (!customer) {
 
+    const notes = [
+      `Created from website request #${request.id}`,
+      isCommercial ? "Commercial website request" : "Residential website request",
+      request.unit_count ? `Units reported: ${request.unit_count}` : ""
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
     const {
       data,
       error
@@ -3667,10 +3745,17 @@ async function convertRequest(id) {
             "LA",
 
           customer_type:
-            "residential",
+            isCommercial
+              ? "commercial"
+              : "residential",
+
+          company_name:
+            isCommercial
+              ? (request.company_name || "")
+              : "",
 
           notes:
-            `Created from website request #${request.id}`
+            notes
 
         })
         .select()
@@ -3689,12 +3774,48 @@ async function convertRequest(id) {
     customer =
       data;
 
+  } else if (isCommercial) {
+
+    const customerUpdates = {
+      customer_type: "commercial"
+    };
+
+    if (request.company_name) {
+      customerUpdates.company_name =
+        request.company_name;
+    }
+
+    const {
+      error: customerUpdateError
+    } =
+      await db
+        .from("customers")
+        .update(customerUpdates)
+        .eq("id", customer.id);
+
+    if (customerUpdateError) {
+      alert(customerUpdateError.message);
+      return;
+    }
+
+    Object.assign(
+      customer,
+      customerUpdates
+    );
+
   }
 
 
   /* ------------------------------------------
      CREATE EQUIPMENT
   ------------------------------------------ */
+
+  const equipmentNotes = [
+    `Website request #${request.id}`,
+    request.unit_count ? `Units reported: ${request.unit_count}` : ""
+  ]
+    .filter(Boolean)
+    .join(" | ");
 
   const {
     data: equipment,
@@ -3715,7 +3836,7 @@ async function convertRequest(id) {
           request.model || "",
 
         notes:
-          `Website request #${request.id}`
+          equipmentNotes
 
       })
       .select()
@@ -3835,7 +3956,7 @@ async function convertRequest(id) {
 
 
   alert(
-    `${request.name || "Request"} was converted to a customer and repair job.`
+    `${requestLabel} was converted to a ${isCommercial ? "commercial" : "residential"} customer and repair job.`
   );
 
 }
