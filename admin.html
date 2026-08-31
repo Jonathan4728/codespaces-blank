@@ -1797,6 +1797,37 @@
     }
 
 
+
+
+    /* ==================================================
+       SCHEDULE
+    =================================================== */
+    .schedule-toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .schedule-toolbar label{min-width:210px}
+    .schedule-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.75fr);gap:18px}
+    .schedule-day{display:grid;gap:7px}
+    .schedule-slot{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #292929;border-radius:7px;background:#0a0a0a}
+    .schedule-slot-time{font-weight:900;color:#ddd;white-space:nowrap}
+    .schedule-slot.empty{border-style:dashed}
+    .schedule-slot-appointments{display:grid;gap:7px;min-width:0}
+    .schedule-appt{padding:10px 11px;border-left:4px solid var(--red);border-radius:5px;background:#171717;min-width:0}
+    .schedule-appt-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .schedule-appt strong{overflow-wrap:anywhere}
+    .schedule-appt-meta{margin-top:4px;color:#aaa;font-size:12px;line-height:1.45}
+    .schedule-appt-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .schedule-customer-list{display:grid;gap:7px;max-height:520px;overflow:auto;padding-right:3px}
+    .schedule-customer-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border:1px solid #292929;border-radius:6px;background:#0a0a0a}
+    .schedule-customer-row div{min-width:0}
+    .schedule-customer-row strong,.schedule-customer-row span{display:block;overflow-wrap:anywhere}
+    .schedule-customer-row span{margin-top:3px;color:#999;font-size:11px}
+    .schedule-status{display:inline-block;padding:4px 8px;border-radius:999px;background:#2a2a2a;color:#ddd;font-size:10px;font-weight:900;text-transform:uppercase}
+    .schedule-status.confirmed{background:#173720;color:#a8e7b8}
+    .schedule-status.completed{background:#1f2f48;color:#b9d7ff}
+    .schedule-status.cancelled,.schedule-status.no-show{background:#46191c;color:#ffc0c3}
+    .schedule-form-note{margin:-5px 0 12px;color:#999;font-size:12px}
+    @media(max-width:900px){.schedule-layout{grid-template-columns:1fr}}
+    @media(max-width:700px){.schedule-slot{grid-template-columns:72px minmax(0,1fr)}.schedule-slot>.small-button{grid-column:1/-1;width:100%}.schedule-toolbar>*{width:100%}.schedule-toolbar label{min-width:0}.schedule-customer-list{max-height:none}}
+
 </style>
 
 </head>
@@ -1944,6 +1975,13 @@
       data-view="timeClockView"
     >
       Time Clock
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="scheduleView"
+    >
+      Schedule
     </button>
 
     <button
@@ -3314,6 +3352,81 @@
     </section>
 
 
+
+    <!-- ==================================================
+         SCHEDULE
+    =================================================== -->
+    <section id="scheduleView" class="view">
+      <h1 class="page-title">Schedule</h1>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 style="margin-bottom:6px;">Daily Schedule</h2>
+            <p style="margin:0;color:#999;">Choose a day, then add a customer to an available time.</p>
+          </div>
+        </div>
+
+        <div class="schedule-toolbar">
+          <button type="button" class="secondary-button" id="schedulePrevDay">← Previous</button>
+          <label>Schedule Date<input type="date" id="scheduleDate"></label>
+          <button type="button" class="secondary-button" id="scheduleToday">Today</button>
+          <button type="button" class="secondary-button" id="scheduleNextDay">Next →</button>
+        </div>
+
+        <div id="scheduleDayLabel" style="font-size:20px;font-weight:900;margin-bottom:12px;"></div>
+        <div id="scheduleDay" class="schedule-day"></div>
+      </div>
+
+      <div class="schedule-layout">
+        <div class="panel">
+          <h2 id="appointmentFormTitle">Add Appointment</h2>
+          <p class="schedule-form-note">Appointments are saved to Supabase and will be available on your phone or computer.</p>
+          <form id="appointmentForm">
+            <input type="hidden" id="appointmentId">
+            <div class="form-grid">
+              <label>Customer<select id="appointmentCustomer" required></select></label>
+              <label>Repair Job<select id="appointmentJob"><option value="">No repair job</option></select></label>
+              <label>Date<input id="appointmentDate" type="date" required></label>
+              <label>Time<input id="appointmentTime" type="time" required></label>
+              <label>Appointment Type
+                <select id="appointmentType">
+                  <option>Mobile Service</option>
+                  <option>Pickup</option>
+                  <option>Delivery</option>
+                  <option>Drop-Off</option>
+                  <option>Customer Meeting</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>Status
+                <select id="appointmentStatus">
+                  <option>Scheduled</option>
+                  <option>Confirmed</option>
+                  <option>Completed</option>
+                  <option>Cancelled</option>
+                  <option>No Show</option>
+                </select>
+              </label>
+              <label class="full-width">Address / Location<input id="appointmentAddress" placeholder="Service address or location"></label>
+              <label class="full-width">Notes<textarea id="appointmentNotes" placeholder="Equipment, service details, gate code, etc."></textarea></label>
+            </div>
+            <div class="button-row">
+              <button class="action-button" type="submit" id="appointmentSaveButton">Save Appointment</button>
+              <button class="secondary-button" type="button" id="appointmentClearButton">Clear</button>
+            </div>
+            <p id="appointmentMessage" class="message"></p>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Customers</h2>
+          <input id="scheduleCustomerSearch" class="search-box" placeholder="Search customer or business..." style="max-width:none;margin-bottom:12px;">
+          <div id="scheduleCustomerList" class="schedule-customer-list"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- ==================================================
          PAYMENTS
     =================================================== -->
@@ -4208,6 +4321,7 @@ const db =
 
 let serviceRequests = [];
 let customers = [];
+let appointments = [];
 let customerTypeFilter = "all";
 let items = [];
 let jobs = [];
@@ -4477,6 +4591,13 @@ async function loadViewData(viewId) {
   if (viewId === "timeClockView") {
 
     await loadTimeClock();
+
+  }
+
+
+  if (viewId === "scheduleView") {
+
+    await loadAppointments();
 
   }
 
@@ -5752,8 +5873,9 @@ function populateCustomerSelects() {
   const selects = [
     $("jobCustomer"),
     $("estimateCustomer"),
-    $("invoiceCustomer")
-  ];
+    $("invoiceCustomer"),
+    $("appointmentCustomer")
+  ].filter(Boolean);
 
 
   selects.forEach(select => {
@@ -11936,14 +12058,34 @@ async function saveInvoiceChanges(id) {
     itemSubtotal - discount;
 
 
-  const currentTaxRate =
-    Number(invoice.subtotal || 0) > 0
-      ? Number(invoice.tax || 0) / Number(invoice.subtotal || 0)
+  const originalDiscountItem =
+    (currentItems || []).find(item =>
+      String(item.item_name || "").trim().toLowerCase() === "discount" &&
+      Number(item.line_total || 0) < 0
+    );
+
+
+  const originalDiscount =
+    originalDiscountItem
+      ? Math.abs(Number(originalDiscountItem.line_total || 0))
+      : 0;
+
+
+  const originalTaxableSubtotal =
+    Math.max(
+      Number(invoice.subtotal || 0),
+      0
+    );
+
+
+  const taxRateDecimal =
+    originalTaxableSubtotal > 0
+      ? Number(invoice.tax || 0) / originalTaxableSubtotal
       : 0;
 
 
   const tax =
-    subtotal * currentTaxRate;
+    subtotal * taxRateDecimal;
 
 
   const total =
@@ -11991,6 +12133,17 @@ async function saveInvoiceChanges(id) {
   await loadInvoices();
   await loadPayments();
   await openInvoice(Number(id));
+
+
+  const savedInvoice =
+    invoices.find(x => Number(x.id) === Number(id));
+
+
+  alert(
+    discount > 0
+      ? `Discount applied: ${money(discount)}\nNew invoice total: ${money(total)}\nBalance due: ${money(balanceDue)}`
+      : `Invoice updated.\nTotal: ${money(total)}\nBalance due: ${money(balanceDue)}`
+  );
 
 }
 
@@ -12401,6 +12554,7 @@ function renderPayments() {
           <th>Invoice</th>
           <th>Method</th>
           <th>Amount</th>
+          <th>Actions</th>
         </tr>
       </thead>
 
@@ -12451,6 +12605,16 @@ function renderPayments() {
           ${money(payment.amount)}
         </td>
 
+        <td>
+          <button
+            type="button"
+            class="small-button red"
+            onclick="deletePayment(${payment.id})"
+          >
+            Delete
+          </button>
+        </td>
+
       </tr>
     `;
 
@@ -12467,6 +12631,111 @@ function renderPayments() {
     .innerHTML =
       html;
 
+}
+
+
+async function deletePayment(paymentId) {
+
+  const payment =
+    payments.find(
+      x => Number(x.id) === Number(paymentId)
+    );
+
+  if (!payment) {
+    alert("Payment record not found.");
+    return;
+  }
+
+  const invoiceId =
+    Number(payment.invoice_id);
+
+  const paymentLabel =
+    payment.payment_number || `Payment #${payment.id}`;
+
+  const confirmed =
+    confirm(
+      `Delete ${paymentLabel} for ${money(payment.amount)}?\n\nThis will restore that amount to the invoice balance.`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const { error: deleteError } =
+    await db
+      .from("payments")
+      .delete()
+      .eq("id", paymentId);
+
+  if (deleteError) {
+    alert(deleteError.message);
+    return;
+  }
+
+  const { data: remainingPayments, error: paymentError } =
+    await db
+      .from("payments")
+      .select("amount")
+      .eq("invoice_id", invoiceId);
+
+  if (paymentError) {
+    alert(paymentError.message);
+    return;
+  }
+
+  const invoice =
+    invoices.find(
+      x => Number(x.id) === invoiceId
+    );
+
+  if (invoice) {
+
+    const amountPaid =
+      (remainingPayments || [])
+        .reduce(
+          (sum, row) =>
+            sum + Number(row.amount || 0),
+          0
+        );
+
+    const total =
+      Number(invoice.total || 0);
+
+    const balanceDue =
+      Math.max(0, total - amountPaid);
+
+    let status = "Sent";
+
+    if (amountPaid >= total && total > 0) {
+      status = "Paid";
+    } else if (amountPaid > 0) {
+      status = "Partially Paid";
+    } else if (invoice.status === "Draft") {
+      status = "Draft";
+    }
+
+    const { error: invoiceError } =
+      await db
+        .from("invoices")
+        .update({
+          amount_paid: amountPaid,
+          balance_due: balanceDue,
+          status
+        })
+        .eq("id", invoiceId);
+
+    if (invoiceError) {
+      alert(invoiceError.message);
+      return;
+    }
+  }
+
+  await loadInvoices();
+  await loadPayments();
+
+  alert(
+    `${paymentLabel} deleted. The invoice balance and payment status were recalculated.`
+  );
 }
 
 
@@ -15602,6 +15871,271 @@ $("exportMileageButton")
 
 
 
+
+/* ==================================================
+   SCHEDULE
+=================================================== */
+
+function appointmentCustomerLabel(customer) {
+  if (!customer) return "Unknown customer";
+  if (customer.customer_type === "commercial" && customer.company_name) {
+    return `${customer.company_name} — ${customerName(customer)}`;
+  }
+  return customerName(customer);
+}
+
+function appointmentTimeDisplay(value) {
+  if (!value) return "";
+  const parts = String(value).slice(0,5).split(":");
+  let h = Number(parts[0]);
+  const m = parts[1] || "00";
+  const suffix = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m} ${suffix}`;
+}
+
+function appointmentDateLong(value) {
+  if (!value) return "";
+  return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
+    weekday:"long", year:"numeric", month:"long", day:"numeric"
+  });
+}
+
+function scheduleShiftDate(days) {
+  const input = $("scheduleDate");
+  const base = input.value || today();
+  const d = new Date(`${base}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  input.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  renderScheduleDay();
+}
+
+async function loadAppointments() {
+  const { data, error } = await db
+    .from("appointments")
+    .select("*")
+    .order("appointment_date", {ascending:true})
+    .order("appointment_time", {ascending:true});
+
+  if (error) {
+    console.error(error);
+    if ($("appointmentMessage")) {
+      $("appointmentMessage").textContent = error.message;
+      $("appointmentMessage").className = "message error";
+    }
+    return;
+  }
+
+  appointments = data || [];
+  if ($("scheduleDate") && !$("scheduleDate").value) $("scheduleDate").value = today();
+  if ($("appointmentDate") && !$("appointmentDate").value) $("appointmentDate").value = $("scheduleDate")?.value || today();
+  renderScheduleDay();
+  renderScheduleCustomers();
+  populateAppointmentJobs();
+}
+
+function renderScheduleDay() {
+  const wrap = $("scheduleDay");
+  if (!wrap) return;
+  const date = $("scheduleDate")?.value || today();
+  if ($("scheduleDayLabel")) $("scheduleDayLabel").textContent = appointmentDateLong(date);
+
+  const dayAppointments = appointments
+    .filter(a => a.appointment_date === date)
+    .sort((a,b) => String(a.appointment_time).localeCompare(String(b.appointment_time)));
+
+  const slots=[];
+  for (let mins=7*60; mins<=19*60; mins+=30) {
+    const hh=String(Math.floor(mins/60)).padStart(2,"0");
+    const mm=String(mins%60).padStart(2,"0");
+    slots.push(`${hh}:${mm}`);
+  }
+
+  wrap.innerHTML = slots.map(slot => {
+    const matches = dayAppointments.filter(a => String(a.appointment_time).slice(0,5) === slot);
+    const cards = matches.map(a => {
+      const c = customers.find(x => Number(x.id) === Number(a.customer_id));
+      const statusClass = String(a.status||"").toLowerCase().replaceAll(" ","-");
+      return `<div class="schedule-appt">
+        <div class="schedule-appt-top">
+          <strong>${escapeHtml(appointmentCustomerLabel(c))}</strong>
+          <span class="schedule-status ${escapeHtml(statusClass)}">${escapeHtml(a.status||"Scheduled")}</span>
+        </div>
+        <div class="schedule-appt-meta">${escapeHtml(a.appointment_type||"")}${a.address ? ` • ${escapeHtml(a.address)}` : ""}</div>
+        ${a.notes ? `<div class="schedule-appt-meta">${escapeHtml(a.notes)}</div>` : ""}
+        <div class="schedule-appt-actions">
+          <button class="small-button" type="button" onclick="editAppointment(${a.id})">Edit</button>
+          <button class="small-button" type="button" onclick="textAppointment(${a.id})">Text Customer</button>
+          ${a.status !== "Completed" ? `<button class="small-button" type="button" onclick="setAppointmentStatus(${a.id},'Completed')">Complete</button>` : ""}
+          <button class="small-button red" type="button" onclick="deleteAppointment(${a.id})">Delete</button>
+        </div>
+      </div>`;
+    }).join("");
+
+    return `<div class="schedule-slot ${matches.length ? "" : "empty"}">
+      <div class="schedule-slot-time">${appointmentTimeDisplay(slot)}</div>
+      <div class="schedule-slot-appointments">${cards || `<span style="color:#777;font-size:12px;">Available</span>`}</div>
+      <button class="small-button" type="button" onclick="scheduleAtTime('${date}','${slot}')">+ Add</button>
+    </div>`;
+  }).join("");
+}
+
+function renderScheduleCustomers() {
+  const wrap = $("scheduleCustomerList");
+  if (!wrap) return;
+  const q = String($("scheduleCustomerSearch")?.value || "").trim().toLowerCase();
+  const list = customers.filter(c => {
+    const hay = `${customerName(c)} ${c.company_name||""} ${c.phone||""} ${c.portal_number||""}`.toLowerCase();
+    return !q || hay.includes(q);
+  });
+
+  wrap.innerHTML = list.length ? list.map(c => `<div class="schedule-customer-row">
+    <div>
+      <strong>${escapeHtml(appointmentCustomerLabel(c))}</strong>
+      <span>${escapeHtml(c.phone||"")}${c.portal_number ? ` • ${escapeHtml(c.portal_number)}` : ""}</span>
+    </div>
+    <button class="small-button" type="button" onclick="scheduleCustomer(${c.id})">Schedule</button>
+  </div>`).join("") : `<p class="empty">No customers found.</p>`;
+}
+
+function populateAppointmentJobs() {
+  const select = $("appointmentJob");
+  if (!select) return;
+  const customerId = Number($("appointmentCustomer")?.value || 0);
+  const current = select.value;
+  select.innerHTML = `<option value="">No repair job</option>`;
+  jobs.filter(j => !customerId || Number(j.customer_id) === customerId).forEach(j => {
+    const option=document.createElement("option");
+    option.value=j.id;
+    option.textContent=`${j.ticket_number||`JOB-${j.id}`} — ${jobEquipment(j)}`;
+    select.appendChild(option);
+  });
+  if ([...select.options].some(o => o.value === current)) select.value=current;
+}
+
+function clearAppointmentForm() {
+  if ($("appointmentId")) $("appointmentId").value="";
+  if ($("appointmentFormTitle")) $("appointmentFormTitle").textContent="Add Appointment";
+  if ($("appointmentSaveButton")) $("appointmentSaveButton").textContent="Save Appointment";
+  if ($("appointmentCustomer")) $("appointmentCustomer").value="";
+  if ($("appointmentJob")) $("appointmentJob").innerHTML='<option value="">No repair job</option>';
+  if ($("appointmentDate")) $("appointmentDate").value=$("scheduleDate")?.value || today();
+  if ($("appointmentTime")) $("appointmentTime").value="";
+  if ($("appointmentType")) $("appointmentType").value="Mobile Service";
+  if ($("appointmentStatus")) $("appointmentStatus").value="Scheduled";
+  if ($("appointmentAddress")) $("appointmentAddress").value="";
+  if ($("appointmentNotes")) $("appointmentNotes").value="";
+  if ($("appointmentMessage")) $("appointmentMessage").textContent="";
+}
+
+function scheduleAtTime(date,time) {
+  clearAppointmentForm();
+  $("appointmentDate").value=date;
+  $("appointmentTime").value=time;
+  $("appointmentCustomer").focus();
+  document.getElementById("appointmentForm")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function scheduleCustomer(customerId) {
+  clearAppointmentForm();
+  $("appointmentCustomer").value=String(customerId);
+  $("appointmentDate").value=$("scheduleDate")?.value || today();
+  const c=customers.find(x=>Number(x.id)===Number(customerId));
+  if (c?.address) $("appointmentAddress").value=[c.address,c.city,c.state,c.zip].filter(Boolean).join(", ");
+  populateAppointmentJobs();
+  $("appointmentTime").focus();
+  document.getElementById("appointmentForm")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+window.editAppointment = function(id) {
+  const a=appointments.find(x=>Number(x.id)===Number(id));
+  if (!a) return;
+  $("appointmentId").value=a.id;
+  $("appointmentCustomer").value=String(a.customer_id);
+  populateAppointmentJobs();
+  $("appointmentJob").value=a.repair_job_id ? String(a.repair_job_id) : "";
+  $("appointmentDate").value=a.appointment_date||"";
+  $("appointmentTime").value=String(a.appointment_time||"").slice(0,5);
+  $("appointmentType").value=a.appointment_type||"Mobile Service";
+  $("appointmentStatus").value=a.status||"Scheduled";
+  $("appointmentAddress").value=a.address||"";
+  $("appointmentNotes").value=a.notes||"";
+  $("appointmentFormTitle").textContent="Edit Appointment";
+  $("appointmentSaveButton").textContent="Save Changes";
+  document.getElementById("appointmentForm")?.scrollIntoView({behavior:"smooth",block:"start"});
+};
+
+window.textAppointment = function(id) {
+  const a=appointments.find(x=>Number(x.id)===Number(id));
+  if (!a) return;
+  const c=customers.find(x=>Number(x.id)===Number(a.customer_id));
+  if (!c?.phone) { alert("This customer does not have a phone number saved."); return; }
+  const first=c.first_name || appointmentCustomerLabel(c);
+  const msg=`Hi ${first}, this is Flores' Small Engine Repair. Your ${a.appointment_type || "service"} appointment is scheduled for ${appointmentDateLong(a.appointment_date)} at ${appointmentTimeDisplay(a.appointment_time)}${a.address ? ` at ${a.address}` : ""}. Please let me know if you need to reschedule. Thank you!`;
+  const phone=String(c.phone).replace(/[^0-9+]/g,"");
+  window.location.href=`sms:${phone}?body=${encodeURIComponent(msg)}`;
+};
+
+window.setAppointmentStatus = async function(id,status) {
+  const {error}=await db.from("appointments").update({status,updated_at:new Date().toISOString()}).eq("id",id);
+  if (error) { alert(error.message); return; }
+  await loadAppointments();
+};
+
+window.deleteAppointment = async function(id) {
+  const a=appointments.find(x=>Number(x.id)===Number(id));
+  const c=customers.find(x=>Number(x.id)===Number(a?.customer_id));
+  if (!confirm(`Delete ${appointmentCustomerLabel(c)}'s appointment?`)) return;
+  const {error}=await db.from("appointments").delete().eq("id",id);
+  if (error) { alert(error.message); return; }
+  await loadAppointments();
+};
+
+$("appointmentCustomer")?.addEventListener("change", () => {
+  populateAppointmentJobs();
+  const c=customers.find(x=>Number(x.id)===Number($("appointmentCustomer").value));
+  if (c && !$("appointmentAddress").value) {
+    $("appointmentAddress").value=[c.address,c.city,c.state,c.zip].filter(Boolean).join(", ");
+  }
+});
+
+$("appointmentForm")?.addEventListener("submit", async event => {
+  event.preventDefault();
+  const id=Number($("appointmentId").value||0);
+  const payload={
+    customer_id:Number($("appointmentCustomer").value),
+    repair_job_id:$("appointmentJob").value ? Number($("appointmentJob").value) : null,
+    appointment_date:$("appointmentDate").value,
+    appointment_time:$("appointmentTime").value,
+    appointment_type:$("appointmentType").value,
+    address:$("appointmentAddress").value.trim() || null,
+    notes:$("appointmentNotes").value.trim() || null,
+    status:$("appointmentStatus").value,
+    updated_at:new Date().toISOString()
+  };
+  if (!payload.customer_id || !payload.appointment_date || !payload.appointment_time) return;
+  const result=id
+    ? await db.from("appointments").update(payload).eq("id",id)
+    : await db.from("appointments").insert(payload);
+  if (result.error) {
+    $("appointmentMessage").textContent=result.error.message;
+    $("appointmentMessage").className="message error";
+    return;
+  }
+  $("scheduleDate").value=payload.appointment_date;
+  clearAppointmentForm();
+  $("appointmentMessage").textContent=id ? "Appointment updated." : "Appointment scheduled.";
+  $("appointmentMessage").className="message success";
+  await loadAppointments();
+});
+
+$("appointmentClearButton")?.addEventListener("click", clearAppointmentForm);
+$("scheduleCustomerSearch")?.addEventListener("input", renderScheduleCustomers);
+$("scheduleDate")?.addEventListener("change", () => { renderScheduleDay(); if (!$("appointmentId")?.value) $("appointmentDate").value=$("scheduleDate").value; });
+$("schedulePrevDay")?.addEventListener("click",()=>scheduleShiftDate(-1));
+$("scheduleNextDay")?.addEventListener("click",()=>scheduleShiftDate(1));
+$("scheduleToday")?.addEventListener("click",()=>{ $("scheduleDate").value=today(); renderScheduleDay(); });
+
 /* ==================================================
    EXPENSES
 =================================================== */
@@ -15952,6 +16486,7 @@ async function startAdmin() {
     loadPayments(),
     loadExpenses(),
     loadMileageLogs(),
+    loadAppointments(),
     loadRequestCount()
   ]);
 
@@ -15964,6 +16499,7 @@ async function startAdmin() {
   loadedViews.add("paymentsView");
   loadedViews.add("expensesView");
   loadedViews.add("mileageView");
+  loadedViews.add("scheduleView");
 
 }
 
