@@ -11261,6 +11261,25 @@ async function openInvoice(id) {
 
       </div>
 
+      <div class="detail-box">
+        <span>Discount $</span>
+        <input
+          id="detailInvoiceDiscount"
+          type="number"
+          min="0"
+          step="0.01"
+          value="0"
+        >
+      </div>
+
+      <div class="detail-box">
+        <span>Discount Reason</span>
+        <input
+          id="detailInvoiceDiscountReason"
+          placeholder="Multi-unit discount, courtesy discount, etc."
+        >
+      </div>
+
     </div>
 
 
@@ -11494,9 +11513,9 @@ async function openInvoice(id) {
 
       <button
         class="action-button"
-        onclick="saveInvoiceStatus(${id})"
+        onclick="saveInvoiceChanges(${id})"
       >
-        Save Status
+        Save Invoice Changes
       </button>
 
       <button
@@ -11543,6 +11562,25 @@ async function openInvoice(id) {
   $("detailInvoiceStatus")
     .value =
       invoice.status;
+
+
+  const existingDiscountItem =
+    (items || []).find(item =>
+      String(item.item_name || "")
+        .trim()
+        .toLowerCase() === "discount" &&
+      Number(item.line_total || 0) < 0
+    );
+
+
+  $("detailInvoiceDiscount").value =
+    existingDiscountItem
+      ? Math.abs(Number(existingDiscountItem.line_total || 0)).toFixed(2)
+      : "0.00";
+
+
+  $("detailInvoiceDiscountReason").value =
+    existingDiscountItem?.item_desc || "";
 
 
   $("invoiceModal")
@@ -11795,26 +11833,164 @@ async function recordInvoicePayment(id) {
 }
 
 
-async function saveInvoiceStatus(id) {
+async function saveInvoiceChanges(id) {
 
-  await db
-    .from("invoices")
-    .update({
-      status:
-        $("detailInvoiceStatus")
-          .value
-    })
-    .eq(
-      "id",
-      id
+  const invoice =
+    invoices.find(x =>
+      Number(x.id) === Number(id)
     );
 
 
-  await loadInvoices();
+  if (!invoice) {
+    alert("Invoice could not be found.");
+    return;
+  }
 
-  closeModal(
-    "invoiceModal"
-  );
+
+  const { data: currentItems, error: itemsError } =
+    await db
+      .from("invoice_items")
+      .select("*")
+      .eq("invoice_id", id);
+
+
+  if (itemsError) {
+    alert(itemsError.message);
+    return;
+  }
+
+
+  const normalItems =
+    (currentItems || []).filter(item =>
+      !(
+        String(item.item_name || "")
+          .trim()
+          .toLowerCase() === "discount" &&
+        Number(item.line_total || 0) < 0
+      )
+    );
+
+
+  const itemSubtotal =
+    normalItems.reduce(
+      (sum, item) => sum + Number(item.line_total || 0),
+      0
+    );
+
+
+  const requestedDiscount =
+    Math.max(
+      Number($("detailInvoiceDiscount")?.value || 0),
+      0
+    );
+
+
+  const discount =
+    Math.min(requestedDiscount, itemSubtotal);
+
+
+  const discountReason =
+    $("detailInvoiceDiscountReason")?.value.trim() ||
+    "Invoice discount";
+
+
+  const { error: deleteDiscountError } =
+    await db
+      .from("invoice_items")
+      .delete()
+      .eq("invoice_id", id)
+      .eq("item_name", "Discount")
+      .lt("line_total", 0);
+
+
+  if (deleteDiscountError) {
+    alert(deleteDiscountError.message);
+    return;
+  }
+
+
+  if (discount > 0) {
+
+    const { error: discountInsertError } =
+      await db
+        .from("invoice_items")
+        .insert({
+          invoice_id: id,
+          item_name: "Discount",
+          item_desc: discountReason,
+          quantity: 1,
+          unit_price: -discount,
+          line_total: -discount
+        });
+
+
+    if (discountInsertError) {
+      alert(discountInsertError.message);
+      return;
+    }
+
+  }
+
+
+  const subtotal =
+    itemSubtotal - discount;
+
+
+  const currentTaxRate =
+    Number(invoice.subtotal || 0) > 0
+      ? Number(invoice.tax || 0) / Number(invoice.subtotal || 0)
+      : 0;
+
+
+  const tax =
+    subtotal * currentTaxRate;
+
+
+  const total =
+    subtotal + tax;
+
+
+  const amountPaid =
+    Number(invoice.amount_paid || 0);
+
+
+  const balanceDue =
+    Math.max(total - amountPaid, 0);
+
+
+  let status =
+    $("detailInvoiceStatus").value;
+
+
+  if (balanceDue <= 0 && total > 0) {
+    status = "Paid";
+  } else if (amountPaid > 0 && balanceDue > 0) {
+    status = "Partially Paid";
+  }
+
+
+  const { error: invoiceError } =
+    await db
+      .from("invoices")
+      .update({
+        status,
+        subtotal,
+        tax,
+        total,
+        balance_due: balanceDue
+      })
+      .eq("id", id);
+
+
+  if (invoiceError) {
+    alert(invoiceError.message);
+    return;
+  }
+
+
+  await loadInvoices();
+  await loadPayments();
+  await openInvoice(Number(id));
 
 }
 
