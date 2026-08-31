@@ -1937,6 +1937,13 @@
 
     <button
       class="nav-tab"
+      data-view="inventoryView"
+    >
+      Inventory
+    </button>
+
+    <button
+      class="nav-tab"
       data-view="jobsView"
     >
       Repair Jobs
@@ -2521,6 +2528,69 @@
 
       </div>
 
+    </section>
+
+
+    <!-- ==================================================
+         INVENTORY / QUICK ORDER
+    =================================================== -->
+
+    <section id="inventoryView" class="view">
+      <h1 class="page-title">Inventory</h1>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span>Inventory Items</span><strong id="inventoryItemCount">0</strong></div>
+        <div class="stat-card"><span>Low Stock</span><strong id="inventoryLowCount">0</strong></div>
+        <div class="stat-card"><span>Estimated Stock Value</span><strong id="inventoryValue">$0.00</strong></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 style="margin-bottom:6px;">Actual Inventory</h2>
+            <p style="margin:0;color:#999;">Only parts and supplies you physically have on hand belong here.</p>
+          </div>
+          <input id="inventorySearch" class="search-box" placeholder="Search inventory...">
+        </div>
+
+        <form id="inventoryForm">
+          <input type="hidden" id="inventoryId">
+          <div class="form-grid three">
+            <label>Item Name<input id="inventoryName" required placeholder="1/4 in fuel filter"></label>
+            <label>Category<input id="inventoryCategory" value="General" placeholder="Fuel System"></label>
+            <label>Part Number<input id="inventoryPartNumber" placeholder="Optional"></label>
+            <label>Qty On Hand<input id="inventoryQty" type="number" min="0" step="0.01" value="0" required></label>
+            <label>Minimum Qty<input id="inventoryMinQty" type="number" min="0" step="0.01" value="0"></label>
+            <label>Target Qty<input id="inventoryTargetQty" type="number" min="0" step="0.01" value="0"></label>
+            <label>Unit<input id="inventoryUnit" value="ea" placeholder="ea / ft / can / kit"></label>
+            <label>Cost Each<input id="inventoryCost" type="number" min="0" step="0.01" value="0"></label>
+            <label>Storage Location<input id="inventoryLocation" placeholder="Packout bin 2"></label>
+            <label class="full-width">Supplier / Reorder Link<input id="inventorySupplierUrl" type="url" placeholder="https://..."></label>
+            <label class="full-width">Notes<textarea id="inventoryNotes" placeholder="Fitment notes, brand preference, etc."></textarea></label>
+          </div>
+          <div class="button-row">
+            <button class="action-button" type="submit" id="inventorySaveButton">Save Inventory Item</button>
+            <button class="secondary-button" type="button" id="inventoryClearButton">Clear</button>
+          </div>
+          <p id="inventoryMessage" class="message"></p>
+        </form>
+
+        <div id="inventoryTableWrapper" class="table-wrap" style="margin-top:22px;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 style="margin-bottom:6px;">Quick Order Stock List</h2>
+            <p style="margin:0;color:#999;">Recommended common stock. These do not count as inventory until you add them.</p>
+          </div>
+          <input id="stockSuggestionSearch" class="search-box" placeholder="Search quick-order list...">
+        </div>
+        <div style="padding:11px 13px;border-left:4px solid var(--red);background:#0b0b0b;color:#aaa;font-size:12px;line-height:1.5;margin-bottom:14px;">
+          Target quantities are starter levels for a mobile/small side-shop. Increase them only after your own usage shows you are turning the item regularly. Always verify exact engine fitment before installing a “universal” or cross-reference part.
+        </div>
+        <div id="stockSuggestionWrapper" class="table-wrap"></div>
+      </div>
     </section>
 
 
@@ -4324,6 +4394,8 @@ let customers = [];
 let appointments = [];
 let customerTypeFilter = "all";
 let items = [];
+let inventoryItems = [];
+let stockSuggestions = [];
 let jobs = [];
 let jobPartsRevenueByJob = {};
 let estimates = [];
@@ -4547,6 +4619,13 @@ async function loadViewData(viewId) {
   if (viewId === "itemsView") {
 
     await loadItems();
+
+  }
+
+
+  if (viewId === "inventoryView") {
+
+    await Promise.all([loadInventory(), loadStockSuggestions()]);
 
   }
 
@@ -6351,6 +6430,207 @@ $("customerForm")
 /* ==================================================
    JOBS
 =================================================== */
+
+
+/* ==================================================
+   INVENTORY / QUICK ORDER STOCK
+=================================================== */
+
+async function loadInventory() {
+  const { data, error } = await db
+    .from("inventory_items")
+    .select("*")
+    .order("category")
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    if ($("inventoryTableWrapper")) $("inventoryTableWrapper").innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
+    return;
+  }
+
+  inventoryItems = data || [];
+  renderInventory();
+}
+
+function renderInventory(list = inventoryItems) {
+  const wrapper = $("inventoryTableWrapper");
+  if (!wrapper) return;
+
+  const search = ($("inventorySearch")?.value || "").trim().toLowerCase();
+  const filtered = list.filter(i => !search || [i.name,i.category,i.part_number,i.storage_location,i.notes].some(v => String(v||"").toLowerCase().includes(search)));
+
+  const low = inventoryItems.filter(i => Number(i.qty_on_hand||0) <= Number(i.min_qty||0) && Number(i.min_qty||0) > 0);
+  const value = inventoryItems.reduce((sum,i)=>sum+(Number(i.qty_on_hand||0)*Number(i.cost_each||0)),0);
+  if ($("inventoryItemCount")) $("inventoryItemCount").textContent = inventoryItems.length;
+  if ($("inventoryLowCount")) $("inventoryLowCount").textContent = low.length;
+  if ($("inventoryValue")) $("inventoryValue").textContent = money(value);
+
+  if (!filtered.length) {
+    wrapper.innerHTML = `<p class="empty">No inventory items yet.</p>`;
+    return;
+  }
+
+  wrapper.innerHTML = `
+    <table>
+      <thead><tr><th>Item</th><th>Category</th><th>On Hand</th><th>Min / Target</th><th>Location</th><th>Value</th><th>Actions</th></tr></thead>
+      <tbody>${filtered.map(i=>{
+        const qty=Number(i.qty_on_hand||0), min=Number(i.min_qty||0), target=Number(i.target_qty||0);
+        const isLow=min>0 && qty<=min;
+        return `<tr>
+          <td><strong>${escapeHtml(i.name)}</strong>${i.part_number?`<br><small style="color:#999;">${escapeHtml(i.part_number)}</small>`:""}</td>
+          <td>${escapeHtml(i.category||"")}</td>
+          <td><strong style="color:${isLow?'#ff7373':'#65d982'};">${qty} ${escapeHtml(i.unit||'ea')}</strong>${isLow?'<br><small style="color:#ff7373;">LOW STOCK</small>':''}</td>
+          <td>${min} / ${target} ${escapeHtml(i.unit||'ea')}</td>
+          <td>${escapeHtml(i.storage_location||'—')}</td>
+          <td>${money(qty*Number(i.cost_each||0))}</td>
+          <td>
+            <button class="small-button" type="button" onclick="adjustInventory(${i.id},1)">+1</button>
+            <button class="small-button" type="button" onclick="adjustInventory(${i.id},-1)">−1</button>
+            <button class="small-button" type="button" onclick="editInventory(${i.id})">Edit</button>
+            ${i.supplier_url?`<a class="small-button" href="${escapeHtml(i.supplier_url)}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;">Order</a>`:''}
+            <button class="small-button red" type="button" onclick="deleteInventory(${i.id})">Delete</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+}
+
+async function loadStockSuggestions() {
+  const { data, error } = await db
+    .from("stock_suggestions")
+    .select("*")
+    .order("priority")
+    .order("category")
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    if ($("stockSuggestionWrapper")) $("stockSuggestionWrapper").innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  stockSuggestions = data || [];
+  renderStockSuggestions();
+}
+
+function renderStockSuggestions() {
+  const wrapper = $("stockSuggestionWrapper");
+  if (!wrapper) return;
+  const search = ($("stockSuggestionSearch")?.value || "").trim().toLowerCase();
+  const list = stockSuggestions.filter(i => !search || [i.name,i.category,i.part_number,i.priority,i.notes].some(v => String(v||"").toLowerCase().includes(search)));
+  if (!list.length) { wrapper.innerHTML = `<p class="empty">No matching stock suggestions.</p>`; return; }
+
+  const rank={High:0,Medium:1,Low:2};
+  list.sort((a,b)=>(rank[a.priority]??9)-(rank[b.priority]??9)||String(a.category).localeCompare(String(b.category))||String(a.name).localeCompare(String(b.name)));
+  wrapper.innerHTML=`<table>
+    <thead><tr><th>Suggested Item</th><th>Priority</th><th>Starter Stock</th><th>Reorder At</th><th>Notes</th><th>Quick Actions</th></tr></thead>
+    <tbody>${list.map(i=>`<tr>
+      <td><strong>${escapeHtml(i.name)}</strong>${i.part_number?`<br><small style="color:#999;">${escapeHtml(i.part_number)}</small>`:''}<br><small style="color:#999;">${escapeHtml(i.category||'')}</small></td>
+      <td><span class="status">${escapeHtml(i.priority||'Medium')}</span></td>
+      <td><strong>${Number(i.target_qty||0)} ${escapeHtml(i.unit||'ea')}</strong></td>
+      <td>${Number(i.min_qty||0)} ${escapeHtml(i.unit||'ea')}</td>
+      <td style="white-space:normal;min-width:260px;">${escapeHtml(i.notes||'')}</td>
+      <td>
+        ${i.amazon_url?`<a class="small-button" href="${escapeHtml(i.amazon_url)}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;">Amazon</a>`:''}
+        <button class="small-button red" type="button" onclick="addSuggestionToInventory(${i.id})">Add to Inventory</button>
+      </td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function clearInventoryForm() {
+  if (!$("inventoryForm")) return;
+  $("inventoryForm").reset();
+  $("inventoryId").value="";
+  $("inventoryCategory").value="General";
+  $("inventoryQty").value="0";
+  $("inventoryMinQty").value="0";
+  $("inventoryTargetQty").value="0";
+  $("inventoryUnit").value="ea";
+  $("inventoryCost").value="0";
+  $("inventorySaveButton").textContent="Save Inventory Item";
+}
+
+function editInventory(id) {
+  const i=inventoryItems.find(x=>Number(x.id)===Number(id));
+  if (!i) return;
+  $("inventoryId").value=i.id;
+  $("inventoryName").value=i.name||"";
+  $("inventoryCategory").value=i.category||"General";
+  $("inventoryPartNumber").value=i.part_number||"";
+  $("inventoryQty").value=Number(i.qty_on_hand||0);
+  $("inventoryMinQty").value=Number(i.min_qty||0);
+  $("inventoryTargetQty").value=Number(i.target_qty||0);
+  $("inventoryUnit").value=i.unit||"ea";
+  $("inventoryCost").value=Number(i.cost_each||0);
+  $("inventoryLocation").value=i.storage_location||"";
+  $("inventorySupplierUrl").value=i.supplier_url||"";
+  $("inventoryNotes").value=i.notes||"";
+  $("inventorySaveButton").textContent="Update Inventory Item";
+  $("inventoryName").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+async function adjustInventory(id, delta) {
+  const i=inventoryItems.find(x=>Number(x.id)===Number(id));
+  if (!i) return;
+  const next=Math.max(0,Number(i.qty_on_hand||0)+Number(delta||0));
+  const {error}=await db.from("inventory_items").update({qty_on_hand:next,updated_at:new Date().toISOString()}).eq("id",id);
+  if (error) return alert(error.message);
+  await loadInventory();
+}
+
+async function deleteInventory(id) {
+  const i=inventoryItems.find(x=>Number(x.id)===Number(id));
+  if (!i || !confirm(`Delete ${i.name} from actual inventory?`)) return;
+  const {error}=await db.from("inventory_items").delete().eq("id",id);
+  if (error) return alert(error.message);
+  await loadInventory();
+}
+
+async function addSuggestionToInventory(id) {
+  const s=stockSuggestions.find(x=>Number(x.id)===Number(id));
+  if (!s) return;
+  const existing=inventoryItems.find(x=>String(x.name||'').toLowerCase()===String(s.name||'').toLowerCase());
+  if (existing) {
+    alert(`${s.name} is already in actual inventory. Edit that inventory item instead.`);
+    return;
+  }
+  const {error}=await db.from("inventory_items").insert({
+    name:s.name, category:s.category, part_number:s.part_number||null,
+    qty_on_hand:0, min_qty:Number(s.min_qty||0), target_qty:Number(s.target_qty||0),
+    unit:s.unit||"ea", supplier_url:s.amazon_url||null,
+    notes:s.notes||null
+  });
+  if (error) return alert(error.message);
+  await loadInventory();
+  alert(`${s.name} added to actual inventory with 0 on hand. Enter what you actually bought/received before counting stock.`);
+}
+
+$("inventoryForm")?.addEventListener("submit", async event=>{
+  event.preventDefault();
+  const id=$("inventoryId").value;
+  const payload={
+    name:$("inventoryName").value.trim(), category:$("inventoryCategory").value.trim()||"General",
+    part_number:$("inventoryPartNumber").value.trim()||null,
+    qty_on_hand:Number($("inventoryQty").value||0), min_qty:Number($("inventoryMinQty").value||0), target_qty:Number($("inventoryTargetQty").value||0),
+    unit:$("inventoryUnit").value.trim()||"ea", storage_location:$("inventoryLocation").value.trim()||null,
+    cost_each:Number($("inventoryCost").value||0), supplier_url:$("inventorySupplierUrl").value.trim()||null,
+    notes:$("inventoryNotes").value.trim()||null, updated_at:new Date().toISOString()
+  };
+  let result=id ? await db.from("inventory_items").update(payload).eq("id",id) : await db.from("inventory_items").insert(payload);
+  if (result.error) {
+    $("inventoryMessage").textContent=result.error.message;
+    $("inventoryMessage").className="message error";
+    return;
+  }
+  $("inventoryMessage").textContent=id?"Inventory item updated.":"Inventory item added.";
+  $("inventoryMessage").className="message success";
+  clearInventoryForm();
+  await loadInventory();
+});
+
+$("inventoryClearButton")?.addEventListener("click",clearInventoryForm);
+$("inventorySearch")?.addEventListener("input",()=>renderInventory());
+$("stockSuggestionSearch")?.addEventListener("input",renderStockSuggestions);
 
 
 /* ==================================================
@@ -16481,6 +16761,8 @@ async function startAdmin() {
   await Promise.all([
     loadCustomers(),
     loadItems(),
+    loadInventory(),
+    loadStockSuggestions(),
     loadJobs(),
     loadInvoices(),
     loadPayments(),
@@ -16493,6 +16775,7 @@ async function startAdmin() {
 
   loadedViews.add("customersView");
   loadedViews.add("itemsView");
+  loadedViews.add("inventoryView");
   loadedViews.add("jobsView");
   loadedViews.add("completedJobsView");
   loadedViews.add("invoicesView");
