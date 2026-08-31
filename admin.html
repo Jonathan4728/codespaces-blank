@@ -252,6 +252,7 @@
       margin: 0;
     }
 
+
     .customer-list-controls {
       display: flex;
       flex-wrap: wrap;
@@ -751,6 +752,43 @@
       text-align: right;
     }
 
+    .document-terms {
+      margin-top: 22px;
+      padding: 14px 16px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #0b0b0b;
+      color: #ddd;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .document-terms strong {
+      display: block;
+      margin-bottom: 7px;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .document-terms ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .document-terms li {
+      margin: 4px 0;
+    }
+
+    .invoice-print .document-terms {
+      background: #f7f7f7;
+      color: #333;
+      border-color: #ddd;
+    }
+
+    .invoice-print .document-terms strong {
+      color: #111;
+    }
+
     @media print {
 
       body * {
@@ -1183,6 +1221,582 @@
 
     }
 
+
+    /* FSER AI */
+    .fser-ai-hero{display:flex;align-items:center;justify-content:space-between;gap:25px;border-top:3px solid var(--red);background:radial-gradient(circle at top right,rgba(223,31,38,.14),transparent 35%),#111}
+    .fser-ai-kicker{margin:0 0 7px;color:var(--green);font-size:11px;font-weight:900;letter-spacing:1.3px}
+    .fser-ai-badge{min-width:125px;padding:14px;border:1px solid #354b3c;border-radius:8px;background:#0d1710;text-align:center}
+    .fser-ai-badge span{display:block;color:#8fc59f;font-size:9px;font-weight:bold;letter-spacing:1px}
+    .fser-ai-badge strong{display:block;margin-top:5px;color:var(--green);font-size:24px}
+    .fser-ai-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.75fr);gap:20px}
+    .fser-ai-safety{margin-bottom:14px;padding:11px 13px;border-left:4px solid #e6a82e;border-radius:5px;background:#1a1408;color:#edcf8d;font-size:12px;line-height:1.45}
+    .fser-ai-test-card{min-height:190px;padding:18px;border:1px solid #343434;border-radius:8px;background:#090909}
+    .fser-test-number{color:var(--red);font-size:11px;font-weight:900;letter-spacing:.9px;text-transform:uppercase}
+    .fser-test-title{margin:7px 0 10px;font-size:21px}
+    .fser-test-instructions{color:#ddd;line-height:1.6}
+    .fser-test-why{margin-top:13px;padding:10px 12px;border-radius:5px;background:#141414;color:#aaa;font-size:12px;line-height:1.5}
+    .fser-answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:16px}
+    .fser-answer-grid button{min-height:45px;border:1px solid #414141;border-radius:6px;background:#1b1b1b;color:#fff;font-weight:bold}
+    .fser-answer-grid button:hover{border-color:var(--red);background:#272727}
+    .fser-result-card{padding:14px;border:1px solid #333;border-radius:7px;background:#0a0a0a}
+    .fser-result-card h3{margin:0 0 7px}
+    .fser-evidence{margin:13px 0 0;padding-left:20px;color:#bbb;font-size:13px;line-height:1.55}
+    .fser-parts-advice{margin-top:16px;padding:12px 14px;border:1px solid #303030;border-left:4px solid var(--red);border-radius:6px;background:#0b0b0b;color:#bbb;font-size:12px;line-height:1.5}
+    .fser-accuracy-rules{display:grid;gap:10px}
+    .fser-accuracy-rules>div{display:grid;gap:4px;padding:12px;border:1px solid #303030;border-radius:6px;background:#0a0a0a}
+    .fser-accuracy-rules span{color:#aaa;font-size:12px;line-height:1.45}
+    .fser-verified-card{margin-top:8px;padding:12px;border:1px solid #31533b;border-radius:6px;background:#0b160e}
+    .fser-verified-card strong{color:var(--green)}
+    @media(max-width:1050px){.fser-ai-grid{grid-template-columns:1fr}}
+    @media(max-width:700px){.fser-ai-hero{align-items:stretch;flex-direction:column}.fser-ai-badge{width:100%}.fser-answer-grid{grid-template-columns:1fr}}
+
+
+    .fser-conclusion-section{
+      margin-top:14px;
+      padding:13px 14px;
+      border:1px solid #2d2d2d;
+      border-radius:7px;
+      background:#0d0d0d;
+    }
+
+    .fser-conclusion-label{
+      color:#f1f1f1;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.8px;
+    }
+
+    .fser-ranked-list{
+      margin:9px 0 0;
+      padding-left:22px;
+      color:#ccc;
+      line-height:1.6;
+      font-size:13px;
+    }
+
+    .fser-ranked-list li+li{
+      margin-top:6px;
+    }
+
+    .fser-next-action{
+      border-left:4px solid var(--red);
+      background:#130b0b;
+    }
+
+    .fser-next-action .fser-conclusion-label{
+      color:#ffb0b0;
+      font-size:12px;
+    }
+
+
+    .fser-equipment-note{
+      margin:0 0 16px;
+      padding:11px 13px;
+      border:1px solid #303030;
+      border-left:4px solid #4f8cff;
+      border-radius:6px;
+      background:#0b1018;
+      color:#aeb9c8;
+      font-size:12px;
+      line-height:1.5;
+    }
+    .fser-equipment-note strong{
+      color:#dbe8ff;
+    }
+
+
+    /* ==================================================
+       HAMBURGER ADMIN NAV
+       Replaces sidebar/top scrolling tabs everywhere
+    =================================================== */
+
+    .admin-header-actions {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .admin-menu-button {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+
+      min-height:42px;
+      padding:10px 14px;
+
+      border:1px solid #3a3a3a;
+      border-radius:6px;
+
+      background:#171717;
+      color:#fff;
+
+      font-weight:800;
+    }
+
+    .admin-menu-button:hover {
+      border-color:var(--red);
+      background:#222;
+    }
+
+    .admin-menu-icon {
+      font-size:21px;
+      line-height:1;
+    }
+
+    .admin-layout {
+      display:block !important;
+      min-height:calc(100vh - 85px);
+    }
+
+    .sidebar {
+      position:fixed !important;
+      top:0 !important;
+      left:0 !important;
+      z-index:10000 !important;
+
+      display:block !important;
+
+      width:min(320px,88vw) !important;
+      height:100vh !important;
+
+      padding:0 14px 22px !important;
+
+      overflow-y:auto !important;
+      overflow-x:hidden !important;
+
+      transform:translateX(-105%);
+      transition:transform .22s ease;
+
+      background:#0b0b0b !important;
+      border-right:1px solid #363636 !important;
+      border-bottom:0 !important;
+
+      box-shadow:12px 0 30px rgba(0,0,0,.45);
+    }
+
+    .sidebar.open {
+      transform:translateX(0);
+    }
+
+    .sidebar-menu-header {
+      position:sticky;
+      top:0;
+      z-index:2;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+
+      margin:0 -14px 15px;
+      padding:16px 14px;
+
+      background:#090909;
+      border-bottom:2px solid var(--red);
+    }
+
+    .sidebar-menu-header strong {
+      display:block;
+      font-size:18px;
+    }
+
+    .sidebar-menu-header span {
+      display:block;
+      margin-top:3px;
+
+      color:var(--red);
+
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+
+    .admin-menu-close {
+      width:42px !important;
+      min-width:42px !important;
+      height:42px !important;
+
+      margin:0 !important;
+      padding:0 !important;
+
+      border:1px solid #444 !important;
+      border-radius:7px !important;
+
+      background:#181818 !important;
+      color:#fff !important;
+
+      text-align:center !important;
+      font-size:27px !important;
+      line-height:1 !important;
+    }
+
+    .sidebar .nav-tab {
+      display:block !important;
+      width:100% !important;
+      min-width:0 !important;
+
+      margin:0 0 7px !important;
+      padding:13px 14px !important;
+
+      border:1px solid #292929 !important;
+      border-radius:7px !important;
+
+      background:#141414 !important;
+      color:#ddd !important;
+
+      text-align:left !important;
+      font-size:13px !important;
+      font-weight:800 !important;
+      white-space:normal !important;
+    }
+
+    .sidebar .nav-tab:hover {
+      border-color:#555 !important;
+      background:#202020 !important;
+    }
+
+    .sidebar .nav-tab.active {
+      border-color:var(--red) !important;
+      background:var(--red) !important;
+      color:#fff !important;
+    }
+
+    .admin-nav-overlay {
+      position:fixed;
+      inset:0;
+      z-index:9500;
+
+      display:none;
+
+      background:rgba(0,0,0,.68);
+      backdrop-filter:blur(2px);
+    }
+
+    .admin-nav-overlay.show {
+      display:block;
+    }
+
+    body.admin-nav-open {
+      overflow:hidden;
+    }
+
+    .main-content {
+      width:100%;
+    }
+
+
+    /* ==================================================
+       PARTS FINDER
+    =================================================== */
+
+    .parts-finder-hero {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+
+      border-top:3px solid var(--red);
+
+      background:
+        radial-gradient(circle at top right,rgba(223,31,38,.14),transparent 35%),
+        #111;
+    }
+
+    .parts-finder-kicker {
+      margin:0 0 7px;
+
+      color:var(--green);
+
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:1.2px;
+    }
+
+    .parts-finder-badge {
+      min-width:125px;
+      padding:14px;
+
+      border:1px solid #3a3a3a;
+      border-radius:8px;
+
+      background:#0b0b0b;
+      text-align:center;
+    }
+
+    .parts-finder-badge span {
+      display:block;
+
+      color:#aaa;
+
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:1px;
+    }
+
+    .parts-finder-badge strong {
+      display:block;
+
+      margin-top:5px;
+
+      font-size:27px;
+    }
+
+    .parts-finder-layout {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:20px;
+    }
+
+    .parts-verification-rule {
+      display:grid;
+      gap:6px;
+
+      padding:14px;
+
+      border:1px solid #31533b;
+      border-radius:7px;
+
+      background:#0b160e;
+    }
+
+    .parts-verification-rule strong {
+      color:var(--green);
+    }
+
+    .parts-verification-rule span {
+      color:#bbb;
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    @media(max-width:850px) {
+
+      .parts-finder-layout {
+        grid-template-columns:1fr;
+      }
+
+      .parts-finder-hero {
+        align-items:stretch;
+        flex-direction:column;
+      }
+
+      .parts-finder-badge {
+        width:100%;
+      }
+
+    }
+
+    @media(max-width:600px) {
+
+      .admin-header {
+        gap:8px;
+      }
+
+      .admin-header-actions {
+        gap:6px;
+      }
+
+      .admin-menu-button {
+        padding:9px 11px;
+      }
+
+      .admin-menu-text {
+        display:none;
+      }
+
+      .logout-button {
+        padding:9px 10px;
+      }
+
+    }
+
+
+
+    /* ==================================================
+       CLEAN MOBILE DASHBOARD
+       Desktop dashboard remains unchanged
+    =================================================== */
+
+    .mobile-dashboard-toggle {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+
+      #dashboardView .page-title {
+        margin-bottom: 14px;
+        font-size: 25px;
+      }
+
+      #dashboardView .stats-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+        gap: 9px !important;
+        margin-bottom: 12px !important;
+      }
+
+      #dashboardView .stat-card {
+        min-width: 0;
+        padding: 13px 12px !important;
+        border-top-width: 2px;
+      }
+
+      #dashboardView .stat-card span {
+        min-height: 27px;
+        font-size: 9px !important;
+        line-height: 1.3;
+      }
+
+      #dashboardView .stat-card strong {
+        margin-top: 5px !important;
+        overflow: hidden;
+        font-size: 21px !important;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+      }
+
+      #dashboardView .dashboard-mobile-secondary {
+        display: none;
+      }
+
+      #dashboardView.mobile-dashboard-expanded .dashboard-mobile-secondary {
+        display: block;
+      }
+
+      .mobile-dashboard-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+
+        width: 100%;
+        min-height: 45px;
+
+        margin: 0 0 14px;
+        padding: 10px 13px;
+
+        border: 1px solid #343434;
+        border-radius: 7px;
+
+        background: #151515;
+        color: #ddd;
+
+        font-size: 12px;
+        font-weight: 900;
+        text-align: left;
+      }
+
+      .mobile-dashboard-toggle strong {
+        color: var(--red);
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      #dashboardView .panel {
+        margin-bottom: 13px !important;
+        padding: 14px !important;
+      }
+
+      #dashboardView .panel h2 {
+        margin-bottom: 12px;
+        font-size: 17px;
+      }
+
+      #dashboardView .dashboard-mobile-extra {
+        display: none;
+      }
+
+      #dashboardView.mobile-dashboard-expanded .dashboard-mobile-extra {
+        display: block;
+      }
+
+      #dashboardView .dashboard-recent-jobs {
+        margin-top: 0;
+      }
+
+      #dashboardView .table-wrap {
+        font-size: 12px;
+      }
+
+      #dashboardView table th,
+      #dashboardView table td {
+        padding: 9px 8px;
+        font-size: 11px;
+      }
+
+    }
+
+    @media (max-width: 390px) {
+
+      #dashboardView .stat-card strong {
+        font-size: 19px !important;
+      }
+
+      #dashboardView .stat-card span {
+        font-size: 8.5px !important;
+      }
+
+    }
+
+
+
+    /* Repair Job List full ticket total */
+    #jobTableWrapper td:last-child strong {
+      color: #fff;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 700px) {
+      #jobTableWrapper th:last-child,
+      #jobTableWrapper td:last-child {
+        text-align: right;
+      }
+
+      #jobTableWrapper td:last-child strong {
+        font-size: 12px;
+      }
+    }
+
+
+
+    /* ==================================================
+       MILEAGE LOG
+    =================================================== */
+
+    .mileage-summary-grid {
+      margin-bottom: 18px;
+    }
+
+    #mileageRate,
+    #mileageDeduction {
+      font-weight: 800;
+    }
+
+    #mileageTableWrapper td strong {
+      white-space: nowrap;
+    }
+
+    @media (max-width:700px) {
+
+      .mileage-summary-grid {
+        grid-template-columns:
+          repeat(2,minmax(0,1fr));
+      }
+
+      #mileageTableWrapper {
+        overflow-x: auto;
+      }
+
+      #mileageTableWrapper table {
+        min-width: 850px;
+      }
+
+    }
+
+
 </style>
 
 </head>
@@ -1208,12 +1822,27 @@
   </div>
 
 
-  <button
-    id="logoutButton"
-    class="logout-button"
-  >
-    Log Out
-  </button>
+  <div class="admin-header-actions">
+
+    <button
+      id="adminMenuButton"
+      class="admin-menu-button"
+      type="button"
+      aria-label="Open admin menu"
+      aria-expanded="false"
+    >
+      <span class="admin-menu-icon">☰</span>
+      <span class="admin-menu-text">Menu</span>
+    </button>
+
+    <button
+      id="logoutButton"
+      class="logout-button"
+    >
+      Log Out
+    </button>
+
+  </div>
 
 </header>
 
@@ -1223,7 +1852,29 @@
 
   <!-- SIDEBAR -->
 
-  <aside class="sidebar">
+  <aside
+    id="adminSidebar"
+    class="sidebar"
+    aria-label="Admin navigation"
+  >
+
+    <div class="sidebar-menu-header">
+
+      <div>
+        <strong>Flores Admin</strong>
+        <span>Navigation</span>
+      </div>
+
+      <button
+        id="adminMenuClose"
+        class="admin-menu-close"
+        type="button"
+        aria-label="Close admin menu"
+      >
+        ×
+      </button>
+
+    </div>
 
     <button
       class="nav-tab active"
@@ -1262,6 +1913,13 @@
 
     <button
       class="nav-tab"
+      data-view="completedJobsView"
+    >
+      Completed Jobs
+    </button>
+
+    <button
+      class="nav-tab"
       data-view="estimatesView"
     >
       Estimates
@@ -1272,6 +1930,13 @@
       data-view="invoicesView"
     >
       Invoices
+    </button>
+
+    <button
+      class="nav-tab"
+      data-view="fserAiView"
+    >
+      🔎 Parts Finder
     </button>
 
     <button
@@ -1295,7 +1960,20 @@
       Expenses
     </button>
 
+    <button
+      class="nav-tab"
+      data-view="mileageView"
+    >
+      Mileage Log
+    </button>
+
   </aside>
+
+  <div
+    id="adminNavOverlay"
+    class="admin-nav-overlay"
+    aria-hidden="true"
+  ></div>
 
 
   <main class="main-content">
@@ -1317,67 +1995,77 @@
 
       <div class="stats-grid">
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Customers</span>
           <strong id="customerCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>New Requests</span>
           <strong id="requestCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Open Jobs</span>
           <strong id="openJobCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Invoices</span>
           <strong id="invoiceCount">0</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Balance Due</span>
           <strong id="balanceDue">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Made This Month</span>
           <strong id="monthRevenue">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Made This Year</span>
           <strong id="yearRevenue">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Estimated Profit This Month</span>
           <strong id="monthProfit">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Estimated Profit This Year</span>
           <strong id="yearProfit">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Expenses This Month</span>
           <strong id="monthExpenses">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Expenses This Year</span>
           <strong id="yearExpenses">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
+          <span>Business Miles This Year</span>
+          <strong id="yearBusinessMiles">0.0 mi</strong>
+        </div>
+
+        <div class="stat-card" dashboard-mobile-secondary">
+          <span>Mileage Deduction This Year</span>
+          <strong id="yearMileageDeduction">$0.00</strong>
+        </div>
+
+        <div class="stat-card" dashboard-mobile-primary">
           <span>Net Profit This Month</span>
           <strong id="monthNetProfit">$0.00</strong>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" dashboard-mobile-secondary">
           <span>Net Profit This Year</span>
           <strong id="yearNetProfit">$0.00</strong>
         </div>
@@ -1385,7 +2073,18 @@
       </div>
 
 
-      <div class="panel">
+      <button
+        id="mobileDashboardToggle"
+        class="mobile-dashboard-toggle"
+        type="button"
+        aria-expanded="false"
+      >
+        <span>More Dashboard</span>
+        <strong id="mobileDashboardToggleIcon">＋</strong>
+      </button>
+
+
+      <div class="panel dashboard-recent-jobs">
 
         <h2>Recent Repair Jobs</h2>
 
@@ -1397,7 +2096,7 @@
       </div>
 
 
-      <div class="panel">
+      <div class="panel dashboard-mobile-extra">
 
         <h2>Recent Invoices</h2>
 
@@ -1409,7 +2108,7 @@
       </div>
 
 
-      <div class="panel">
+      <div class="panel dashboard-mobile-extra">
 
         <h2>Monthly Revenue</h2>
 
@@ -1425,7 +2124,7 @@
       </div>
 
 
-      <div class="panel">
+      <div class="panel dashboard-mobile-extra">
 
         <h2>Yearly Revenue</h2>
 
@@ -1910,6 +2609,40 @@
 
 
     <!-- ==================================================
+         COMPLETED JOBS
+    =================================================== -->
+
+    <section
+      id="completedJobsView"
+      class="view"
+    >
+      <h1 class="page-title">Completed Jobs</h1>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 style="margin-bottom:6px;">Completed Repair History</h2>
+            <p style="margin:0;color:#999;">
+              Jobs move here automatically when their status is marked Completed.
+            </p>
+          </div>
+
+          <input
+            id="completedJobSearch"
+            class="search-box"
+            placeholder="Search completed jobs..."
+          >
+        </div>
+
+        <div
+          id="completedJobTableWrapper"
+          class="table-wrap"
+        ></div>
+      </div>
+    </section>
+
+
+    <!-- ==================================================
          ESTIMATES
     =================================================== -->
 
@@ -2020,6 +2753,11 @@
               <strong id="estimateTotal">$0.00</strong>
             </div>
 
+          </div>
+
+          <div style="margin-top:14px;padding:12px 14px;border:1px solid #5a3a12;border-left:4px solid #f0a328;border-radius:6px;background:#171109;color:#f2d19a;font-size:13px;line-height:1.5;">
+            <strong style="color:#fff;">Parts Payment Policy:</strong>
+            Parts must be paid for before they are ordered. Parts will not be ordered until the required parts payment is received.
           </div>
 
 
@@ -2161,6 +2899,32 @@
             </label>
 
 
+            <label>
+              Discount $
+
+              <input
+                id="invoiceDiscount"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+                placeholder="0.00"
+              >
+
+            </label>
+
+
+            <label>
+              Discount Reason
+
+              <input
+                id="invoiceDiscountReason"
+                placeholder="Multi-unit discount"
+              >
+
+            </label>
+
+
             <label class="full-width">
               Notes
 
@@ -2197,6 +2961,11 @@
             <div class="total-row">
               <span>Subtotal</span>
               <strong id="invoiceSubtotal">$0.00</strong>
+            </div>
+
+            <div class="total-row">
+              <span>Discount</span>
+              <strong id="invoiceDiscountTotal">-$0.00</strong>
             </div>
 
             <div class="total-row">
@@ -2249,6 +3018,212 @@
           id="invoiceTableWrapper"
           class="table-wrap"
         ></div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         PARTS FINDER
+    =================================================== -->
+
+    <section
+      id="fserAiView"
+      class="view"
+    >
+
+      <h1 class="page-title">🔎 Parts Finder</h1>
+
+
+      <div class="panel parts-finder-hero">
+
+        <div>
+
+          <p class="parts-finder-kicker">
+            FSER PARTS LOOKUP
+          </p>
+
+          <h2 style="margin-bottom:8px;">
+            Find the Diagram. Verify the Part.
+          </h2>
+
+          <p style="margin:0;color:#aaa;line-height:1.55;">
+            Enter the brand, exact model number, and the part you are looking for.
+            Open the diagram or OEM lookup, then save the verified part number for later.
+          </p>
+
+        </div>
+
+        <div class="parts-finder-badge">
+          <span>PARTS LOOKUP</span>
+          <strong>🔎</strong>
+        </div>
+
+      </div>
+
+
+      <div class="parts-finder-layout">
+
+        <div class="panel">
+
+          <h2>Find a Part</h2>
+
+          <div class="form-grid">
+
+            <label>
+              Brand / Manufacturer
+              <input
+                id="fserPartsBrand"
+                placeholder="Briggs & Stratton, Honda, Kawasaki..."
+              >
+            </label>
+
+            <label>
+              Exact Model Number
+              <input
+                id="fserPartsModel"
+                placeholder="31C707-3346-G6, GX160..."
+              >
+            </label>
+
+            <label class="full-width">
+              Part Needed
+              <input
+                id="fserPartsNeed"
+                placeholder="Carburetor, deck belt, starter, ring gear..."
+              >
+            </label>
+
+          </div>
+
+
+          <div class="button-row">
+
+            <button
+              id="fserPartsTreeButton"
+              class="action-button"
+              type="button"
+            >
+              Open PartsTree Diagrams
+            </button>
+
+            <button
+              id="fserOfficialPartsButton"
+              class="secondary-button"
+              type="button"
+            >
+              Official OEM Lookup
+            </button>
+
+            <button
+              id="fserWebPartsButton"
+              class="secondary-button"
+              type="button"
+            >
+              Search Model + Part
+            </button>
+
+          </div>
+
+
+          <div
+            id="fserPartsAdvice"
+            class="fser-parts-advice"
+          >
+            Use the full model, type, code, serial, or spec number when available.
+            Verify the exact diagram before ordering.
+          </div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <h2>✅ Save a Verified Part</h2>
+
+          <p style="color:#aaa;margin-top:-8px;line-height:1.5;">
+            Once you confirm a part fits the exact model, save it here so you can
+            find it quickly the next time that machine comes in.
+          </p>
+
+
+          <div class="form-grid">
+
+            <label>
+              Verified OEM Part #
+              <input
+                id="fserVerifiedPartNumber"
+                placeholder="OEM part number"
+              >
+            </label>
+
+            <label>
+              Description
+              <input
+                id="fserVerifiedPartDescription"
+                placeholder="Carburetor assembly"
+              >
+            </label>
+
+            <label class="full-width">
+              Notes
+              <input
+                id="fserVerifiedPartNotes"
+                placeholder="Diagram ref, superseded number, fitment notes..."
+              >
+            </label>
+
+          </div>
+
+
+          <div class="button-row">
+
+            <button
+              id="saveFserVerifiedPart"
+              class="action-button"
+              type="button"
+            >
+              Save Verified Part
+            </button>
+
+            <button
+              id="clearFserPartsForm"
+              class="secondary-button"
+              type="button"
+            >
+              Clear
+            </button>
+
+          </div>
+
+
+          <div
+            id="fserVerifiedMatches"
+            style="margin-top:18px;"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>Verification Rule</h2>
+
+        <div class="parts-verification-rule">
+
+          <strong>🟢 VERIFIED</strong>
+
+          <span>
+            Save a part only after matching it to the exact model/diagram or
+            personally confirming fitment. If the model information is incomplete,
+            verify it before ordering.
+          </span>
+
+        </div>
 
       </div>
 
@@ -2457,6 +3432,271 @@
           id="paymentTableWrapper"
           class="table-wrap"
         ></div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         MILEAGE LOG
+    =================================================== -->
+
+    <section
+      id="mileageView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Mileage Log
+      </h1>
+
+
+      <div class="stats-grid mileage-summary-grid">
+
+        <div class="stat-card">
+          <span>Business Miles This Year</span>
+          <strong id="mileageYearMiles">0.0 mi</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>Estimated Mileage Deduction</span>
+          <strong id="mileageYearDeduction">$0.00</strong>
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <h2>
+          Log Business Trip
+        </h2>
+
+        <p class="small-note">
+          Log business-only vehicle trips. The IRS mileage rate is selected automatically from the trip date.
+        </p>
+
+
+        <form id="mileageForm">
+
+          <input
+            type="hidden"
+            id="mileageId"
+          >
+
+
+          <div class="form-grid">
+
+            <label>
+              Date
+
+              <input
+                id="mileageDate"
+                type="date"
+                required
+              >
+            </label>
+
+
+            <label>
+              Customer
+
+              <select id="mileageCustomerId">
+
+                <option value="">
+                  No customer / general business
+                </option>
+
+              </select>
+            </label>
+
+
+            <label>
+              Repair Job
+
+              <select id="mileageJobId">
+
+                <option value="">
+                  No repair job
+                </option>
+
+              </select>
+            </label>
+
+
+            <label>
+              Business Purpose
+
+              <select id="mileagePurpose" required>
+
+                <option value="Mobile Repair">
+                  Mobile Repair
+                </option>
+
+                <option value="Pickup / Delivery">
+                  Pickup / Delivery
+                </option>
+
+                <option value="Parts Pickup">
+                  Parts Pickup
+                </option>
+
+                <option value="Supply Run">
+                  Supply Run
+                </option>
+
+                <option value="Customer Estimate / Diagnosis">
+                  Customer Estimate / Diagnosis
+                </option>
+
+                <option value="Business Errand">
+                  Business Errand
+                </option>
+
+                <option value="Other Business">
+                  Other Business
+                </option>
+
+              </select>
+            </label>
+
+
+            <label>
+              Starting Location
+
+              <input
+                id="mileageStartLocation"
+                placeholder="Example: Shop / Home"
+                required
+              >
+            </label>
+
+
+            <label>
+              Destination
+
+              <input
+                id="mileageDestination"
+                placeholder="Customer address, parts store, etc."
+                required
+              >
+            </label>
+
+
+            <label>
+              Business Miles
+
+              <input
+                id="mileageMiles"
+                type="number"
+                min="0"
+                step="0.1"
+                placeholder="Total business miles driven"
+                required
+              >
+            </label>
+
+
+            <label>
+              IRS Rate
+
+              <input
+                id="mileageRate"
+                type="number"
+                step="0.001"
+                readonly
+              >
+            </label>
+
+
+            <label>
+              Estimated Deduction
+
+              <input
+                id="mileageDeduction"
+                type="text"
+                value="$0.00"
+                readonly
+              >
+            </label>
+
+
+            <label class="full-width">
+              Notes
+
+              <textarea
+                id="mileageNotes"
+                placeholder="Optional notes about the trip"
+              ></textarea>
+            </label>
+
+          </div>
+
+
+          <div class="button-row">
+
+            <button
+              class="action-button"
+              type="submit"
+              id="mileageSaveButton"
+            >
+              Save Mileage
+            </button>
+
+            <button
+              class="small-button"
+              type="button"
+              id="clearMileageButton"
+            >
+              Clear
+            </button>
+
+          </div>
+
+
+          <p id="mileageMessage"></p>
+
+        </form>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-title-row">
+
+          <h2>
+            Mileage History
+          </h2>
+
+          <button
+            class="small-button"
+            type="button"
+            id="exportMileageButton"
+          >
+            Export CSV
+          </button>
+
+        </div>
+
+
+        <input
+          id="mileageSearch"
+          class="table-search"
+          placeholder="Search customer, job, destination, purpose..."
+        >
+
+
+        <div
+          id="mileageTableWrapper"
+          class="table-wrap"
+        >
+          <p class="empty">
+            No mileage logged yet.
+          </p>
+        </div>
 
       </div>
 
@@ -2971,11 +4211,13 @@ let customers = [];
 let customerTypeFilter = "all";
 let items = [];
 let jobs = [];
+let jobPartsRevenueByJob = {};
 let estimates = [];
 let editingEstimateId = null;
 let invoices = [];
 let payments = [];
 let expenses = [];
+let mileageLogs = [];
 let timeEntries = [];
 let activeTimeEntry = null;
 let timeClockInterval = null;
@@ -3043,6 +4285,25 @@ function escapeHtml(value) {
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+
+}
+
+function documentTermsHtml() {
+
+  return `
+    <div class="document-terms">
+      <strong>Terms &amp; Conditions</strong>
+      <ul>
+        <li>Approval of an estimate authorizes Flores Small Engine Repair to perform the work listed.</li>
+        <li>Parts must be paid in advance before they are ordered. Parts orders will not be placed until the required parts payment has been received.</li>
+        <li>Estimates may change if additional problems are discovered. Additional work will be discussed and approved before proceeding.</li>
+        <li>Payment is due in full upon completion and is required before equipment is released or picked up.</li>
+        <li>Labor performed by Flores Small Engine Repair is guaranteed for 30 days from completion. Manufacturer warranties apply to parts when available.</li>
+        <li>Warranty does not cover misuse, neglect, abuse, unrelated failures, or damage occurring after the completed repair.</li>
+        <li>Equipment not picked up within 30 days of completion may be subject to storage fees and applicable abandoned-equipment procedures.</li>
+      </ul>
+    </div>
+  `;
 
 }
 
@@ -3183,6 +4444,15 @@ async function loadViewData(viewId) {
   }
 
 
+  if (viewId === "completedJobsView") {
+
+    await loadJobs();
+
+    renderCompletedJobs();
+
+  }
+
+
   if (viewId === "estimatesView") {
 
     await loadEstimates();
@@ -3193,6 +4463,13 @@ async function loadViewData(viewId) {
   if (viewId === "invoicesView") {
 
     await loadInvoices();
+
+  }
+
+
+  if (viewId === "fserAiView") {
+
+    renderFserVerifiedMatches();
 
   }
 
@@ -3217,9 +4494,196 @@ async function loadViewData(viewId) {
   }
 
 
+  if (viewId === "mileageView") {
+
+    await loadMileageLogs();
+
+  }
+
+
   loadedViews.add(viewId);
 
 }
+
+
+
+
+/* ==================================================
+   MOBILE DASHBOARD CLEANUP
+=================================================== */
+
+function setMobileDashboardExpanded(expanded) {
+
+  const dashboard =
+    $("dashboardView");
+
+  const toggle =
+    $("mobileDashboardToggle");
+
+  const icon =
+    $("mobileDashboardToggleIcon");
+
+
+  if (!dashboard || !toggle) {
+    return;
+  }
+
+
+  dashboard
+    .classList
+    .toggle(
+      "mobile-dashboard-expanded",
+      expanded
+    );
+
+
+  toggle.setAttribute(
+    "aria-expanded",
+    expanded
+      ? "true"
+      : "false"
+  );
+
+
+  const label =
+    toggle.querySelector("span");
+
+  if (label) {
+    label.textContent =
+      expanded
+        ? "Less Dashboard"
+        : "More Dashboard";
+  }
+
+
+  if (icon) {
+    icon.textContent =
+      expanded
+        ? "−"
+        : "＋";
+  }
+
+}
+
+
+$("mobileDashboardToggle")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const dashboard =
+        $("dashboardView");
+
+      const expanded =
+        dashboard
+          ?.classList
+          .contains(
+            "mobile-dashboard-expanded"
+          ) || false;
+
+
+      setMobileDashboardExpanded(
+        !expanded
+      );
+
+    }
+  );
+
+
+/* ==================================================
+   ADMIN HAMBURGER MENU
+=================================================== */
+
+function openAdminMenu() {
+
+  $("adminSidebar")
+    ?.classList
+    .add("open");
+
+  $("adminNavOverlay")
+    ?.classList
+    .add("show");
+
+  document.body
+    .classList
+    .add("admin-nav-open");
+
+  $("adminMenuButton")
+    ?.setAttribute(
+      "aria-expanded",
+      "true"
+    );
+
+}
+
+
+function closeAdminMenu() {
+
+  $("adminSidebar")
+    ?.classList
+    .remove("open");
+
+  $("adminNavOverlay")
+    ?.classList
+    .remove("show");
+
+  document.body
+    .classList
+    .remove("admin-nav-open");
+
+  $("adminMenuButton")
+    ?.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+
+}
+
+
+$("adminMenuButton")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      if (
+        $("adminSidebar")
+          ?.classList
+          .contains("open")
+      ) {
+        closeAdminMenu();
+      } else {
+        openAdminMenu();
+      }
+
+    }
+  );
+
+
+$("adminMenuClose")
+  ?.addEventListener(
+    "click",
+    closeAdminMenu
+  );
+
+
+$("adminNavOverlay")
+  ?.addEventListener(
+    "click",
+    closeAdminMenu
+  );
+
+
+document
+  .addEventListener(
+    "keydown",
+    event => {
+
+      if (event.key === "Escape") {
+        closeAdminMenu();
+      }
+
+    }
+  );
 
 
 document
@@ -3251,6 +4715,9 @@ document
           button.dataset.view;
 
 
+        closeAdminMenu();
+
+
         $(
           viewId
         )
@@ -3267,6 +4734,13 @@ document
 
   });
 
+
+
+$("completedJobSearch")
+  ?.addEventListener(
+    "input",
+    () => renderCompletedJobs()
+  );
 
 
 /* ==================================================
@@ -5332,6 +6806,9 @@ async function loadJobs() {
   jobs = data || [];
 
 
+  await loadJobPartsRevenueTotals();
+
+
   $("openJobCount")
     .textContent =
       jobs.filter(
@@ -5343,11 +6820,15 @@ async function loadJobs() {
 
   renderJobs();
 
+  renderCompletedJobs();
+
   await calculateDashboardProfit();
 
   renderRecentJobs();
 
   populateJobSelects();
+
+  populateFserAiJobs();
 
 }
 
@@ -5414,14 +6895,128 @@ function jobEquipment(job) {
 }
 
 
+async function loadJobPartsRevenueTotals() {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("job_parts")
+      .select(
+        "repair_job_id, quantity, sell_price_each"
+      );
+
+
+  if (error) {
+
+    console.error(
+      "Could not load repair ticket part totals:",
+      error
+    );
+
+    jobPartsRevenueByJob = {};
+    return;
+
+  }
+
+
+  const totals = {};
+
+
+  (data || [])
+    .forEach(
+      part => {
+
+        const jobId =
+          Number(
+            part.repair_job_id
+          );
+
+
+        if (!jobId) {
+          return;
+        }
+
+
+        totals[jobId] =
+          Number(
+            totals[jobId] || 0
+          ) +
+          (
+            Number(
+              part.quantity || 0
+            ) *
+            Number(
+              part.sell_price_each || 0
+            )
+          );
+
+      }
+    );
+
+
+  jobPartsRevenueByJob =
+    totals;
+
+}
+
+
+function repairTicketTotal(job) {
+
+  const labor =
+    Number(
+      job?.labor_hours || 0
+    ) *
+    Number(
+      job?.labor_rate || 0
+    );
+
+
+  const fees =
+    Number(
+      job?.service_fee || 0
+    ) +
+    Number(
+      job?.travel_fee || 0
+    ) +
+    Number(
+      job?.pickup_delivery_fee || 0
+    );
+
+
+  const parts =
+    Number(
+      jobPartsRevenueByJob[
+        Number(job?.id)
+      ] || 0
+    );
+
+
+  return (
+    labor +
+    fees +
+    parts
+  );
+
+}
+
+
 function renderJobs() {
 
-  if (!jobs.length) {
+  const activeJobs =
+    jobs.filter(
+      job =>
+        job.status !== "Completed"
+    );
+
+
+  if (!activeJobs.length) {
 
     $("jobTableWrapper")
       .innerHTML =
         `<p class="empty">
-          No repair jobs.
+          No active repair jobs.
         </p>`;
 
     return;
@@ -5439,7 +7034,7 @@ function renderJobs() {
           <th>Customer</th>
           <th>Equipment</th>
           <th>Status</th>
-          <th>Labor</th>
+          <th>Total</th>
         </tr>
       </thead>
 
@@ -5447,11 +7042,12 @@ function renderJobs() {
   `;
 
 
-  jobs.forEach(job => {
+  activeJobs.forEach(job => {
 
-    const labor =
-      Number(job.labor_hours || 0) *
-      Number(job.labor_rate || 0);
+    const ticketTotal =
+      repairTicketTotal(
+        job
+      );
 
 
     html += `
@@ -5486,7 +7082,9 @@ function renderJobs() {
         </td>
 
         <td>
-          ${money(labor)}
+          <strong>
+            ${money(ticketTotal)}
+          </strong>
         </td>
 
       </tr>
@@ -5507,6 +7105,135 @@ function renderJobs() {
 
 }
 
+
+function renderCompletedJobs() {
+
+  const wrapper =
+    $("completedJobTableWrapper");
+
+  if (!wrapper) {
+    return;
+  }
+
+
+  const search =
+    ($("completedJobSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+
+  const completed =
+    jobs
+      .filter(
+        job =>
+          job.status === "Completed"
+      )
+      .filter(job => {
+
+        if (!search) {
+          return true;
+        }
+
+        const haystack = [
+          job.job_number,
+          customerName(job.customers),
+          jobEquipment(job),
+          job.date_completed,
+          job.created_at
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return haystack.includes(search);
+
+      });
+
+
+  if (!completed.length) {
+
+    wrapper.innerHTML =
+      `<p class="empty">
+        ${search
+          ? "No completed jobs match your search."
+          : "No completed jobs yet."}
+      </p>`;
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Job #</th>
+          <th>Customer</th>
+          <th>Equipment</th>
+          <th>Completed</th>
+          <th>Labor</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+
+  completed.forEach(job => {
+
+    const labor =
+      Number(job.labor_hours || 0) *
+      Number(job.labor_rate || 0);
+
+
+    html += `
+
+      <tr
+        class="clickable-row"
+        onclick="openJob(${job.id})"
+      >
+
+        <td>${escapeHtml(job.job_number)}</td>
+
+        <td>
+          ${escapeHtml(
+            customerName(job.customers)
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            jobEquipment(job)
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            job.date_completed
+              ? dateDisplay(job.date_completed)
+              : ""
+          )}
+        </td>
+
+        <td>${money(labor)}</td>
+
+      </tr>
+    `;
+
+  });
+
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+
+  wrapper.innerHTML = html;
+
+}
 
 function renderRecentJobs() {
 
@@ -5876,6 +7603,15 @@ async function loadJobParts(jobId) {
           ),
         0
       );
+
+
+  jobPartsRevenueByJob[
+    Number(jobId)
+  ] =
+    partsRevenue;
+
+
+  renderJobs();
 
 
   const estimatedProfit =
@@ -7210,14 +8946,35 @@ function calculateDocument(type) {
       );
 
 
+    const requestedDiscount =
+      Number(
+        $("invoiceDiscount")?.value || 0
+      );
+
+
+    const discount =
+      Math.min(
+        Math.max(requestedDiscount, 0),
+        subtotal
+      );
+
+
+    const taxableSubtotal =
+      Math.max(0, subtotal - discount);
+
+
     const tax =
-      subtotal *
+      taxableSubtotal *
       (taxRate / 100);
 
 
     $("invoiceSubtotal")
       .textContent =
         money(subtotal);
+
+    $("invoiceDiscountTotal")
+      .textContent =
+        `-${money(discount)}`;
 
     $("invoiceTax")
       .textContent =
@@ -7226,7 +8983,7 @@ function calculateDocument(type) {
     $("invoiceTotal")
       .textContent =
         money(
-          subtotal + tax
+          taxableSubtotal + tax
         );
 
   }
@@ -7326,6 +9083,14 @@ $("addInvoiceLine")
 
 
 $("invoiceTaxRate")
+  .addEventListener(
+    "input",
+    () =>
+      calculateDocument("invoice")
+  );
+
+
+$("invoiceDiscount")
   .addEventListener(
     "input",
     () =>
@@ -8796,7 +10561,11 @@ async function openEstimate(id) {
         Delete Estimate
       </button>
 
-    </div>
+    
+
+        ${documentTermsHtml()}
+
+</div>
   `;
 
 
@@ -9204,13 +10973,47 @@ $("invoiceForm")
       }
 
 
-      const subtotal =
+      const itemSubtotal =
         lines.reduce(
           (sum,line) =>
             sum +
             Number(line.line_total),
           0
         );
+
+
+      const requestedDiscount =
+        Number(
+          $("invoiceDiscount")?.value || 0
+        );
+
+
+      const discount =
+        Math.min(
+          Math.max(requestedDiscount, 0),
+          itemSubtotal
+        );
+
+
+      if (discount > 0) {
+
+        const discountReason =
+          $("invoiceDiscountReason")?.value.trim() ||
+          "Invoice discount";
+
+        lines.push({
+          item_name: "Discount",
+          item_desc: discountReason,
+          quantity: 1,
+          unit_price: -discount,
+          line_total: -discount
+        });
+
+      }
+
+
+      const subtotal =
+        itemSubtotal - discount;
 
 
       const taxRate =
@@ -9342,6 +11145,12 @@ $("invoiceForm")
 
       $("invoiceTaxRate").value =
         0;
+
+      $("invoiceDiscount").value =
+        0;
+
+      $("invoiceDiscountReason").value =
+        "";
 
       $("invoiceLines")
         .innerHTML = "";
@@ -9718,7 +11527,11 @@ async function openInvoice(id) {
         Delete Invoice
       </button>
 
-    </div>
+    
+
+        ${documentTermsHtml()}
+
+</div>
   `;
 
 
@@ -10984,10 +12797,7 @@ async function printEstimate(id) {
           }
         </p>
 
-        <p style="font-size:12px; color:#555;">
-          Manufacturer warranties apply to parts when available.
-          Labor is guaranteed for 30 days after completed repair.
-        </p>
+        ${documentTermsHtml()}
 
       </div>
     `;
@@ -11052,6 +12862,8 @@ async function emailEstimate(id) {
 
 Here is your repair estimate from Flores Small Engine Repair.
 
+Parts must be paid for before they are ordered. Parts orders are placed after the required parts payment is received.
+
 Estimate: ${estimate.estimate_number}
 Total: ${money(estimate.total)}
 
@@ -11064,6 +12876,8 @@ Your permanent FSER portal number: ${estimate.customers?.portal_number || "Conta
 Use the last 4 digits of your phone number to sign in.
 
 You can use this same FSER number anytime to view current and past repairs, estimates, and invoices.
+
+By approving this estimate, you authorize the work listed. Additional work will be discussed before proceeding. Payment is due in full upon completion and before equipment is released. Labor is guaranteed for 30 days; manufacturer parts warranties apply when available.
 
 Please reply to approve the estimate or contact us with any questions.
 
@@ -11121,6 +12935,8 @@ async function textEstimate(id) {
 `Hi ${contact.name}, this is Flores Small Engine Repair.
 
 Your estimate ${estimate.estimate_number} is ${money(estimate.total)}.
+
+Parts must be paid for before they are ordered. Parts will be ordered once the required parts payment is received.
 
 You can review your estimate and track your repair anytime in the Customer Portal:
 ${portalUrl}
@@ -11215,6 +13031,8 @@ Paid: ${money(invoice.amount_paid)}
 Balance Due: ${money(invoice.balance_due)}
 
 ${itemText}
+
+Payment is due in full upon completion and before equipment is released. Labor is guaranteed for 30 days from completion; manufacturer parts warranties apply when available.
 
 Thank you for your business.
 
@@ -11564,7 +13382,11 @@ async function printInvoice(id) {
           guaranteed for 30 days.
         </p>
 
-      </div>
+      
+
+        ${documentTermsHtml()}
+
+</div>
     `;
 
 
@@ -12518,6 +14340,1092 @@ $("timeClockJob")
    START
 =================================================== */
 
+
+/* FSER Parts Finder */
+function fserPartsQuery(){
+  const brand=$("fserPartsBrand").value.trim(),model=$("fserPartsModel").value.trim(),need=$("fserPartsNeed").value.trim();
+  return {brand,model,need,full:[brand,model,need].filter(Boolean).join(" ")};
+}
+function fserOpenUrl(url){window.open(url,"_blank","noopener")}
+function fserOfficialUrl(brand,model,need){
+  const b=brand.toLowerCase();
+  if(b.includes("briggs"))return "https://shop.briggsandstratton.com/pages/parts-lookup";
+  if(b.includes("kawasaki"))return "https://www.kawasaki.com/en-us/owner-center/parts";
+  if(b.includes("honda"))return "https://publications.powerequipment.honda.com/";
+  if(b.includes("kohler")||b.includes("rehlko"))return "https://kohlerpower.com/en/engines/manuals";
+  return `https://www.google.com/search?q=${encodeURIComponent(`${brand} ${model} ${need} official OEM parts diagram`)}`;
+}
+
+$("fserPartsTreeButton")?.addEventListener("click",()=>{
+  const {full,model}=fserPartsQuery();
+  if(!model){$("fserPartsAdvice").textContent="Enter the exact model number first. Exact model/variant information is the safest way to use a parts diagram.";return}
+  fserOpenUrl(`https://www.partstree.com/search/?search=${encodeURIComponent(full)}&tab=models`);
+});
+
+$("fserOfficialPartsButton")?.addEventListener("click",()=>{
+  const {brand,model,need}=fserPartsQuery();
+  if(!brand){$("fserPartsAdvice").textContent="Enter the manufacturer/engine brand so FSER can choose the best official lookup.";return}
+  fserOpenUrl(fserOfficialUrl(brand,model,need));
+});
+
+$("fserWebPartsButton")?.addEventListener("click",()=>{
+  const {full}=fserPartsQuery();
+  if(full)fserOpenUrl(`https://www.google.com/search?q=${encodeURIComponent(`${full} OEM parts diagram`)}`);
+});
+
+function getFserVerifiedParts(){
+  try{return JSON.parse(localStorage.getItem("fserVerifiedParts")||"[]")}catch{return[]}
+}
+
+function renderFserVerifiedMatches(){
+  const target=$("fserVerifiedMatches");if(!target)return;
+  const parts=getFserVerifiedParts();
+  const brand=($("fserPartsBrand")?.value||"").trim().toLowerCase();
+  const model=($("fserPartsModel")?.value||"").trim().toLowerCase();
+  const need=($("fserPartsNeed")?.value||"").trim().toLowerCase();
+  const matches=parts.filter(part=>{
+    const h=[part.brand,part.model,part.description,part.partNumber,part.notes].join(" ").toLowerCase();
+    if(model&&!h.includes(model))return false;
+    if(need&&!h.includes(need))return false;
+    if(brand&&!h.includes(brand))return false;
+    return true;
+  }).slice(0,8);
+  if(!parts.length){target.innerHTML=`<p class="empty">No FSER-verified parts saved yet.</p>`;return}
+  if(!matches.length){target.innerHTML=`<p class="empty">No verified match for the current model/part search.</p>`;return}
+  target.innerHTML=matches.map(part=>`<div class="fser-verified-card"><strong>🟢 ${escapeHtml(part.partNumber)}</strong><div style="margin-top:4px;">${escapeHtml(part.description)}</div><div style="margin-top:5px;color:#aaa;font-size:12px;">${escapeHtml([part.brand,part.model].filter(Boolean).join(" — "))}</div>${part.notes?`<div style="margin-top:5px;color:#888;font-size:11px;">${escapeHtml(part.notes)}</div>`:""}</div>`).join("");
+}
+
+$("saveFserVerifiedPart")?.addEventListener("click",()=>{
+  const {brand,model}=fserPartsQuery();
+  const partNumber=$("fserVerifiedPartNumber").value.trim(),description=$("fserVerifiedPartDescription").value.trim(),notes=$("fserVerifiedPartNotes").value.trim();
+  if(!model||!partNumber||!description){$("fserPartsAdvice").textContent="To save a VERIFIED part, enter the model, OEM part number, and description.";return}
+  const parts=getFserVerifiedParts();
+  parts.unshift({brand,model,partNumber,description,notes,verifiedAt:new Date().toISOString()});
+  try {
+    localStorage.setItem("fserVerifiedParts",JSON.stringify(parts));
+  } catch (error) {
+    $("fserPartsAdvice").textContent="Browser storage is blocked, so this verified part could not be saved on this device.";
+    return;
+  }
+  $("fserPartsAdvice").textContent=`🟢 VERIFIED saved: ${partNumber} for ${model}.`;
+  renderFserVerifiedMatches();
+});
+
+["fserPartsBrand","fserPartsModel","fserPartsNeed"].forEach(id=>$(id)?.addEventListener("input",renderFserVerifiedMatches));
+
+$("clearFserPartsForm")?.addEventListener("click",()=>{
+  ["fserPartsBrand","fserPartsModel","fserPartsNeed","fserVerifiedPartNumber","fserVerifiedPartDescription","fserVerifiedPartNotes"].forEach(id=>$(id).value="");
+  renderFserVerifiedMatches();
+});
+
+
+
+/* ==================================================
+   MILEAGE LOG
+=================================================== */
+
+function businessMileageRateForDate(
+  dateValue
+) {
+
+  if (!dateValue) {
+    return 0.76;
+  }
+
+
+  const date =
+    new Date(
+      `${dateValue}T00:00:00`
+    );
+
+
+  const julyFirst2026 =
+    new Date(
+      "2026-07-01T00:00:00"
+    );
+
+
+  const janFirst2026 =
+    new Date(
+      "2026-01-01T00:00:00"
+    );
+
+
+  if (
+    date >= janFirst2026 &&
+    date < julyFirst2026
+  ) {
+    return 0.725;
+  }
+
+
+  if (
+    date >= julyFirst2026
+  ) {
+    return 0.76;
+  }
+
+
+  // Older trips can still be edited manually in Supabase if needed.
+  // Current app is configured for 2026 business mileage.
+  return 0;
+}
+
+
+function updateMileageCalculation() {
+
+  const dateValue =
+    $("mileageDate")?.value || "";
+
+  const miles =
+    Number(
+      $("mileageMiles")?.value || 0
+    );
+
+  const rate =
+    businessMileageRateForDate(
+      dateValue
+    );
+
+
+  if ($("mileageRate")) {
+    $("mileageRate").value =
+      rate
+        ? rate.toFixed(3)
+        : "";
+  }
+
+
+  if ($("mileageDeduction")) {
+
+    $("mileageDeduction").value =
+      money(
+        miles *
+        rate
+      );
+
+  }
+
+}
+
+
+function populateMileageCustomerOptions() {
+
+  const select =
+    $("mileageCustomerId");
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const selected =
+    select.value;
+
+
+  select.innerHTML =
+    `<option value="">
+      No customer / general business
+    </option>` +
+    customers
+      .slice()
+      .sort(
+        (a,b) =>
+          customerName(a)
+            .localeCompare(
+              customerName(b)
+            )
+      )
+      .map(
+        customer => `
+          <option value="${customer.id}">
+            ${escapeHtml(
+              customerName(customer)
+            )}
+            ${customer.portal_number
+              ? ` — ${escapeHtml(customer.portal_number)}`
+              : ""}
+          </option>
+        `
+      )
+      .join("");
+
+
+  if (
+    selected &&
+    customers.some(
+      customer =>
+        String(customer.id) ===
+        String(selected)
+    )
+  ) {
+    select.value =
+      selected;
+  }
+
+}
+
+
+function populateMileageJobOptions() {
+
+  const select =
+    $("mileageJobId");
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const selectedCustomerId =
+    Number(
+      $("mileageCustomerId")?.value || 0
+    );
+
+  const currentValue =
+    select.value;
+
+
+  const availableJobs =
+    jobs.filter(
+      job =>
+        !selectedCustomerId ||
+        Number(job.customer_id) ===
+          selectedCustomerId
+    );
+
+
+  select.innerHTML =
+    `<option value="">
+      No repair job
+    </option>` +
+    availableJobs
+      .map(
+        job => `
+          <option value="${job.id}">
+            ${escapeHtml(job.job_number || "")}
+            ${jobEquipment(job)
+              ? ` — ${escapeHtml(jobEquipment(job))}`
+              : ""}
+          </option>
+        `
+      )
+      .join("");
+
+
+  if (
+    currentValue &&
+    availableJobs.some(
+      job =>
+        String(job.id) ===
+        String(currentValue)
+    )
+  ) {
+    select.value =
+      currentValue;
+  }
+
+}
+
+
+function clearMileageForm() {
+
+  if (!$("mileageForm")) {
+    return;
+  }
+
+
+  $("mileageId").value =
+    "";
+
+  $("mileageDate").value =
+    today();
+
+  $("mileageCustomerId").value =
+    "";
+
+  populateMileageJobOptions();
+
+  $("mileageJobId").value =
+    "";
+
+  $("mileagePurpose").value =
+    "Mobile Repair";
+
+  $("mileageStartLocation").value =
+    "";
+
+  $("mileageDestination").value =
+    "";
+
+  $("mileageMiles").value =
+    "";
+
+  $("mileageNotes").value =
+    "";
+
+  $("mileageSaveButton").textContent =
+    "Save Mileage";
+
+  $("mileageMessage").textContent =
+    "";
+
+
+  updateMileageCalculation();
+
+}
+
+
+async function loadMileageLogs() {
+
+  if (
+    !customers.length
+  ) {
+    await loadCustomers();
+  }
+
+
+  if (
+    !jobs.length
+  ) {
+    await loadJobs();
+  }
+
+
+  populateMileageCustomerOptions();
+  populateMileageJobOptions();
+
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("mileage_logs")
+      .select(`
+        *,
+        customers (
+          id,
+          first_name,
+          last_name,
+          portal_number
+        ),
+        repair_jobs (
+          id,
+          job_number
+        )
+      `)
+      .order(
+        "trip_date",
+        { ascending:false }
+      )
+      .order(
+        "created_at",
+        { ascending:false }
+      );
+
+
+  if (error) {
+
+    $("mileageTableWrapper")
+      .innerHTML =
+        `<p class="empty">
+          ${escapeHtml(error.message)}
+        </p>`;
+
+    return;
+
+  }
+
+
+  mileageLogs =
+    data || [];
+
+
+  renderMileageLogs();
+  updateMileageDashboard();
+
+
+  if (
+    !$("mileageDate").value
+  ) {
+    clearMileageForm();
+  }
+
+}
+
+
+function renderMileageLogs() {
+
+  const wrapper =
+    $("mileageTableWrapper");
+
+
+  if (!wrapper) {
+    return;
+  }
+
+
+  const q =
+    ($("mileageSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+
+  const rows =
+    mileageLogs.filter(
+      trip => {
+
+        const customer =
+          customerName(
+            trip.customers
+          );
+
+        return [
+          trip.trip_date,
+          customer,
+          trip.customers?.portal_number,
+          trip.repair_jobs?.job_number,
+          trip.business_purpose,
+          trip.start_location,
+          trip.destination,
+          trip.notes
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+
+      }
+    );
+
+
+  if (!rows.length) {
+
+    wrapper.innerHTML =
+      `<p class="empty">
+        No mileage found.
+      </p>`;
+
+    return;
+
+  }
+
+
+  wrapper.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Customer / Job</th>
+          <th>Purpose</th>
+          <th>Route</th>
+          <th>Miles</th>
+          <th>Rate</th>
+          <th>Deduction</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${rows.map(
+          trip => {
+
+            const customer =
+              customerName(
+                trip.customers
+              );
+
+            const job =
+              trip.repair_jobs
+                ?.job_number || "";
+
+            return `
+              <tr>
+
+                <td>
+                  ${escapeHtml(
+                    dateDisplay(
+                      trip.trip_date
+                    )
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    customer ||
+                    "General business"
+                  )}
+
+                  ${job
+                    ? `<div class="small-note">
+                        ${escapeHtml(job)}
+                       </div>`
+                    : ""}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    trip.business_purpose || ""
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    trip.start_location || ""
+                  )}
+                  →
+                  ${escapeHtml(
+                    trip.destination || ""
+                  )}
+                </td>
+
+                <td>
+                  ${Number(
+                    trip.business_miles || 0
+                  ).toFixed(1)}
+                </td>
+
+                <td>
+                  $${Number(
+                    trip.mileage_rate || 0
+                  ).toFixed(3)}
+                </td>
+
+                <td>
+                  <strong>
+                    ${money(
+                      trip.deduction_amount
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+
+                  <button
+                    class="small-button"
+                    type="button"
+                    onclick="editMileage(${trip.id})"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    class="small-button red"
+                    type="button"
+                    onclick="deleteMileage(${trip.id})"
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+            `;
+
+          }
+        ).join("")}
+
+      </tbody>
+    </table>
+  `;
+
+}
+
+
+function updateMileageDashboard() {
+
+  const year =
+    new Date()
+      .getFullYear();
+
+
+  let miles =
+    0;
+
+  let deduction =
+    0;
+
+
+  mileageLogs
+    .forEach(
+      trip => {
+
+        const tripYear =
+          Number(
+            String(
+              trip.trip_date || ""
+            )
+              .slice(0,4)
+          );
+
+
+        if (
+          tripYear === year
+        ) {
+
+          miles +=
+            Number(
+              trip.business_miles || 0
+            );
+
+          deduction +=
+            Number(
+              trip.deduction_amount || 0
+            );
+
+        }
+
+      }
+    );
+
+
+  if ($("mileageYearMiles")) {
+    $("mileageYearMiles")
+      .textContent =
+        `${miles.toFixed(1)} mi`;
+  }
+
+
+  if ($("mileageYearDeduction")) {
+    $("mileageYearDeduction")
+      .textContent =
+        money(deduction);
+  }
+
+
+  if ($("yearBusinessMiles")) {
+    $("yearBusinessMiles")
+      .textContent =
+        `${miles.toFixed(1)} mi`;
+  }
+
+
+  if ($("yearMileageDeduction")) {
+    $("yearMileageDeduction")
+      .textContent =
+        money(deduction);
+  }
+
+}
+
+
+function editMileage(id) {
+
+  const trip =
+    mileageLogs.find(
+      row =>
+        Number(row.id) ===
+        Number(id)
+    );
+
+
+  if (!trip) {
+    return;
+  }
+
+
+  $("mileageId").value =
+    trip.id;
+
+  $("mileageDate").value =
+    trip.trip_date || today();
+
+  $("mileageCustomerId").value =
+    trip.customer_id || "";
+
+  populateMileageJobOptions();
+
+  $("mileageJobId").value =
+    trip.repair_job_id || "";
+
+  $("mileagePurpose").value =
+    trip.business_purpose ||
+    "Other Business";
+
+  $("mileageStartLocation").value =
+    trip.start_location || "";
+
+  $("mileageDestination").value =
+    trip.destination || "";
+
+  $("mileageMiles").value =
+    Number(
+      trip.business_miles || 0
+    );
+
+  $("mileageNotes").value =
+    trip.notes || "";
+
+  $("mileageSaveButton").textContent =
+    "Save Changes";
+
+
+  updateMileageCalculation();
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+}
+
+
+async function deleteMileage(id) {
+
+  if (
+    !confirm(
+      "Delete this mileage entry?"
+    )
+  ) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from("mileage_logs")
+      .delete()
+      .eq(
+        "id",
+        Number(id)
+      );
+
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+
+  await loadMileageLogs();
+
+}
+
+
+$("mileageDate")
+  ?.addEventListener(
+    "change",
+    updateMileageCalculation
+  );
+
+
+$("mileageMiles")
+  ?.addEventListener(
+    "input",
+    updateMileageCalculation
+  );
+
+
+$("mileageCustomerId")
+  ?.addEventListener(
+    "change",
+    populateMileageJobOptions
+  );
+
+
+$("mileageForm")
+  ?.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const id =
+        Number(
+          $("mileageId").value || 0
+        );
+
+
+      const dateValue =
+        $("mileageDate").value;
+
+      const miles =
+        Number(
+          $("mileageMiles").value || 0
+        );
+
+      const rate =
+        businessMileageRateForDate(
+          dateValue
+        );
+
+
+      if (!rate) {
+
+        $("mileageMessage")
+          .textContent =
+            "This app currently auto-calculates IRS business mileage for 2026 trips.";
+
+        $("mileageMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      const payload = {
+
+        trip_date:
+          dateValue,
+
+        customer_id:
+          Number(
+            $("mileageCustomerId").value || 0
+          ) || null,
+
+        repair_job_id:
+          Number(
+            $("mileageJobId").value || 0
+          ) || null,
+
+        business_purpose:
+          $("mileagePurpose").value,
+
+        start_location:
+          $("mileageStartLocation")
+            .value
+            .trim(),
+
+        destination:
+          $("mileageDestination")
+            .value
+            .trim(),
+
+        business_miles:
+          miles,
+
+        mileage_rate:
+          rate,
+
+        deduction_amount:
+          Math.round(
+            miles *
+            rate *
+            100
+          ) / 100,
+
+        notes:
+          $("mileageNotes")
+            .value
+            .trim()
+
+      };
+
+
+      let result;
+
+
+      if (id) {
+
+        result =
+          await db
+            .from("mileage_logs")
+            .update(payload)
+            .eq(
+              "id",
+              id
+            );
+
+      } else {
+
+        result =
+          await db
+            .from("mileage_logs")
+            .insert(payload);
+
+      }
+
+
+      if (result.error) {
+
+        $("mileageMessage")
+          .textContent =
+            result.error.message;
+
+        $("mileageMessage")
+          .className =
+            "message error";
+
+        return;
+
+      }
+
+
+      clearMileageForm();
+
+
+      $("mileageMessage")
+        .textContent =
+          id
+            ? "Mileage updated."
+            : "Mileage saved.";
+
+      $("mileageMessage")
+        .className =
+          "message success";
+
+
+      await loadMileageLogs();
+
+    }
+  );
+
+
+$("clearMileageButton")
+  ?.addEventListener(
+    "click",
+    clearMileageForm
+  );
+
+
+$("mileageSearch")
+  ?.addEventListener(
+    "input",
+    renderMileageLogs
+  );
+
+
+$("exportMileageButton")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      if (!mileageLogs.length) {
+
+        alert(
+          "There is no mileage to export."
+        );
+
+        return;
+
+      }
+
+
+      const rows = [
+        [
+          "Date",
+          "Customer",
+          "FSER Number",
+          "Repair Job",
+          "Business Purpose",
+          "Starting Location",
+          "Destination",
+          "Business Miles",
+          "IRS Rate",
+          "Estimated Deduction",
+          "Notes"
+        ]
+      ];
+
+
+      mileageLogs
+        .forEach(
+          trip => {
+
+            rows.push([
+              trip.trip_date || "",
+              customerName(
+                trip.customers
+              ),
+              trip.customers
+                ?.portal_number || "",
+              trip.repair_jobs
+                ?.job_number || "",
+              trip.business_purpose || "",
+              trip.start_location || "",
+              trip.destination || "",
+              Number(
+                trip.business_miles || 0
+              ).toFixed(1),
+              Number(
+                trip.mileage_rate || 0
+              ).toFixed(3),
+              Number(
+                trip.deduction_amount || 0
+              ).toFixed(2),
+              trip.notes || ""
+            ]);
+
+          }
+        );
+
+
+      const csv =
+        rows
+          .map(
+            row =>
+              row
+                .map(
+                  value =>
+                    `"${String(value)
+                      .replaceAll(
+                        '"',
+                        '""'
+                      )}"`
+                )
+                .join(",")
+          )
+          .join("\n");
+
+
+      const blob =
+        new Blob(
+          [csv],
+          {
+            type:
+              "text/csv;charset=utf-8;"
+          }
+        );
+
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+
+      link.href =
+        url;
+
+      link.download =
+        `fser-mileage-${new Date().getFullYear()}.csv`;
+
+
+      document.body
+        .appendChild(
+          link
+        );
+
+
+      link.click();
+
+
+      link.remove();
+
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    }
+  );
+
+
+
 /* ==================================================
    EXPENSES
 =================================================== */
@@ -12867,6 +15775,7 @@ async function startAdmin() {
     loadInvoices(),
     loadPayments(),
     loadExpenses(),
+    loadMileageLogs(),
     loadRequestCount()
   ]);
 
@@ -12874,9 +15783,11 @@ async function startAdmin() {
   loadedViews.add("customersView");
   loadedViews.add("itemsView");
   loadedViews.add("jobsView");
+  loadedViews.add("completedJobsView");
   loadedViews.add("invoicesView");
   loadedViews.add("paymentsView");
   loadedViews.add("expensesView");
+  loadedViews.add("mileageView");
 
 }
 
