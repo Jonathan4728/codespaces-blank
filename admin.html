@@ -4110,6 +4110,14 @@
 
 
       <label class="full-width">
+        Customer Complaint
+
+        <textarea id="editJobComplaint"></textarea>
+
+      </label>
+
+
+      <label class="full-width">
         Diagnosis
 
         <textarea id="editDiagnosis"></textarea>
@@ -7901,6 +7909,9 @@ async function openJob(id) {
   $("editPickupFee").value =
     job.pickup_delivery_fee || 0;
 
+  $("editJobComplaint").value =
+    job.complaint || "";
+
   $("editDiagnosis").value =
     job.diagnosis || "";
 
@@ -8563,6 +8574,10 @@ $("saveJobButton")
           Number(
             $("editPickupFee").value || 0
           ),
+
+        complaint:
+          $("editJobComplaint")
+            .value.trim(),
 
         diagnosis:
           $("editDiagnosis")
