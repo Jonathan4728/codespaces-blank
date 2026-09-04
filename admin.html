@@ -1828,6 +1828,106 @@
     @media(max-width:900px){.schedule-layout{grid-template-columns:1fr}}
     @media(max-width:700px){.schedule-slot{grid-template-columns:72px minmax(0,1fr)}.schedule-slot>.small-button{grid-column:1/-1;width:100%}.schedule-toolbar>*{width:100%}.schedule-toolbar label{min-width:0}.schedule-customer-list{max-height:none}}
 
+    #estimateLines .line-item {
+      grid-template-columns: .65fr 1.1fr 1.5fr .5fr .7fr .7fr 42px;
+    }
+
+    .workflow-banner {
+      margin: 14px 0;
+      padding: 12px 14px;
+      border: 1px solid #353535;
+      border-left: 4px solid var(--red);
+      border-radius: 6px;
+      background: #0b0b0b;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .workflow-banner.good {
+      border-left-color: var(--green);
+    }
+
+    .workflow-banner.warning {
+      border-left-color: #f0a328;
+    }
+
+    .photo-toolbar {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    .job-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .job-photo-card {
+      overflow: hidden;
+      border: 1px solid #303030;
+      border-radius: 7px;
+      background: #090909;
+    }
+
+    .job-photo-card img {
+      width: 100%;
+      height: 130px;
+      display: block;
+      object-fit: cover;
+      background: #151515;
+    }
+
+    .job-photo-card div {
+      padding: 9px;
+    }
+
+    .job-photo-card p {
+      min-height: 32px;
+      margin: 0 0 8px;
+      color: #bbb;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 46px;
+      margin-top: 18px;
+      padding: 10px 12px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background: #090909;
+    }
+
+    .check-label input {
+      width: 18px;
+      min-height: 18px;
+      margin: 0;
+    }
+
+    .alert-action {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1000px) {
+      #estimateLines .line-item,
+      .photo-toolbar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      #estimateLines .line-item,
+      .photo-toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+
 </style>
 
 </head>
@@ -2184,6 +2284,13 @@
 
       </div>
 
+      <div class="panel">
+        <h2>Needs Attention</h2>
+        <p style="margin-top:-7px;color:#999;">Automatic follow-ups for quotes, parts payments, pickup, invoices, reviews, and warranty returns.</p>
+        <div id="dashboardAlerts" class="detail-grid"></div>
+        <div id="dashboardAlertList" class="table-wrap" style="margin-top:16px;"></div>
+      </div>
+
     </section>
 
 
@@ -2249,13 +2356,6 @@
           </p>
         </div>
 
-      </div>
-
-    
-      <div class="panel">
-        <h2>Needs Attention</h2>
-        <div id="dashboardAlerts" class="detail-grid"></div>
-        <div id="dashboardAlertList" class="table-wrap" style="margin-top:16px;"></div>
       </div>
 
 </section>
@@ -2854,6 +2954,11 @@
             <div class="total-row">
               <span>Subtotal</span>
               <strong id="estimateSubtotal">$0.00</strong>
+            </div>
+
+            <div class="total-row">
+              <span>Parts Due Upfront</span>
+              <strong id="estimatePartsTotal">$0.00</strong>
             </div>
 
             <div class="total-row grand">
@@ -4132,8 +4237,32 @@
 
       </label>
 
+      <label>
+        Warranty Expires
+        <input id="editWarrantyExpires" type="date">
+      </label>
+
+      <label class="check-label">
+        <input id="editWarrantyReturn" type="checkbox">
+        Warranty / Repeat Repair
+      </label>
+
+      <label class="full-width">
+        Original Warranty Job
+        <select id="editWarrantyParentJob">
+          <option value="">No original job linked</option>
+        </select>
+      </label>
+
+      <div id="jobWarrantySummary" class="workflow-banner full-width"></div>
+
     </div>
 
+    <h3>Quote &amp; Parts Payment</h3>
+
+    <div id="jobQuotePaymentSummary" class="workflow-banner">
+      No estimate is linked to this repair job.
+    </div>
 
     <h3>Job Profit</h3>
 
@@ -4186,6 +4315,13 @@
 
     <div class="form-grid three">
 
+      <label class="full-width">
+        Use Inventory Item
+        <select id="newPartInventoryItem">
+          <option value="">Not from inventory / must order</option>
+        </select>
+      </label>
+
       <label>
         Description
         <input id="newPartDescription">
@@ -4236,6 +4372,25 @@
 
     </div>
 
+    <h3>Repair Photos</h3>
+
+    <div class="photo-toolbar">
+      <label>
+        Add Photos
+        <input id="jobPhotoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+      </label>
+
+      <label>
+        Caption
+        <input id="jobPhotoCaption" placeholder="Before repair, damaged part, completed repair...">
+      </label>
+
+      <button id="uploadJobPhotosButton" class="secondary-button" type="button">
+        Upload Photos
+      </button>
+    </div>
+
+    <div id="jobPhotoList" class="job-photo-grid"></div>
 
     <div class="button-row">
 
@@ -4277,6 +4432,14 @@
         type="button"
       >
         Text Ready for Pickup
+      </button>
+
+      <button
+        id="reviewRequestButton"
+        class="secondary-button"
+        type="button"
+      >
+        Text Review Request
       </button>
 
       <button
@@ -5835,47 +5998,272 @@ async function calculateDashboardProfit() {
 
 
 async function loadDashboardAlerts() {
-  const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
-  const activeJobs = jobs.filter(j => !["completed","picked up","closed"].includes(String(j.status||"").toLowerCase()));
-  const waitingApproval = activeJobs.filter(j => String(j.status||"").toLowerCase().includes("approval"));
-  const waitingParts = activeJobs.filter(j => String(j.status||"").toLowerCase().includes("part"));
-  const readyPickup = jobs.filter(j => String(j.status||"").toLowerCase().includes("ready"));
-  const oldJobs = activeJobs.filter(j => {
-    const raw=j.created_at||j.date_received;
-    return raw && new Date(raw)<sevenDaysAgo;
+  const now = Date.now();
+  const twoDaysAgo = now - 2 * 86400000;
+  const sevenDaysAgo = now - 7 * 86400000;
+  const activeJobs = jobs.filter(job =>
+    !["completed","picked up","closed"].includes(
+      String(job.status || "").toLowerCase()
+    )
+  );
+  const oldJobs = activeJobs.filter(job => {
+    const value = job.date_received || job.created_at;
+    return value && new Date(value).getTime() < sevenDaysAgo;
   });
-  const unpaid=invoices.filter(i=>Number(i.balance_due||0)>0);
-  const outstanding=unpaid.reduce((s,i)=>s+Number(i.balance_due||0),0);
+  const quoteFollowUps = estimates.filter(estimate => {
+    const sent = estimate.last_sent_at || estimate.created_at;
+    const reminder = estimate.last_reminder_sent_at;
+    return (
+      estimate.customer_response === "Pending" &&
+      estimate.status === "Sent" &&
+      sent &&
+      new Date(sent).getTime() < twoDaysAgo &&
+      (!reminder || new Date(reminder).getTime() < twoDaysAgo)
+    );
+  });
+  const partsDue = estimates.filter(estimate =>
+    estimate.customer_response === "Accepted" &&
+    Number(estimate.parts_balance_due || 0) > 0
+  );
+  const readyPickup = jobs.filter(job =>
+    String(job.status || "").toLowerCase().includes("ready")
+  );
+  const reviewDue = jobs.filter(job => {
+    if (job.status !== "Completed" || job.review_requested_at) return false;
+    const completed = job.date_completed || job.created_at;
+    return completed && new Date(completed).getTime() < twoDaysAgo;
+  });
+  const warrantyReturns = activeJobs.filter(job =>
+    Boolean(job.warranty_return)
+  );
+  const unpaid = invoices.filter(invoice =>
+    Number(invoice.balance_due || 0) > 0
+  );
+  const outstanding = unpaid.reduce(
+    (sum, invoice) =>
+      sum + Number(invoice.balance_due || 0),
+    0
+  );
 
   if (!$("dashboardAlerts") || !$("dashboardAlertList")) return;
 
   $("dashboardAlerts").innerHTML=`
-    <div class="detail-box"><span>Waiting on Approval</span><strong>${waitingApproval.length}</strong></div>
-    <div class="detail-box"><span>Waiting on Parts</span><strong>${waitingParts.length}</strong></div>
+    <div class="detail-box"><span>Quote Follow-Ups</span><strong>${quoteFollowUps.length}</strong></div>
+    <div class="detail-box"><span>Parts Payments Due</span><strong>${partsDue.length}</strong></div>
     <div class="detail-box"><span>Ready for Pickup</span><strong>${readyPickup.length}</strong></div>
-    <div class="detail-box"><span>Open 7+ Days</span><strong>${oldJobs.length}</strong></div>
-    <div class="detail-box"><span>Invoices With Balance</span><strong>${unpaid.length}</strong></div>
+    <div class="detail-box"><span>Review Requests Due</span><strong>${reviewDue.length}</strong></div>
+    <div class="detail-box"><span>Warranty Returns</span><strong>${warrantyReturns.length}</strong></div>
     <div class="detail-box"><span>Outstanding Balance</span><strong>${money(outstanding)}</strong></div>`;
 
-  const alerts=[];
-  const addJob=(type,j)=>alerts.push({type,customer:customerName(j.customers),ref:j.ticket_number||"",detail:jobEquipment(j),click:`openJob(${j.id})`});
-  waitingApproval.forEach(j=>addJob("Waiting on Approval",j));
-  waitingParts.forEach(j=>addJob("Waiting on Parts",j));
-  readyPickup.forEach(j=>addJob("Ready for Pickup",j));
-  oldJobs.forEach(j=>addJob("Open 7+ Days",j));
-  unpaid.forEach(i=>alerts.push({
-    type:Number(i.amount_paid||0)>0?"Partially Paid":"Unpaid Invoice",
-    customer:customerName(i.customers),ref:i.invoice_number||"",
-    detail:`Balance ${money(i.balance_due)}`,click:`openInvoice(${i.id})`
+  const alerts = [];
+
+  quoteFollowUps.forEach(estimate => alerts.push({
+    type: "Quote Follow-Up",
+    customer: customerName(estimate.customers),
+    ref: estimate.estimate_number || "",
+    detail: "Awaiting customer response",
+    click: `openEstimate(${estimate.id})`,
+    action: `sendEstimateReminder(${estimate.id}, "quote")`,
+    actionLabel: "Text Reminder"
+  }));
+
+  partsDue.forEach(estimate => alerts.push({
+    type: "Parts Payment Due",
+    customer: customerName(estimate.customers),
+    ref: estimate.estimate_number || "",
+    detail: `${money(estimate.parts_balance_due)} due before ordering`,
+    click: `openEstimate(${estimate.id})`,
+    action: `sendEstimateReminder(${estimate.id}, "parts")`,
+    actionLabel: "Text Customer"
+  }));
+
+  readyPickup.forEach(job => alerts.push({
+    type: "Ready for Pickup",
+    customer: customerName(job.customers),
+    ref: job.job_number || "",
+    detail: jobEquipment(job),
+    click: `openJob(${job.id})`,
+    action: `sendPickupReminder(${job.id})`,
+    actionLabel: "Text Pickup"
+  }));
+
+  unpaid.forEach(invoice => alerts.push({
+    type: Number(invoice.amount_paid || 0) > 0
+      ? "Partially Paid Invoice"
+      : "Unpaid Invoice",
+    customer: customerName(invoice.customers),
+    ref: invoice.invoice_number || "",
+    detail: `Balance ${money(invoice.balance_due)}`,
+    click: `openInvoice(${invoice.id})`,
+    action: `sendInvoiceReminder(${invoice.id})`,
+    actionLabel: "Text Reminder"
+  }));
+
+  reviewDue.forEach(job => alerts.push({
+    type: "Review Request Due",
+    customer: customerName(job.customers),
+    ref: job.job_number || "",
+    detail: jobEquipment(job),
+    click: `openJob(${job.id})`,
+    action: `sendReviewReminder(${job.id})`,
+    actionLabel: "Text Review"
+  }));
+
+  warrantyReturns.forEach(job => alerts.push({
+    type: "Warranty Return",
+    customer: customerName(job.customers),
+    ref: job.job_number || "",
+    detail: jobEquipment(job),
+    click: `openJob(${job.id})`
+  }));
+
+  oldJobs.forEach(job => alerts.push({
+    type: "Open 7+ Days",
+    customer: customerName(job.customers),
+    ref: job.job_number || "",
+    detail: jobEquipment(job),
+    click: `openJob(${job.id})`
   }));
 
   $("dashboardAlertList").innerHTML = alerts.length ? `
-    <table><thead><tr><th>Alert</th><th>Customer</th><th>Ticket / Invoice</th><th>Details</th></tr></thead>
+    <table><thead><tr><th>Alert</th><th>Customer</th><th>Ticket / Invoice</th><th>Details</th><th>Action</th></tr></thead>
     <tbody>${alerts.map(a=>`<tr style="cursor:pointer;" onclick="${a.click}">
       <td><span class="status">${escapeHtml(a.type)}</span></td>
       <td>${escapeHtml(a.customer)}</td><td>${escapeHtml(a.ref)}</td><td>${escapeHtml(a.detail)}</td>
+      <td>${
+        a.action
+          ? `<button class="small-button alert-action" type="button" onclick='event.stopPropagation(); ${a.action}'>${escapeHtml(a.actionLabel)}</button>`
+          : ""
+      }</td>
     </tr>`).join("")}</tbody></table>` :
     `<p class="empty">Nothing needs attention right now.</p>`;
+}
+
+
+async function sendEstimateReminder(id, reason) {
+  const estimate = estimates.find(
+    item => Number(item.id) === Number(id)
+  );
+  const phone = estimate?.customers?.phone;
+
+  if (!estimate || !phone) {
+    alert("This customer does not have a phone number saved.");
+    return;
+  }
+
+  const approvalUrl = getQuoteApprovalUrl(estimate);
+  const message =
+    reason === "parts"
+      ? `Hi ${customerName(estimate.customers)}, this is Flores Small Engine Repair. Your quote ${estimate.estimate_number} is approved, and ${money(estimate.parts_balance_due)} is due for parts before they can be ordered. Please call or text (337) 326-8324 with any questions. Quote: ${approvalUrl}`
+      : `Hi ${customerName(estimate.customers)}, this is Flores Small Engine Repair following up on quote ${estimate.estimate_number} for ${money(estimate.total)}. You can approve or decline it without logging in here: ${approvalUrl}`;
+
+  const sentAt = new Date().toISOString();
+  const { error } = await db
+    .from("estimates")
+    .update({ last_reminder_sent_at: sentAt })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  estimate.last_reminder_sent_at = sentAt;
+  location.href =
+    `sms:${cleanPhone(phone)}?body=${encodeURIComponent(message)}`;
+}
+
+
+async function sendInvoiceReminder(id) {
+  const invoice = invoices.find(
+    item => Number(item.id) === Number(id)
+  );
+  const phone = invoice?.customers?.phone;
+
+  if (!invoice || !phone) {
+    alert("This customer does not have a phone number saved.");
+    return;
+  }
+
+  const message =
+    `Hi ${customerName(invoice.customers)}, this is Flores Small Engine Repair. This is a reminder that invoice ${invoice.invoice_number} has a balance of ${money(invoice.balance_due)}. View it in the customer portal: https://floressmallenginerepair.com/portal.html`;
+
+  const sentAt = new Date().toISOString();
+  const { error } = await db
+    .from("invoices")
+    .update({ last_reminder_sent_at: sentAt })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  invoice.last_reminder_sent_at = sentAt;
+  location.href =
+    `sms:${cleanPhone(phone)}?body=${encodeURIComponent(message)}`;
+}
+
+
+async function sendPickupReminder(id) {
+  const job = jobs.find(
+    item => Number(item.id) === Number(id)
+  );
+  const phone = job?.customers?.phone;
+
+  if (!job || !phone) {
+    alert("This customer does not have a phone number saved.");
+    return;
+  }
+
+  const message =
+    `Hi ${job.customers.first_name || customerName(job.customers)}, this is Flores Small Engine Repair. ${jobEquipment(job) || "Your equipment"} is ready for pickup. Total due: ${money(repairTicketTotal(job))}. Payment is required before equipment is released. Portal: https://floressmallenginerepair.com/portal.html`;
+
+  const sentAt = new Date().toISOString();
+  const { error } = await db
+    .from("repair_jobs")
+    .update({ pickup_reminder_sent_at: sentAt })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  job.pickup_reminder_sent_at = sentAt;
+  location.href =
+    `sms:${cleanPhone(phone)}?body=${encodeURIComponent(message)}`;
+}
+
+
+async function sendReviewReminder(id) {
+  const job = jobs.find(
+    item => Number(item.id) === Number(id)
+  );
+  const phone = job?.customers?.phone;
+
+  if (!job || !phone) {
+    alert("This customer does not have a phone number saved.");
+    return;
+  }
+
+  const message =
+    `Hi ${job.customers.first_name || customerName(job.customers)}, thank you for choosing Flores Small Engine Repair. If you were happy with our service, we would greatly appreciate a Google review: https://g.page/r/CVPS3WL6jDtSECE/review`;
+
+  const sentAt = new Date().toISOString();
+  const { error } = await db
+    .from("repair_jobs")
+    .update({ review_requested_at: sentAt })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  job.review_requested_at = sentAt;
+  location.href =
+    `sms:${cleanPhone(phone)}?body=${encodeURIComponent(message)}`;
 }
 
 async function openCustomerHistory(customerId) {
@@ -7029,6 +7417,10 @@ async function deleteItem(id) {
       error.message
     );
 
+    await loadJobParts(
+      Number(jobId)
+    );
+
     return;
 
   }
@@ -7164,6 +7556,26 @@ function applyCatalogItem(
         item.rate || 0
       )
         .toFixed(2);
+  }
+
+  if (type === "estimate") {
+    const itemTypeSelect =
+      row.querySelector(
+        ".estimate-item-type"
+      );
+
+    if (itemTypeSelect) {
+      const productType =
+        String(item.product_type || "")
+          .toLowerCase();
+
+      itemTypeSelect.value =
+        productType.includes("part") ||
+        productType.includes("good") ||
+        productType.includes("product")
+          ? "part"
+          : "service";
+    }
   }
 
 
@@ -7583,6 +7995,7 @@ function renderCompletedJobs() {
           <th>Customer</th>
           <th>Equipment</th>
           <th>Completed</th>
+          <th>Warranty</th>
           <th>Labor</th>
         </tr>
       </thead>
@@ -7625,6 +8038,20 @@ function renderCompletedJobs() {
               ? dateDisplay(job.date_completed)
               : ""
           )}
+        </td>
+
+        <td>
+          ${
+            job.warranty_expires
+              ? (() => {
+                  const days = warrantyDaysRemaining(job.warranty_expires);
+                  return days >= 0
+                    ? `${days} day${days === 1 ? "" : "s"} left`
+                    : "Expired";
+                })()
+              : "—"
+          }
+          ${job.warranty_return ? '<span class="status">Return</span>' : ""}
         </td>
 
         <td>${money(labor)}</td>
@@ -7866,6 +8293,136 @@ function closeModal(id) {
 }
 
 
+function populateWarrantyParentJobs(job) {
+  const select = $("editWarrantyParentJob");
+
+  select.innerHTML =
+    '<option value="">No original job linked</option>' +
+    jobs
+      .filter(candidate =>
+        candidate.status === "Completed" &&
+        Number(candidate.customer_id) === Number(job.customer_id) &&
+        Number(candidate.id) !== Number(job.id)
+      )
+      .map(candidate =>
+        `<option value="${candidate.id}">${escapeHtml(candidate.job_number)} — ${escapeHtml(jobEquipment(candidate))}</option>`
+      )
+      .join("");
+}
+
+
+function warrantyDaysRemaining(value) {
+  if (!value) return null;
+  const end = new Date(value + "T23:59:59");
+  return Math.ceil((end.getTime() - Date.now()) / 86400000);
+}
+
+
+function renderJobWarrantySummary(job) {
+  const box = $("jobWarrantySummary");
+  const expires = $("editWarrantyExpires").value || job.warranty_expires;
+  const days = warrantyDaysRemaining(expires);
+
+  if (!expires) {
+    box.className = "workflow-banner full-width";
+    box.textContent =
+      job.status === "Completed"
+        ? "Save this completed job to start its 30-day labor warranty."
+        : "The 30-day labor warranty will be dated automatically when the job is completed.";
+    return;
+  }
+
+  const active = days >= 0;
+  box.className =
+    `workflow-banner full-width ${active ? "good" : ""}`;
+  box.innerHTML =
+    `<strong>30-Day Labor Warranty:</strong> ${
+      active
+        ? `${days} day${days === 1 ? "" : "s"} remaining`
+        : `Expired ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ago`
+    } (${escapeHtml(dateDisplay(expires))}).${
+      $("editWarrantyReturn").checked
+        ? " This job is marked as a warranty / repeat repair."
+        : ""
+    }`;
+}
+
+
+function populateJobInventorySelect(selectedId) {
+  const select = $("newPartInventoryItem");
+  if (!select) return;
+
+  select.innerHTML =
+    '<option value="">Not from inventory / must order</option>' +
+    inventoryItems
+      .map(item =>
+        `<option value="${item.id}">${escapeHtml(item.name)}${
+          item.part_number ? ` — ${escapeHtml(item.part_number)}` : ""
+        } (${Number(item.qty_on_hand || 0)} ${escapeHtml(item.unit || "ea")} on hand)</option>`
+      )
+      .join("");
+
+  select.value = selectedId ? String(selectedId) : "";
+}
+
+
+async function loadJobQuotePayment(jobId) {
+  const box = $("jobQuotePaymentSummary");
+  box.className = "workflow-banner";
+  box.textContent = "Loading quote and parts payment...";
+
+  const { data: estimate, error } = await db
+    .from("estimates")
+    .select("id,estimate_number,status,customer_response,parts_total,parts_amount_paid,parts_balance_due,parts_payment_status")
+    .eq("repair_job_id", Number(jobId))
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  if (!estimate) {
+    box.innerHTML =
+      "<strong>No linked estimate.</strong> Create an estimate and mark each parts line as Part to activate the parts-payment lock.";
+    return;
+  }
+
+  const paid = estimate.parts_payment_status === "Paid" ||
+    estimate.parts_payment_status === "Not Required";
+
+  box.className =
+    `workflow-banner ${paid ? "good" : "warning"}`;
+  box.innerHTML = `
+    <strong>${escapeHtml(estimate.estimate_number)}</strong> —
+    ${escapeHtml(estimate.customer_response || estimate.status || "Pending")}
+    <br>
+    Parts: ${money(estimate.parts_total)} &nbsp;|&nbsp;
+    Paid: ${money(estimate.parts_amount_paid)} &nbsp;|&nbsp;
+    Due: <strong>${money(estimate.parts_balance_due)}</strong>
+    <br>
+    ${
+      paid
+        ? "Parts payment requirement is satisfied."
+        : "Ordered status is locked until the quote is accepted and the parts balance is paid."
+    }
+    <button class="small-button" type="button" style="margin-left:10px;" onclick="openEstimateFromJob(${estimate.id})">
+      Open Estimate
+    </button>
+  `;
+}
+
+
+async function openEstimateFromJob(estimateId) {
+  if (!estimates.some(item => Number(item.id) === Number(estimateId))) {
+    await loadEstimates();
+  }
+  openEstimate(Number(estimateId));
+}
+
+
 async function openJob(id) {
 
   const job =
@@ -7918,6 +8475,21 @@ async function openJob(id) {
   $("editRepairNotes").value =
     job.repair_notes || "";
 
+  $("editWarrantyExpires").value =
+    job.warranty_expires || "";
+
+  $("editWarrantyReturn").checked =
+    Boolean(job.warranty_return);
+
+  populateWarrantyParentJobs(job);
+
+  $("editWarrantyParentJob").value =
+    job.warranty_parent_job_id
+      ? String(job.warranty_parent_job_id)
+      : "";
+
+  renderJobWarrantySummary(job);
+
 
   $("newPartDescription").value = "";
   $("newPartNumber").value = "";
@@ -7925,12 +8497,22 @@ async function openJob(id) {
   $("newPartCost").value = "";
   $("newPartSell").value = "";
   $("newPartStatus").value = "Needed";
+  populateJobInventorySelect("");
   $("editingJobPartId").value = "";
   $("addJobPartButton").textContent = "Add Part";
   $("cancelJobPartEditButton").style.display = "none";
 
 
-  await loadJobParts(id);
+  await Promise.all([
+    loadJobParts(id),
+    loadJobQuotePayment(id),
+    loadJobPhotos(id)
+  ]);
+
+  $("reviewRequestButton").style.display =
+    job.status === "Completed"
+      ? "inline-block"
+      : "none";
 
 
   $("jobModal")
@@ -8094,6 +8676,7 @@ async function loadJobParts(jobId) {
           <th>Qty</th>
           <th>Cost</th>
           <th>Sell</th>
+          <th>Inventory</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -8130,6 +8713,14 @@ async function loadJobParts(jobId) {
 
         <td>
           ${money(part.sell_price_each)}
+        </td>
+
+        <td>
+          ${
+            part.inventory_item_id
+              ? `Linked${part.inventory_deducted ? " — Deducted" : ""}`
+              : "Must order"
+          }
         </td>
 
         <td>
@@ -8187,6 +8778,171 @@ async function loadJobParts(jobId) {
 }
 
 
+async function loadJobPhotos(jobId) {
+  const container = $("jobPhotoList");
+  container.innerHTML = '<p class="empty">Loading photos...</p>';
+
+  const { data: photos, error } = await db
+    .from("job_photos")
+    .select("*")
+    .eq("repair_job_id", Number(jobId))
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML =
+      `<p class="error">${escapeHtml(error.message)}</p>`;
+    return;
+  }
+
+  if (!photos?.length) {
+    container.innerHTML =
+      '<p class="empty">No repair photos yet.</p>';
+    return;
+  }
+
+  const cards = await Promise.all(
+    photos.map(async photo => {
+      const { data } = await db.storage
+        .from("job-photos")
+        .createSignedUrl(photo.storage_path, 3600);
+
+      const signedUrl = data?.signedUrl || "";
+
+      return `
+        <article class="job-photo-card">
+          ${
+            signedUrl
+              ? `<a href="${escapeHtml(signedUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(signedUrl)}" alt="${escapeHtml(photo.caption || photo.file_name)}"></a>`
+              : '<div class="empty">Preview unavailable</div>'
+          }
+          <div>
+            <p>${escapeHtml(photo.caption || photo.file_name)}</p>
+            <button class="small-button red" type="button" onclick='deleteJobPhoto(${photo.id}, ${JSON.stringify(photo.storage_path)}, ${jobId})'>Delete</button>
+          </div>
+        </article>
+      `;
+    })
+  );
+
+  container.innerHTML = cards.join("");
+}
+
+
+$("uploadJobPhotosButton")
+  ?.addEventListener(
+    "click",
+    async () => {
+      const jobId = Number($("editJobId").value);
+      const files = Array.from($("jobPhotoFiles").files || []);
+      const caption = $("jobPhotoCaption").value.trim();
+      const button = $("uploadJobPhotosButton");
+
+      if (!jobId || !files.length) {
+        $("editJobMessage").textContent =
+          "Choose at least one repair photo.";
+        $("editJobMessage").className =
+          "message error";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Uploading...";
+
+      try {
+        for (const file of files) {
+          if (file.size > 10 * 1024 * 1024) {
+            throw new Error(file.name + " is larger than 10 MB.");
+          }
+
+          if (!["image/jpeg","image/png","image/webp","image/heic","image/heif"].includes(file.type)) {
+            throw new Error(file.name + " is not a supported image.");
+          }
+
+          const safeName =
+            file.name.replace(/[^a-z0-9._-]/gi, "-");
+          const path =
+            jobId + "/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
+
+          const { error: uploadError } = await db.storage
+            .from("job-photos")
+            .upload(path, file, {
+              cacheControl: "3600",
+              contentType: file.type,
+              upsert: false
+            });
+
+          if (uploadError) {
+            throw uploadError;
+          }
+
+          const { error: rowError } = await db
+            .from("job_photos")
+            .insert({
+              repair_job_id: jobId,
+              storage_path: path,
+              file_name: file.name,
+              mime_type: file.type,
+              caption
+            });
+
+          if (rowError) {
+            await db.storage
+              .from("job-photos")
+              .remove([path]);
+            throw rowError;
+          }
+        }
+
+        $("jobPhotoFiles").value = "";
+        $("jobPhotoCaption").value = "";
+        $("editJobMessage").textContent =
+          files.length === 1
+            ? "Photo uploaded."
+            : files.length + " photos uploaded.";
+        $("editJobMessage").className =
+          "message success";
+        await loadJobPhotos(jobId);
+      } catch (error) {
+        $("editJobMessage").textContent =
+          error?.message || "The photos could not be uploaded.";
+        $("editJobMessage").className =
+          "message error";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Upload Photos";
+      }
+    }
+  );
+
+
+async function deleteJobPhoto(photoId, storagePath, jobId) {
+  if (!confirm("Delete this repair photo?")) {
+    return;
+  }
+
+  const { error: storageError } = await db.storage
+    .from("job-photos")
+    .remove([storagePath]);
+
+  if (storageError) {
+    alert(storageError.message);
+    return;
+  }
+
+  const { error } = await db
+    .from("job_photos")
+    .delete()
+    .eq("id", Number(photoId));
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadJobPhotos(Number(jobId));
+}
+
+
 async function updateJobPartStatus(
   partId,
   status,
@@ -8213,14 +8969,20 @@ async function updateJobPartStatus(
       error.message
     );
 
+    await loadJobParts(
+      Number(jobId)
+    );
+
     return;
 
   }
 
 
-  await loadJobParts(
-    Number(jobId)
-  );
+  await Promise.all([
+    loadJobParts(Number(jobId)),
+    loadInventory(),
+    loadJobQuotePayment(Number(jobId))
+  ]);
 
 
   await calculateDashboardProfit();
@@ -8239,6 +9001,7 @@ function resetJobPartForm() {
   $("newPartCost").value = "";
   $("newPartSell").value = "";
   $("newPartStatus").value = "Needed";
+  populateJobInventorySelect("");
 
   $("addJobPartButton").textContent =
     "Add Part";
@@ -8273,6 +9036,10 @@ function editJobPart(part) {
   $("newPartStatus").value =
     part.status || "Needed";
 
+  populateJobInventorySelect(
+    part.inventory_item_id || ""
+  );
+
   $("addJobPartButton").textContent =
     "Save Part Changes";
 
@@ -8290,6 +9057,32 @@ $("cancelJobPartEditButton")
   .addEventListener(
     "click",
     resetJobPartForm
+  );
+
+
+$("newPartInventoryItem")
+  ?.addEventListener(
+    "change",
+    event => {
+      const item = inventoryItems.find(
+        entry =>
+          Number(entry.id) ===
+          Number(event.target.value)
+      );
+
+      if (!item) {
+        return;
+      }
+
+      $("newPartDescription").value =
+        item.name || "";
+      $("newPartNumber").value =
+        item.part_number || "";
+      $("newPartCost").value =
+        Number(item.cost_each || 0).toFixed(2);
+      $("newPartStatus").value =
+        "Needed";
+    }
   );
 
 
@@ -8318,9 +9111,11 @@ async function deleteJobPart(
 
   resetJobPartForm();
 
-  await loadJobParts(
-    Number(jobId)
-  );
+  await Promise.all([
+    loadJobParts(Number(jobId)),
+    loadInventory(),
+    loadJobQuotePayment(Number(jobId))
+  ]);
 
 }
 
@@ -8357,6 +9152,11 @@ $("addJobPartButton")
 
         repair_job_id:
           jobId,
+
+        inventory_item_id:
+          $("newPartInventoryItem").value
+            ? Number($("newPartInventoryItem").value)
+            : null,
 
         description:
           $("newPartDescription")
@@ -8444,6 +9244,11 @@ $("addJobPartButton")
 
 
       await loadJobParts(jobId);
+
+      await Promise.all([
+        loadInventory(),
+        loadJobQuotePayment(jobId)
+      ]);
 
     }
   );
@@ -8587,6 +9392,18 @@ $("saveJobButton")
           $("editRepairNotes")
             .value.trim(),
 
+        warranty_expires:
+          $("editWarrantyExpires").value ||
+          null,
+
+        warranty_return:
+          $("editWarrantyReturn").checked,
+
+        warranty_parent_job_id:
+          $("editWarrantyParentJob").value
+            ? Number($("editWarrantyParentJob").value)
+            : null,
+
         date_completed:
           status === "Completed"
             ? today()
@@ -8641,6 +9458,24 @@ $("saveJobButton")
   );
 
 
+["editWarrantyExpires","editWarrantyReturn"]
+  .forEach(id =>
+    $(id)?.addEventListener(
+      "change",
+      () => {
+        const job = jobs.find(
+          item =>
+            Number(item.id) ===
+            Number($("editJobId").value)
+        );
+        if (job) {
+          renderJobWarrantySummary(job);
+        }
+      }
+    )
+  );
+
+
 
 /* ==================================================
    TEXT CUSTOMER JOB UPDATE
@@ -8657,7 +9492,7 @@ function getJobStatusMessage(status) {
       "We are currently diagnosing your equipment and will update you once we determine what repairs are needed.",
 
     "Waiting on Approval":
-      "Your estimate is ready. Please log into the customer portal to review and approve or decline it.",
+      "Your estimate is ready. Please review it and approve or decline it.",
 
     "Waiting on Parts":
       "Your repair is currently waiting on parts. We will update you when the parts arrive.",
@@ -8739,6 +9574,22 @@ $("textJobUpdateButton")
           status
         );
 
+      const linkedEstimate =
+        estimates.find(
+          estimate =>
+            Number(estimate.repair_job_id) === jobId &&
+            estimate.customer_response === "Pending"
+        );
+
+      const directQuoteText =
+        status === "Waiting on Approval" && linkedEstimate
+          ? `
+
+Review and approve or decline the quote without logging in:
+${getQuoteApprovalUrl(linkedEstimate)}
+`
+          : "";
+
 
       const portalUrl =
         "https://floressmallenginerepair.com/portal.html";
@@ -8750,6 +9601,7 @@ $("textJobUpdateButton")
 Update for job ${job.job_number} (${equipment}):
 
 ${updateText}
+${directQuoteText}
 
 Current status: ${status}
 
@@ -8873,9 +9725,60 @@ $("readyPickupTextButton")
         String(phone)
           .replace(/[^\d+]/g, "");
 
+      await db
+        .from("repair_jobs")
+        .update({
+          pickup_reminder_sent_at:
+            new Date().toISOString()
+        })
+        .eq("id", jobId);
+
+      job.pickup_reminder_sent_at =
+        new Date().toISOString();
+
       window.location.href =
         `sms:${smsPhone}?body=${encodeURIComponent(message)}`;
 
+    }
+  );
+
+
+$("reviewRequestButton")
+  ?.addEventListener(
+    "click",
+    async () => {
+      const jobId = Number($("editJobId").value);
+      const job = jobs.find(
+        item => Number(item.id) === jobId
+      );
+
+      if (!job?.customers?.phone) {
+        alert("This customer does not have a phone number saved.");
+        return;
+      }
+
+      const firstName =
+        job.customers.first_name ||
+        customerName(job.customers) ||
+        "there";
+
+      const message =
+        `Hi ${firstName}, thank you for choosing Flores Small Engine Repair for ${jobEquipment(job) || "your equipment"}. If you were happy with our service, we would greatly appreciate a Google review: https://g.page/r/CVPS3WL6jDtSECE/review`;
+
+      const sentAt = new Date().toISOString();
+      const { error } = await db
+        .from("repair_jobs")
+        .update({ review_requested_at: sentAt })
+        .eq("id", jobId);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      job.review_requested_at = sentAt;
+      window.location.href =
+        `sms:${cleanPhone(job.customers.phone)}?body=${encodeURIComponent(message)}`;
     }
   );
 
@@ -9094,6 +9997,26 @@ $("deleteJobButton")
 
       }
 
+      const { data: photos } =
+        await db
+          .from("job_photos")
+          .select("storage_path")
+          .eq("repair_job_id", jobId);
+
+      if (photos?.length) {
+        const { error: photoStorageError } =
+          await db.storage
+            .from("job-photos")
+            .remove(
+              photos.map(photo => photo.storage_path)
+            );
+
+        if (photoStorageError) {
+          alert(photoStorageError.message);
+          return;
+        }
+      }
+
 
       /* ------------------------------------------
          DELETE REPAIR JOB
@@ -9150,6 +10073,10 @@ function lineHtml(type) {
   return `
 
     <div class="line-item">
+
+      ${type === "estimate"
+        ? '<label>Type<select class="estimate-item-type"><option value="service">Service / Labor</option><option value="part">Part</option></select></label>'
+        : ""}
 
       <label>
         Saved Item
@@ -9277,6 +10204,16 @@ function bindLineEvents(type) {
 
       }
 
+      const itemTypeSelect =
+        row.querySelector(
+          ".estimate-item-type"
+        );
+
+      if (itemTypeSelect) {
+        itemTypeSelect.onchange =
+          () => calculateDocument(type);
+      }
+
 
       row
         .querySelector(".remove-line")
@@ -9304,6 +10241,7 @@ function calculateDocument(type) {
 
 
   let subtotal = 0;
+  let partsTotal = 0;
 
 
   rows.forEach(row => {
@@ -9342,6 +10280,13 @@ function calculateDocument(type) {
 
     subtotal += total;
 
+    if (
+      type === "estimate" &&
+      row.querySelector(".estimate-item-type")?.value === "part"
+    ) {
+      partsTotal += total;
+    }
+
   });
 
 
@@ -9354,6 +10299,12 @@ function calculateDocument(type) {
     $("estimateTotal")
       .textContent =
         money(subtotal);
+
+    if ($("estimatePartsTotal")) {
+      $("estimatePartsTotal")
+        .textContent =
+          money(partsTotal);
+    }
 
   } else {
 
@@ -9471,7 +10422,16 @@ function readLines(type) {
           price,
 
         line_total:
-          qty * price
+          qty * price,
+
+        ...(type === "estimate"
+          ? {
+              item_type:
+                row.querySelector(
+                  ".estimate-item-type"
+                )?.value || "service"
+            }
+          : {})
 
       });
 
@@ -9592,6 +10552,7 @@ function renderEstimates(list) {
           <th>Date</th>
           <th>Status</th>
           <th>Total</th>
+          <th>Parts Due</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -9637,6 +10598,13 @@ function renderEstimates(list) {
 
         <td>
           ${money(estimate.total)}
+        </td>
+
+        <td>
+          <span class="status">
+            ${escapeHtml(estimate.parts_payment_status || "Not Required")}
+          </span>
+          ${Number(estimate.parts_balance_due || 0) > 0 ? ` ${money(estimate.parts_balance_due)}` : ""}
         </td>
 
         <td>
@@ -9789,7 +10757,8 @@ async function loadEstimateFromRepairJob(jobId) {
     nameValue,
     descriptionValue,
     qtyValue,
-    priceValue
+    priceValue,
+    itemTypeValue = "service"
   ) {
 
     addLine(
@@ -9829,6 +10798,16 @@ async function loadEstimateFromRepairJob(jobId) {
       row.querySelector(
         ".estimate-item-price"
       );
+
+    const itemType =
+      row.querySelector(
+        ".estimate-item-type"
+      );
+
+    if (itemType) {
+      itemType.value =
+        itemTypeValue;
+    }
 
 
     if (name) {
@@ -9980,7 +10959,9 @@ async function loadEstimateFromRepairJob(jobId) {
 
           Number(
             part.sell_price_each || 0
-          )
+          ),
+
+          "part"
         );
 
       }
@@ -10357,6 +11338,13 @@ async function editEstimate(id) {
             rows.length - 1
           ];
 
+        row
+          .querySelector(
+            ".estimate-item-type"
+          )
+          .value =
+            item.item_type || "service";
+
 
         row
           .querySelector(
@@ -10526,6 +11514,13 @@ $("estimateForm")
               status:
                 $("estimateStatus")
                   .value,
+
+              customer_response:
+                ["Accepted","Declined"].includes(
+                  $("estimateStatus").value
+                )
+                  ? $("estimateStatus").value
+                  : "Pending",
 
               expiry_date:
                 $("estimateExpiry")
@@ -10699,6 +11694,13 @@ $("estimateForm")
               $("estimateStatus")
                 .value,
 
+            customer_response:
+              ["Accepted","Declined"].includes(
+                $("estimateStatus").value
+              )
+                ? $("estimateStatus").value
+                : "Pending",
+
             quote_date:
               today(),
 
@@ -10806,16 +11808,22 @@ async function openEstimate(id) {
     );
 
 
-  const {
-    data: items
-  } =
-    await db
-      .from("estimate_items")
-      .select("*")
-      .eq(
-        "estimate_id",
-        id
-      );
+  const [
+    { data: items },
+    { data: partPayments }
+  ] =
+    await Promise.all([
+      db
+        .from("estimate_items")
+        .select("*")
+        .eq("estimate_id", id)
+        .order("id", { ascending:true }),
+      db
+        .from("estimate_payments")
+        .select("*")
+        .eq("estimate_id", id)
+        .order("payment_date", { ascending:false })
+    ]);
 
 
   $("estimateModalTitle")
@@ -10823,6 +11831,61 @@ async function openEstimate(id) {
       `Estimate ${
         estimate.estimate_number
       }`;
+
+  const partsDue =
+    Number(estimate.parts_balance_due || 0);
+
+  const paymentRows =
+    (partPayments || [])
+      .map(payment => `
+        <tr>
+          <td>${dateDisplay(payment.payment_date)}</td>
+          <td>${escapeHtml(payment.payment_method)}</td>
+          <td>${escapeHtml(payment.reference || "")}</td>
+          <td>${money(payment.amount)}</td>
+          <td>
+            <button class="small-button red" type="button" onclick="deleteEstimatePartsPayment(${payment.id}, ${id})">Delete</button>
+          </td>
+        </tr>
+      `)
+      .join("");
+
+  const paymentPanelHtml =
+    Number(estimate.parts_total || 0) > 0
+      ? `
+        <h3>Parts Payment</h3>
+        <div class="workflow-banner ${partsDue <= 0 ? "good" : "warning"}">
+          Parts: <strong>${money(estimate.parts_total)}</strong> &nbsp;|&nbsp;
+          Paid: <strong>${money(estimate.parts_amount_paid)}</strong> &nbsp;|&nbsp;
+          Due: <strong>${money(partsDue)}</strong>
+          <br>
+          ${
+            partsDue <= 0
+              ? "Paid in full. Ordered status is unlocked after the customer accepts the quote."
+              : "Parts cannot be marked Ordered until this balance is paid and the quote is accepted."
+          }
+        </div>
+        ${
+          partsDue > 0
+            ? `
+              <div class="form-grid three">
+                <label>Amount<input id="estimatePartsPaymentAmount" type="number" min="0.01" max="${partsDue.toFixed(2)}" step="0.01" value="${partsDue.toFixed(2)}"></label>
+                <label>Method<select id="estimatePartsPaymentMethod"><option>Cash</option><option>Card</option><option>Check</option><option>Online</option><option>Other</option></select></label>
+                <label>Reference<input id="estimatePartsPaymentReference" placeholder="Receipt or confirmation #"></label>
+              </div>
+              <button class="action-button" type="button" onclick="recordEstimatePartsPayment(${id})">Record Parts Payment</button>
+            `
+            : ""
+        }
+        <div class="table-wrap" style="margin-top:12px;">
+          ${
+            paymentRows
+              ? `<table><thead><tr><th>Date</th><th>Method</th><th>Reference</th><th>Amount</th><th></th></tr></thead><tbody>${paymentRows}</tbody></table>`
+              : '<p class="empty">No parts payments recorded.</p>'
+          }
+        </div>
+      `
+      : '<div class="workflow-banner good"><strong>No parts payment required.</strong> This estimate has no lines marked as Part.</div>';
 
 
   let html = `
@@ -10845,6 +11908,21 @@ async function openEstimate(id) {
         <strong>
           ${money(estimate.total)}
         </strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Customer Response</span>
+        <strong>${escapeHtml(estimate.customer_response || "Pending")}</strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Parts Payment</span>
+        <strong>${escapeHtml(estimate.parts_payment_status || "Not Required")}</strong>
+      </div>
+
+      <div class="detail-box">
+        <span>Parts Balance</span>
+        <strong>${money(estimate.parts_balance_due)}</strong>
       </div>
 
       <div class="detail-box">
@@ -10873,6 +11951,7 @@ async function openEstimate(id) {
 
         <thead>
           <tr>
+            <th>Type</th>
             <th>Item</th>
             <th>Description</th>
             <th>Qty</th>
@@ -10891,6 +11970,10 @@ async function openEstimate(id) {
       html += `
 
         <tr>
+
+          <td>
+            ${item.item_type === "part" ? "Part" : "Service"}
+          </td>
 
           <td>
             ${escapeHtml(item.item_name)}
@@ -10926,6 +12009,7 @@ async function openEstimate(id) {
 
     </div>
 
+    ${paymentPanelHtml}
 
     <div class="button-row">
 
@@ -10962,6 +12046,13 @@ async function openEstimate(id) {
         onclick="textEstimate(${id})"
       >
         Text Quote
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="copyQuoteApprovalLink(${id})"
+      >
+        Copy No-Login Approval Link
       </button>
 
       <button
@@ -11003,22 +12094,142 @@ async function openEstimate(id) {
 }
 
 
+function getQuoteApprovalUrl(estimate) {
+  if (!estimate?.approval_token) {
+    return "";
+  }
+
+  return (
+    "https://floressmallenginerepair.com/quote.html?token=" +
+    encodeURIComponent(estimate.approval_token)
+  );
+}
+
+
+async function copyQuoteApprovalLink(id) {
+  const estimate = estimates.find(
+    item => Number(item.id) === Number(id)
+  );
+  const link = getQuoteApprovalUrl(estimate);
+
+  if (!link) {
+    alert("This estimate does not have an approval link.");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(link);
+    alert("No-login quote approval link copied.");
+  } catch {
+    prompt("Copy this quote approval link:", link);
+  }
+}
+
+
+async function recordEstimatePartsPayment(id) {
+  const amount =
+    Number($("estimatePartsPaymentAmount")?.value || 0);
+
+  if (amount <= 0) {
+    alert("Enter a payment amount greater than zero.");
+    return;
+  }
+
+  const { error } = await db
+    .from("estimate_payments")
+    .insert({
+      estimate_id: Number(id),
+      amount,
+      payment_method:
+        $("estimatePartsPaymentMethod")?.value || "Cash",
+      payment_date: today(),
+      reference:
+        $("estimatePartsPaymentReference")?.value.trim() || null
+    });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadEstimates();
+  await openEstimate(Number(id));
+}
+
+
+async function deleteEstimatePartsPayment(paymentId, estimateId) {
+  if (!confirm("Delete this parts payment?")) {
+    return;
+  }
+
+  const { error } = await db
+    .from("estimate_payments")
+    .delete()
+    .eq("id", Number(paymentId));
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadEstimates();
+  await openEstimate(Number(estimateId));
+}
+
+
 async function saveEstimateStatus(id) {
 
-  await db
+  const status =
+    $("detailEstimateStatus")
+      .value;
+
+  const estimate =
+    estimates.find(
+      item => Number(item.id) === Number(id)
+    );
+
+  const { error } = await db
     .from("estimates")
     .update({
-      status:
-        $("detailEstimateStatus")
-          .value
+      status,
+      customer_response:
+        status === "Accepted" || status === "Declined"
+          ? status
+          : "Pending",
+      customer_responded_at:
+        status === "Accepted" || status === "Declined"
+          ? new Date().toISOString()
+          : null
     })
     .eq(
       "id",
       id
     );
 
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  if (
+    status === "Accepted" &&
+    estimate?.repair_job_id
+  ) {
+    const nextStatus =
+      Number(estimate.parts_total || 0) > 0
+        ? "Waiting on Parts"
+        : "Diagnosing";
+
+    await db
+      .from("repair_jobs")
+      .update({ status: nextStatus })
+      .eq("id", estimate.repair_job_id)
+      .eq("status", "Waiting on Approval");
+  }
+
 
   await loadEstimates();
+  await loadJobs();
 
   closeModal(
     "estimateModal"
@@ -13647,7 +14858,7 @@ function buildEstimatePdf(
 
   const terms = [
     "Approval authorizes the work listed. Additional work will be discussed before proceeding.",
-    "If parts must be ordered, we will provide the required parts-payment amount before placing the order.",
+    "If parts are needed, all parts must be paid for upfront before they are ordered. Parts will not be ordered until payment is received.",
     "The remaining balance is due upon completion and before the equipment is released.",
     "Labor is guaranteed for 30 days. Manufacturer parts warranties apply when available."
   ];
@@ -14101,6 +15312,9 @@ async function emailEstimate(id) {
       `Flores Small Engine Repair Estimate ${estimate.estimate_number}`
     );
 
+  const approvalUrl =
+    getQuoteApprovalUrl(estimate);
+
 
   const body =
     encodeURIComponent(
@@ -14115,6 +15329,9 @@ Total: ${money(estimate.total)}
 
 ${itemText}
 
+Review and approve or decline this quote without logging in:
+${approvalUrl}
+
 Customer Portal:
 https://floressmallenginerepair.com/portal.html
 
@@ -14125,12 +15342,33 @@ You can use this same FSER number anytime to view current and past repairs, esti
 
 By approving this estimate, you authorize the work listed. Additional work will be discussed before proceeding. Payment is due in full upon completion and before equipment is released. Labor is guaranteed for 30 days; manufacturer parts warranties apply when available.
 
-Please reply to approve the estimate or contact us with any questions.
+Use the approval link above, or contact us with any questions.
 
 Flores Small Engine Repair
 (337) 326-8324`
     );
 
+
+  const sentAt = new Date().toISOString();
+  await db
+    .from("estimates")
+    .update({
+      status: estimate.status === "Draft" ? "Sent" : estimate.status,
+      last_sent_at: sentAt
+    })
+    .eq("id", id);
+
+  estimate.status =
+    estimate.status === "Draft" ? "Sent" : estimate.status;
+  estimate.last_sent_at = sentAt;
+
+  if (estimate.repair_job_id) {
+    await db
+      .from("repair_jobs")
+      .update({ status: "Waiting on Approval" })
+      .eq("id", estimate.repair_job_id)
+      .in("status", ["Received","Diagnosing"]);
+  }
 
   location.href =
     `mailto:${contact.email}?subject=${subject}&body=${body}`;
@@ -14175,6 +15413,9 @@ async function textEstimate(id) {
   const portalUrl =
     "https://floressmallenginerepair.com/portal.html";
 
+  const approvalUrl =
+    getQuoteApprovalUrl(estimate);
+
 
   const body =
     encodeURIComponent(
@@ -14184,7 +15425,10 @@ Your estimate ${estimate.estimate_number} is ${money(estimate.total)}.
 
 If parts are needed, all parts must be paid for upfront before they are ordered. Parts will not be ordered until payment is received.
 
-You can review your estimate and track your repair anytime in the Customer Portal:
+Review and approve or decline this quote without logging in:
+${approvalUrl}
+
+Track your repair anytime in the Customer Portal:
 ${portalUrl}
 
 Your permanent FSER portal number is: ${portalNumber}
@@ -14195,6 +15439,27 @@ Keep this same FSER number for all future repairs, estimates, and invoices.
 Reply to this message if you have any questions.`
     );
 
+
+  const sentAt = new Date().toISOString();
+  await db
+    .from("estimates")
+    .update({
+      status: estimate.status === "Draft" ? "Sent" : estimate.status,
+      last_sent_at: sentAt
+    })
+    .eq("id", id);
+
+  estimate.status =
+    estimate.status === "Draft" ? "Sent" : estimate.status;
+  estimate.last_sent_at = sentAt;
+
+  if (estimate.repair_job_id) {
+    await db
+      .from("repair_jobs")
+      .update({ status: "Waiting on Approval" })
+      .eq("id", estimate.repair_job_id)
+      .in("status", ["Received","Diagnosing"]);
+  }
 
   location.href =
     `sms:${cleanPhone(contact.phone)}?body=${body}`;
@@ -17276,8 +18541,7 @@ async function startAdmin() {
   addLine("invoice");
 
 
-  /* Load only what the dashboard needs.
-     Requests and estimates load when their tabs are opened. */
+  /* Load dashboard records and follow-up reminders. */
 
   await Promise.all([
     loadCustomers(),
@@ -17285,6 +18549,7 @@ async function startAdmin() {
     loadInventory(),
     loadStockSuggestions(),
     loadJobs(),
+    loadEstimates(),
     loadInvoices(),
     loadPayments(),
     loadExpenses(),
@@ -17293,12 +18558,15 @@ async function startAdmin() {
     loadRequestCount()
   ]);
 
+  await loadDashboardAlerts();
+
 
   loadedViews.add("customersView");
   loadedViews.add("itemsView");
   loadedViews.add("inventoryView");
   loadedViews.add("jobsView");
   loadedViews.add("completedJobsView");
+  loadedViews.add("estimatesView");
   loadedViews.add("invoicesView");
   loadedViews.add("paymentsView");
   loadedViews.add("expensesView");

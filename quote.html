@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Review Your Quote | Flores Small Engine Repair</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --red: #df1f26;
+      --green: #2dbd68;
+      --gold: #f0a328;
+      --panel: #111;
+      --line: #303030;
+      --muted: #aaa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #070707;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 2px solid var(--red);
+      background: #050505;
+    }
+    .header-inner {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .mark {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--red);
+      font-size: 15px;
+      font-weight: 900;
+    }
+    .brand strong { display: block; font-size: 18px; }
+    .brand span { color: var(--red); font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 28px 20px 50px;
+    }
+    .panel {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel);
+      box-shadow: 0 16px 50px rgba(0,0,0,.25);
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(25px, 5vw, 38px); }
+    h2 { margin: 24px 0 10px; font-size: 20px; }
+    p { margin: 8px 0; }
+    .muted { color: var(--muted); }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #090909;
+    }
+    .card span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .card strong { display: block; margin-top: 5px; font-size: 20px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 7px; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { padding: 11px; border-bottom: 1px solid #272727; text-align: left; }
+    th { color: #ccc; background: #0a0a0a; font-size: 11px; text-transform: uppercase; }
+    .number { text-align: right; white-space: nowrap; }
+    .notice {
+      margin: 18px 0;
+      padding: 13px 15px;
+      border: 1px solid #5a3a12;
+      border-left: 4px solid var(--gold);
+      border-radius: 6px;
+      background: #171109;
+      color: #f2d19a;
+    }
+    .terms {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #0a0a0a;
+      color: #ccc;
+      font-size: 13px;
+    }
+    .terms ul { margin: 8px 0 0; padding-left: 20px; }
+    .confirm {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 20px 0 12px;
+      color: #ddd;
+    }
+    .confirm input { width: 20px; height: 20px; flex: 0 0 auto; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      min-height: 46px;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .approve { background: var(--green); }
+    .decline { background: #5b2023; }
+    .state {
+      padding: 30px 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .result {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--green);
+      border-radius: 6px;
+      background: #09140d;
+    }
+    .error { border-left-color: var(--red); background: #190b0c; color: #ffc6c8; }
+    footer {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 0 20px 35px;
+      color: #888;
+      font-size: 12px;
+      text-align: center;
+    }
+    a { color: #fff; }
+    [hidden] { display: none !important; }
+    @media (max-width: 650px) {
+      main { padding: 18px 12px 35px; }
+      .panel { padding: 16px; }
+      .summary { grid-template-columns: 1fr; }
+      .actions { display: grid; grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="mark">FSER</div>
+      <div class="brand">
+        <strong>Flores Small Engine Repair</strong>
+        <span>REPAIR ESTIMATE</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div id="loading" class="state">Loading your quote...</div>
+      <div id="errorState" class="result error" hidden></div>
+
+      <div id="quoteContent" hidden>
+        <p class="muted" id="greeting"></p>
+        <h1 id="subject">Repair Estimate</h1>
+        <p class="muted" id="quoteMeta"></p>
+
+        <div class="summary">
+          <div class="card"><span>Estimate Total</span><strong id="total">$0.00</strong></div>
+          <div class="card"><span>Parts Due Upfront</span><strong id="partsTotal">$0.00</strong></div>
+          <div class="card"><span>Response</span><strong id="responseStatus">Pending</strong></div>
+        </div>
+
+        <h2>Estimate Items</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Type</th><th>Item</th><th>Description</th><th class="number">Qty</th><th class="number">Price</th><th class="number">Total</th></tr>
+            </thead>
+            <tbody id="quoteItems"></tbody>
+          </table>
+        </div>
+
+        <div id="partsNotice" class="notice" hidden>
+          <strong>Parts Payment Policy:</strong>
+          If parts are needed, all parts must be paid for upfront before they are ordered. Parts will not be ordered until payment is received.
+        </div>
+
+        <div class="terms">
+          <strong>Terms &amp; Conditions</strong>
+          <ul>
+            <li>Approval authorizes Flores Small Engine Repair to perform the work listed.</li>
+            <li>Additional work will be discussed and approved before proceeding.</li>
+            <li>Payment is due in full before equipment is released or picked up.</li>
+            <li>Labor is guaranteed for 30 days from completion. Manufacturer warranties apply to parts when available.</li>
+          </ul>
+        </div>
+
+        <label id="confirmLabel" class="confirm">
+          <input id="authorization" type="checkbox">
+          <span>I authorize the work listed and understand the parts-payment policy and terms above.</span>
+        </label>
+
+        <div id="actions" class="actions">
+          <button id="approveButton" class="approve" type="button" disabled>Approve Quote</button>
+          <button id="declineButton" class="decline" type="button">Decline Quote</button>
+        </div>
+
+        <div id="resultState" class="result" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Questions? Call or text <a href="tel:+13373268324">(337) 326-8324</a>.
+  </footer>
+
+  <script>
+    const endpoint =
+      "https://ykqbjqiujnqljwwyxrre.supabase.co/functions/v1/quote-approval";
+    const token =
+      new URLSearchParams(location.search).get("token") || "";
+    let quote = null;
+
+    const byId = id => document.getElementById(id);
+    const money = value =>
+      "$" + Number(value || 0).toFixed(2);
+    const date = value =>
+      value
+        ? new Date(value + "T00:00:00").toLocaleDateString()
+        : "";
+
+    function showError(message) {
+      byId("loading").hidden = true;
+      byId("quoteContent").hidden = true;
+      byId("errorState").textContent = message;
+      byId("errorState").hidden = false;
+    }
+
+    function cell(row, value, className) {
+      const td = document.createElement("td");
+      td.textContent = value;
+      if (className) td.className = className;
+      row.appendChild(td);
+    }
+
+    function renderQuote(data) {
+      quote = data;
+      byId("loading").hidden = true;
+      byId("errorState").hidden = true;
+      byId("quoteContent").hidden = false;
+      byId("greeting").textContent =
+        data.customer_name ? "Prepared for " + data.customer_name : "Prepared for Customer";
+      byId("subject").textContent =
+        data.subject || "Repair Estimate";
+      byId("quoteMeta").textContent =
+        data.estimate_number +
+        (data.job_number ? " • " + data.job_number : "") +
+        (data.quote_date ? " • " + date(data.quote_date) : "") +
+        (data.expiry_date ? " • Expires " + date(data.expiry_date) : "");
+      byId("total").textContent = money(data.total);
+      byId("partsTotal").textContent = money(data.parts_total);
+      byId("responseStatus").textContent =
+        data.customer_response || "Pending";
+      byId("partsNotice").hidden =
+        Number(data.parts_total || 0) <= 0;
+
+      const body = byId("quoteItems");
+      body.innerHTML = "";
+      (data.items || []).forEach(item => {
+        const row = document.createElement("tr");
+        cell(row, item.item_type === "part" ? "Part" : "Service");
+        cell(row, item.item_name || "");
+        cell(row, item.item_desc || "");
+        cell(row, String(item.quantity || 0), "number");
+        cell(row, money(item.unit_price), "number");
+        cell(row, money(item.line_total), "number");
+        body.appendChild(row);
+      });
+
+      const finished =
+        data.customer_response !== "Pending";
+      const unavailable =
+        finished || data.expired;
+
+      byId("authorization").disabled = unavailable;
+      byId("approveButton").disabled = true;
+      byId("declineButton").disabled = unavailable;
+
+      if (unavailable) {
+        byId("confirmLabel").hidden = true;
+        byId("actions").hidden = true;
+        byId("resultState").hidden = false;
+        byId("resultState").textContent =
+          data.expired && !finished
+            ? "This quote has expired. Please contact us for an updated quote."
+            : "This quote was " + String(data.customer_response).toLowerCase() + ". Thank you.";
+      }
+    }
+
+    async function loadQuote() {
+      if (!/^[0-9a-f-]{36}$/i.test(token)) {
+        showError("This quote link is invalid.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          endpoint + "?token=" + encodeURIComponent(token),
+          { headers: { Accept: "application/json" } }
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "The quote could not be loaded.");
+        }
+        renderQuote(data.quote);
+      } catch (error) {
+        showError(error.message || "The quote could not be loaded.");
+      }
+    }
+
+    async function submitDecision(decision) {
+      if (decision === "Accepted" && !byId("authorization").checked) {
+        return;
+      }
+
+      if (
+        decision === "Declined" &&
+        !confirm("Decline this quote? Flores Small Engine Repair will be notified.")
+      ) {
+        return;
+      }
+
+      byId("approveButton").disabled = true;
+      byId("declineButton").disabled = true;
+      byId("resultState").hidden = false;
+      byId("resultState").textContent = "Saving your response...";
+
+      try {
+        const response = await fetch(
+          endpoint + "?token=" + encodeURIComponent(token),
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ decision })
+          }
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Your response could not be saved.");
+        }
+
+        quote.customer_response = decision;
+        byId("responseStatus").textContent = decision;
+        byId("confirmLabel").hidden = true;
+        byId("actions").hidden = true;
+        byId("resultState").textContent =
+          decision === "Accepted"
+            ? "Quote approved. Thank you—we will continue with your repair. If parts are required, we will confirm the upfront parts payment with you before ordering."
+            : "Quote declined. Flores Small Engine Repair has received your response.";
+      } catch (error) {
+        byId("resultState").classList.add("error");
+        byId("resultState").textContent =
+          error.message || "Your response could not be saved.";
+        byId("declineButton").disabled = false;
+        byId("approveButton").disabled =
+          !byId("authorization").checked;
+      }
+    }
+
+    byId("authorization").addEventListener("change", event => {
+      byId("approveButton").disabled = !event.target.checked;
+    });
+    byId("approveButton").addEventListener("click", () =>
+      submitDecision("Accepted")
+    );
+    byId("declineButton").addEventListener("click", () =>
+      submitDecision("Declined")
+    );
+
+    loadQuote();
+  </script>
+</body>
+</html>
