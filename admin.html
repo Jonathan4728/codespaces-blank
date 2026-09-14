@@ -1820,6 +1820,11 @@
     .schedule-customer-row div{min-width:0}
     .schedule-customer-row strong,.schedule-customer-row span{display:block;overflow-wrap:anywhere}
     .schedule-customer-row span{margin-top:3px;color:#999;font-size:11px}
+    .dashboard-upcoming-appointments table{min-width:0}
+    .dashboard-upcoming-appointments th,.dashboard-upcoming-appointments td{white-space:nowrap}
+    .dashboard-upcoming-appointments .upcoming-date{font-weight:900;color:#fff}
+    .dashboard-upcoming-appointments .upcoming-time{font-weight:900;color:#ddd}
+    .dashboard-upcoming-appointments .upcoming-customer{font-weight:800}
     .schedule-status{display:inline-block;padding:4px 8px;border-radius:999px;background:#2a2a2a;color:#ddd;font-size:10px;font-weight:900;text-transform:uppercase}
     .schedule-status.confirmed{background:#173720;color:#a8e7b8}
     .schedule-status.completed{background:#1f2f48;color:#b9d7ff}
@@ -2215,6 +2220,14 @@
           <strong id="yearNetProfit">$0.00</strong>
         </div>
 
+      </div>
+
+      <div class="panel dashboard-upcoming-appointments">
+        <div class="panel-header">
+          <h2>Upcoming Appointments</h2>
+          <span style="color:#999;font-size:12px;">Next scheduled appointments</span>
+        </div>
+        <div id="upcomingAppointments" class="table-wrap"></div>
       </div>
 
 
@@ -3656,7 +3669,7 @@
 
                 <option>Cash</option>
                 <option>Card</option>
-                <option>Check</option>
+
                 <option>Cash App</option>
                 <option>Zelle</option>
                 <option>Other</option>
@@ -4655,6 +4668,7 @@ function documentTermsHtml() {
         <li>If parts are needed, all parts must be paid for upfront before they are ordered. Parts will not be ordered until payment is received.</li>
         <li>Estimates may change if additional problems are discovered. Additional work will be discussed and approved before proceeding.</li>
         <li>Payment is due in full upon completion and is required before equipment is released or picked up.</li>
+        <li><strong>CHECKS ARE NOT ACCEPTED.</strong> Payment must be made using an accepted payment method.</li>
         <li>Labor performed by Flores Small Engine Repair is guaranteed for 30 days from completion. Manufacturer warranties apply to parts when available.</li>
         <li>Warranty does not cover misuse, neglect, abuse, unrelated failures, or damage occurring after the completed repair.</li>
         <li>Equipment not picked up within 30 days of completion may be subject to storage fees and applicable abandoned-equipment procedures.</li>
@@ -11868,9 +11882,12 @@ async function openEstimate(id) {
         ${
           partsDue > 0
             ? `
+              <div class="workflow-banner warning" style="margin-bottom:12px;">
+                <strong>CHECKS NOT ACCEPTED.</strong> Cash, card, or online payment only.
+              </div>
               <div class="form-grid three">
                 <label>Amount<input id="estimatePartsPaymentAmount" type="number" min="0.01" max="${partsDue.toFixed(2)}" step="0.01" value="${partsDue.toFixed(2)}"></label>
-                <label>Method<select id="estimatePartsPaymentMethod"><option>Cash</option><option>Card</option><option>Check</option><option>Online</option><option>Other</option></select></label>
+                <label>Method<select id="estimatePartsPaymentMethod"><option>Cash</option><option>Card</option><option>Online</option><option>Other</option></select></label>
                 <label>Reference<input id="estimatePartsPaymentReference" placeholder="Receipt or confirmation #"></label>
               </div>
               <button class="action-button" type="button" onclick="recordEstimatePartsPayment(${id})">Record Parts Payment</button>
@@ -12135,13 +12152,18 @@ async function recordEstimatePartsPayment(id) {
     return;
   }
 
+  const partsPaymentMethod = $("estimatePartsPaymentMethod")?.value || "Cash";
+  if (String(partsPaymentMethod).trim().toLowerCase() === "check") {
+    alert("Checks are not accepted. Please select an accepted payment method.");
+    return;
+  }
+
   const { error } = await db
     .from("estimate_payments")
     .insert({
       estimate_id: Number(id),
       amount,
-      payment_method:
-        $("estimatePartsPaymentMethod")?.value || "Cash",
+      payment_method: partsPaymentMethod,
       payment_date: today(),
       reference:
         $("estimatePartsPaymentReference")?.value.trim() || null
@@ -12983,6 +13005,10 @@ async function openInvoice(id) {
               Add Payment
             </h3>
 
+            <div class="workflow-banner warning" style="margin-bottom:12px;">
+              <strong>CHECKS NOT ACCEPTED.</strong> Cash, card, Cash App, Zelle, or another accepted electronic payment method only.
+            </div>
+
             <div class="form-grid three">
 
               <label>
@@ -13002,7 +13028,7 @@ async function openInvoice(id) {
                 <select id="invoicePaymentMethod">
                   <option>Cash</option>
                   <option>Card</option>
-                  <option>Check</option>
+
                   <option>Cash App</option>
                   <option>Zelle</option>
                   <option>Other</option>
@@ -13326,6 +13352,13 @@ async function recordInvoicePayment(id) {
       ?.value ||
     "Cash";
 
+
+  if (String(method).trim().toLowerCase() === "check") {
+    $("invoicePaymentMessage").textContent =
+      "Checks are not accepted. Please select an accepted payment method.";
+    $("invoicePaymentMessage").className = "message error";
+    return;
+  }
 
   const paymentDate =
     $("invoicePaymentDate")
@@ -17998,6 +18031,44 @@ async function loadAppointments() {
   renderScheduleDay();
   renderScheduleCustomers();
   populateAppointmentJobs();
+  renderUpcomingAppointments();
+}
+
+function renderUpcomingAppointments() {
+  const wrap = $("upcomingAppointments");
+  if (!wrap) return;
+
+  const now = new Date();
+  const upcoming = appointments
+    .filter(a => {
+      const status = String(a.status || "Scheduled").toLowerCase();
+      if (["completed", "cancelled", "no show", "no-show"].includes(status)) return false;
+      if (!a.appointment_date || !a.appointment_time) return false;
+      const when = new Date(`${a.appointment_date}T${String(a.appointment_time).slice(0,5)}:00`);
+      return !Number.isNaN(when.getTime()) && when >= now;
+    })
+    .sort((a,b) => `${a.appointment_date}T${String(a.appointment_time).slice(0,5)}`.localeCompare(`${b.appointment_date}T${String(b.appointment_time).slice(0,5)}`))
+    .slice(0, 10);
+
+  if (!upcoming.length) {
+    wrap.innerHTML = `<p class="empty">No upcoming appointments.</p>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Date</th><th>Time</th><th>Customer</th></tr></thead>
+      <tbody>
+        ${upcoming.map(a => {
+          const c = customers.find(x => Number(x.id) === Number(a.customer_id));
+          return `<tr>
+            <td class="upcoming-date">${escapeHtml(appointmentDateLong(a.appointment_date))}</td>
+            <td class="upcoming-time">${escapeHtml(appointmentTimeDisplay(a.appointment_time))}</td>
+            <td class="upcoming-customer">${escapeHtml(appointmentCustomerLabel(c))}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
 }
 
 function renderScheduleDay() {
