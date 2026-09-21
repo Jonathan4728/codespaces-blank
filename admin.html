@@ -3229,7 +3229,17 @@
 
         <div class="panel-header">
 
-          <h2>Invoice History</h2>
+          <h2 id="invoiceHistoryTitle">Unpaid / Open Invoices</h2>
+
+          <select
+            id="invoicePaymentFilter"
+            class="search-box"
+            aria-label="Filter invoices by payment status"
+          >
+            <option value="unpaid">Unpaid / Open</option>
+            <option value="paid">Paid</option>
+            <option value="all">All Invoices</option>
+          </select>
 
           <input
             id="invoiceSearch"
@@ -12325,9 +12335,7 @@ async function loadInvoices() {
       );
 
 
-  renderInvoices(
-    invoices
-  );
+  applyInvoiceFilters();
 
   renderRecentInvoices();
 
@@ -12484,6 +12492,82 @@ function renderInvoices(list) {
 }
 
 
+function invoiceIsPaid(invoice) {
+
+  const status =
+    String(invoice.status || "")
+      .trim()
+      .toLowerCase();
+
+  const total =
+    Number(invoice.total || 0);
+
+  const amountPaid =
+    Number(invoice.amount_paid || 0);
+
+  const balanceDue =
+    Number(invoice.balance_due || 0);
+
+  return status === "paid" ||
+    (
+      balanceDue <= 0 &&
+      amountPaid >= total
+    );
+
+}
+
+
+function applyInvoiceFilters() {
+
+  const paymentFilter =
+    $("invoicePaymentFilter")?.value ||
+    "unpaid";
+
+  const q =
+    ($("invoiceSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const filtered =
+    invoices.filter(invoice => {
+
+      const isPaid =
+        invoiceIsPaid(invoice);
+
+      const matchesPayment =
+        paymentFilter === "all" ||
+        (paymentFilter === "paid" && isPaid) ||
+        (paymentFilter === "unpaid" && !isPaid);
+
+      const matchesSearch =
+        !q ||
+        [
+          invoice.invoice_number,
+          invoice.status,
+          customerName(invoice.customers)
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+
+      return matchesPayment && matchesSearch;
+
+    });
+
+  if ($("invoiceHistoryTitle")) {
+    $("invoiceHistoryTitle").textContent =
+      paymentFilter === "paid"
+        ? "Paid Invoices"
+        : paymentFilter === "all"
+          ? "All Invoices"
+          : "Unpaid / Open Invoices";
+  }
+
+  renderInvoices(filtered);
+
+}
+
+
 function renderRecentInvoices() {
 
   const recent =
@@ -12571,32 +12655,14 @@ function renderRecentInvoices() {
 $("invoiceSearch")
   .addEventListener(
     "input",
-    event => {
-
-      const q =
-        event.target.value
-          .toLowerCase();
+    applyInvoiceFilters
+  );
 
 
-      renderInvoices(
-
-        invoices.filter(
-          x =>
-            [
-              x.invoice_number,
-              x.status,
-              customerName(
-                x.customers
-              )
-            ]
-              .join(" ")
-              .toLowerCase()
-              .includes(q)
-        )
-
-      );
-
-    }
+$("invoicePaymentFilter")
+  ?.addEventListener(
+    "change",
+    applyInvoiceFilters
   );
 
 
@@ -17111,6 +17177,51 @@ function populateMileageCustomerOptions() {
 }
 
 
+function fillMileageDestinationFromCustomer() {
+
+  const customerId =
+    Number(
+      $("mileageCustomerId")?.value || 0
+    );
+
+  if (!customerId) {
+    return;
+  }
+
+  const customer =
+    customers.find(
+      item =>
+        Number(item.id) === customerId
+    );
+
+  if (!customer) {
+    return;
+  }
+
+  const cityStateZip = [
+    customer.city,
+    [customer.state, customer.zip]
+      .filter(Boolean)
+      .join(" ")
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const fullAddress = [
+    customer.address,
+    cityStateZip
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (fullAddress && $("mileageDestination")) {
+    $("mileageDestination").value =
+      fullAddress;
+  }
+
+}
+
+
 function populateMileageJobOptions() {
 
   const select =
@@ -17668,7 +17779,10 @@ $("mileageMiles")
 $("mileageCustomerId")
   ?.addEventListener(
     "change",
-    populateMileageJobOptions
+    () => {
+      populateMileageJobOptions();
+      fillMileageDestinationFromCustomer();
+    }
   );
 
 
