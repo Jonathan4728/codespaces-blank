@@ -2609,6 +2609,8 @@
               Clear
             </button>
 
+            <button id="addRecentPricesButton" class="secondary-button" type="button">Add Recent Service Prices</button>
+
           </div>
 
           <p
@@ -4281,6 +4283,15 @@
 
     </div>
 
+    <h3>Work Order Items</h3>
+    <p style="color:#aaa;margin-top:0;">Add services and labor here. These lines carry into a new quote with the parts below.</p>
+    <div id="jobItemLines" class="line-items"></div>
+    <div class="button-row">
+      <button id="addJobItemLine" class="secondary-button" type="button">+ Add Item</button>
+      <button id="saveJobItemLines" class="action-button" type="button">Save Work Order Items</button>
+    </div>
+    <p id="jobItemMessage" class="message"></p>
+
     <h3>Quote &amp; Parts Payment</h3>
 
     <div id="jobQuotePaymentSummary" class="workflow-banner">
@@ -4440,6 +4451,8 @@
       >
         Save Job
       </button>
+
+      <button id="quoteFromJobButton" class="secondary-button" type="button">Make Quote from Work Order</button>
 
       <button
         id="textJobUpdateButton"
@@ -5755,7 +5768,7 @@ async function convertRequest(id) {
           request.problem || "",
 
         labor_rate:
-          40
+          /mobile/i.test(request.service_type || "") ? 50 : 40
 
       })
       .select()
@@ -7220,6 +7233,42 @@ $("clearItemButton")
     clearItemForm
   );
 
+/* Recent prices supplied by the shop. Existing catalog entries are left alone. */
+$("addRecentPricesButton")?.addEventListener("click", async () => {
+  const recent = [
+    {name:"Shop Labor", rate:40, unit:"hr", description:"Shop labor per hour", product_type:"service", active:true},
+    {name:"Mobile Labor", rate:50, unit:"hr", description:"On-site labor per hour; travel billed separately", product_type:"service", active:true},
+    {name:"Mobile Carburetor Cleaning", rate:120, unit:"each", description:"Carburetor cleaning; travel billed separately", product_type:"service", active:true},
+    {name:"Riding Mower Carburetor Cleaning", rate:100, unit:"each", description:"Carburetor cleaning; travel billed separately", product_type:"service", active:true},
+    {name:"Travel Fee", rate:30, unit:"trip", description:"Mobile service trip", product_type:"service", active:true},
+    {name:"Rush Service Fee", rate:70, unit:"each", description:"Rush scheduling fee", product_type:"service", active:true},
+    {name:"Recoil Starter Repair", rate:70, unit:"each", description:"Repair recoil starter; parts extra", product_type:"service", active:true},
+    {name:"Push Mower Oil Change", rate:35, unit:"each", description:"Engine oil change labor only; oil and parts extra", product_type:"service", active:true},
+    {name:"Commercial Walk-Behind Oil Change", rate:50, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra", product_type:"service", active:true},
+    {name:"Riding Mower Oil Change", rate:55, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra", product_type:"service", active:true},
+    {name:"Zero-Turn Oil Change", rate:65, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Hydrostatic transmission service is separate.", product_type:"service", active:true},
+    {name:"Generator Oil Change", rate:45, unit:"each", description:"Engine oil change labor only; oil and parts extra", product_type:"service", active:true},
+    {name:"Pressure Washer Oil Change", rate:40, unit:"each", description:"Engine oil change labor only; oil and parts extra. Pump oil service is separate.", product_type:"service", active:true},
+    {name:"ATV Oil Change", rate:70, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Differential and transmission fluids are separate.", product_type:"service", active:true},
+    {name:"Side-by-Side Oil Change", rate:85, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Differential and transmission fluids are separate.", product_type:"service", active:true},
+    {name:"Four-Stroke Outboard Oil Change", rate:85, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Gearcase service is separate.", product_type:"service", active:true},
+    {name:"Outboard Gearcase Oil Change", rate:60, unit:"each", description:"Lower unit gear oil change labor only; gear oil, seals and parts extra", product_type:"service", active:true}
+  ];
+  const missing = recent.filter(entry => !items.some(existing =>
+    existing.name.trim().toLowerCase() === entry.name.toLowerCase()));
+  if (!missing.length) {
+    $("itemMessage").textContent = "These service prices are already in Items.";
+    return;
+  }
+  const button = $("addRecentPricesButton");
+  button.disabled = true;
+  const {error} = await db.from("items").insert(missing);
+  button.disabled = false;
+  $("itemMessage").textContent = error ? error.message : `${missing.length} service prices added. Review them before quoting.`;
+  $("itemMessage").className = error ? "message error" : "message success";
+  if (!error) await loadItems();
+});
+
 
 $("itemSearch")
   ?.addEventListener(
@@ -7611,6 +7660,87 @@ function applyCatalogItem(
 
 
 
+
+/* Work order services are stored separately from physical parts. */
+function addJobItemLine(saved = {}) {
+  const container = $("jobItemLines");
+  const row = document.createElement("div");
+  row.className = "line-item";
+  row.innerHTML = `
+    <label>Saved Item<select class="catalog-item-select">${catalogOptions()}</select>
+      <input class="job-item-name" placeholder="Service or labor" style="margin-top:8px"></label>
+    <label>Description<input class="job-item-description"></label>
+    <label>Qty<input class="job-item-qty" type="number" min="0.01" step="0.01" value="1"></label>
+    <label>Price<input class="job-item-price" type="number" min="0" step="0.01" value="0"></label>
+    <button class="remove-line" type="button" aria-label="Remove item">×</button>`;
+  container.appendChild(row);
+  $("jobItemMessage").textContent = "Unsaved work order items.";
+  row.addEventListener("input", () => { $("jobItemMessage").textContent = "Unsaved work order items."; });
+  row.querySelector(".catalog-item-select").addEventListener("change", event =>
+    { applyCatalogItem("job", row, event.target.value);
+      $("jobItemMessage").textContent = "Unsaved work order items."; });
+  row.querySelector(".remove-line").addEventListener("click", () => {
+    row.remove(); $("jobItemMessage").textContent = "Unsaved work order items.";
+  });
+  row.querySelector(".job-item-name").value = saved.item_name || "";
+  row.querySelector(".job-item-description").value = saved.item_desc || "";
+  row.querySelector(".job-item-qty").value = saved.quantity ?? 1;
+  row.querySelector(".job-item-price").value = saved.unit_price ?? 0;
+}
+
+async function loadJobItems(jobId) {
+  $("jobItemMessage").textContent = "";
+  $("jobItemLines").innerHTML = "";
+  const {data, error} = await db.from("job_items").select("*")
+    .eq("repair_job_id", jobId).order("position", {ascending:true});
+  if (error) {
+    $("jobItemMessage").textContent = "Work order items need the included database setup: " + error.message;
+    $("jobItemMessage").className = "message error";
+    return;
+  }
+  (data || []).forEach(addJobItemLine);
+  $("jobItemMessage").textContent = "Work order items saved.";
+}
+
+$("addJobItemLine")?.addEventListener("click", () => addJobItemLine());
+$("saveJobItemLines")?.addEventListener("click", async () => {
+  const jobId = Number($("editJobId").value);
+  if (!jobId) return;
+  const lines = [...$("jobItemLines").querySelectorAll(".line-item")].map((row, position) => ({
+    repair_job_id:jobId, position,
+    item_name:row.querySelector(".job-item-name").value.trim(),
+    item_desc:row.querySelector(".job-item-description").value.trim(),
+    quantity:Number(row.querySelector(".job-item-qty").value),
+    unit_price:Number(row.querySelector(".job-item-price").value)
+  }));
+  if (lines.some(x => !x.item_name || !Number.isFinite(x.quantity) || x.quantity <= 0 ||
+      !Number.isFinite(x.unit_price) || x.unit_price < 0)) {
+    $("jobItemMessage").textContent = "Each item needs a name, quantity above zero, and valid price.";
+    $("jobItemMessage").className = "message error";
+    return;
+  }
+  const button = $("saveJobItemLines");
+  button.disabled = true;
+  const {data:current, error:readError} = await db.from("job_items").select("id")
+    .eq("repair_job_id", jobId).order("position", {ascending:true});
+  let error = readError;
+  if (!error && lines.length) {
+    const result = await db.from("job_items").upsert(lines.map((line, position) => ({
+      ...line, id:current?.[position]?.id
+    }))).select("id");
+    error = result.error;
+    if (!error && (current || []).length > lines.length) {
+      const removed = current.slice(lines.length).map(x => x.id);
+      error = (await db.from("job_items").delete().in("id", removed)).error;
+    }
+  } else if (!error && current?.length) {
+    error = (await db.from("job_items").delete().eq("repair_job_id", jobId)).error;
+  }
+  button.disabled = false;
+  $("jobItemMessage").textContent = error ? error.message : "Work order items saved.";
+  $("jobItemMessage").className = error ? "message error" : "message success";
+  if (!error) await loadJobItems(jobId);
+});
 
 async function loadJobs() {
 
@@ -8259,8 +8389,8 @@ $("jobForm")
               $("jobComplaint")
                 .value.trim(),
 
-            labor_rate:
-              40
+        labor_rate:
+              $("serviceType").value === "Mobile Service" ? 50 : 40
 
           });
 
@@ -8529,6 +8659,7 @@ async function openJob(id) {
 
   await Promise.all([
     loadJobParts(id),
+    loadJobItems(id),
     loadJobQuotePayment(id),
     loadJobPhotos(id)
   ]);
@@ -10769,6 +10900,15 @@ async function loadEstimateFromRepairJob(jobId) {
 
   }
 
+  const {data:workOrderItems, error:workOrderError} = await db
+    .from("job_items").select("*").eq("repair_job_id", Number(jobId))
+    .order("position", {ascending:true});
+  if (workOrderError) {
+    $("estimateMessage").textContent = "Could not load work order items: " + workOrderError.message;
+    $("estimateMessage").className = "message error";
+    return;
+  }
+
 
   $("estimateLines")
     .innerHTML = "";
@@ -10863,6 +11003,10 @@ async function loadEstimateFromRepairJob(jobId) {
 
   }
 
+
+  (workOrderItems || []).forEach(item => addEstimateCharge(
+    item.item_name, item.item_desc, Number(item.quantity), Number(item.unit_price), "service"
+  ));
 
   /* ------------------------------------------
      SERVICE FEE
@@ -11149,6 +11293,25 @@ $("estimateJob")
 
     }
   );
+
+$("quoteFromJobButton")?.addEventListener("click", async () => {
+  const jobId = Number($("editJobId").value);
+  const job = jobs.find(entry => Number(entry.id) === jobId);
+  if (!job) return;
+  if ($("jobItemMessage").textContent === "Unsaved work order items.") {
+    $("jobItemMessage").textContent = "Save Work Order Items before making the quote.";
+    $("jobItemMessage").className = "message error";
+    return;
+  }
+  closeModal("jobModal");
+  document.querySelector('[data-view="estimatesView"]')?.click();
+  await loadViewData("estimatesView");
+  resetEstimateEditor();
+  $("estimateCustomer").value = String(job.customer_id);
+  filterEstimateJobsByCustomer();
+  await loadEstimateFromRepairJob(jobId);
+  $("estimateForm").scrollIntoView({behavior:"smooth", block:"start"});
+});
 
 
 
