@@ -2609,7 +2609,6 @@
               Clear
             </button>
 
-            <button id="addRecentPricesButton" class="secondary-button" type="button">Add Recent Service Prices</button>
 
           </div>
 
@@ -7232,43 +7231,6 @@ $("clearItemButton")
     "click",
     clearItemForm
   );
-
-/* Recent prices supplied by the shop. Existing catalog entries are left alone. */
-$("addRecentPricesButton")?.addEventListener("click", async () => {
-  const recent = [
-    {name:"Shop Labor", rate:40, unit:"hr", description:"Shop labor per hour", product_type:"service", active:true},
-    {name:"Mobile Labor", rate:50, unit:"hr", description:"On-site labor per hour; travel billed separately", product_type:"service", active:true},
-    {name:"Mobile Carburetor Cleaning", rate:120, unit:"each", description:"Carburetor cleaning; travel billed separately", product_type:"service", active:true},
-    {name:"Riding Mower Carburetor Cleaning", rate:100, unit:"each", description:"Carburetor cleaning; travel billed separately", product_type:"service", active:true},
-    {name:"Travel Fee", rate:30, unit:"trip", description:"Mobile service trip", product_type:"service", active:true},
-    {name:"Rush Service Fee", rate:70, unit:"each", description:"Rush scheduling fee", product_type:"service", active:true},
-    {name:"Recoil Starter Repair", rate:70, unit:"each", description:"Repair recoil starter; parts extra", product_type:"service", active:true},
-    {name:"Push Mower Oil Change", rate:35, unit:"each", description:"Engine oil change labor only; oil and parts extra", product_type:"service", active:true},
-    {name:"Commercial Walk-Behind Oil Change", rate:50, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra", product_type:"service", active:true},
-    {name:"Riding Mower Oil Change", rate:55, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra", product_type:"service", active:true},
-    {name:"Zero-Turn Oil Change", rate:65, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Hydrostatic transmission service is separate.", product_type:"service", active:true},
-    {name:"Generator Oil Change", rate:45, unit:"each", description:"Engine oil change labor only; oil and parts extra", product_type:"service", active:true},
-    {name:"Pressure Washer Oil Change", rate:40, unit:"each", description:"Engine oil change labor only; oil and parts extra. Pump oil service is separate.", product_type:"service", active:true},
-    {name:"ATV Oil Change", rate:70, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Differential and transmission fluids are separate.", product_type:"service", active:true},
-    {name:"Side-by-Side Oil Change", rate:85, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Differential and transmission fluids are separate.", product_type:"service", active:true},
-    {name:"Four-Stroke Outboard Oil Change", rate:85, unit:"each", description:"Engine oil change labor only; oil, filter and parts extra. Gearcase service is separate.", product_type:"service", active:true},
-    {name:"Outboard Gearcase Oil Change", rate:60, unit:"each", description:"Lower unit gear oil change labor only; gear oil, seals and parts extra", product_type:"service", active:true}
-  ];
-  const missing = recent.filter(entry => !items.some(existing =>
-    existing.name.trim().toLowerCase() === entry.name.toLowerCase()));
-  if (!missing.length) {
-    $("itemMessage").textContent = "These service prices are already in Items.";
-    return;
-  }
-  const button = $("addRecentPricesButton");
-  button.disabled = true;
-  const {error} = await db.from("items").insert(missing);
-  button.disabled = false;
-  $("itemMessage").textContent = error ? error.message : `${missing.length} service prices added. Review them before quoting.`;
-  $("itemMessage").className = error ? "message error" : "message success";
-  if (!error) await loadItems();
-});
-
 
 $("itemSearch")
   ?.addEventListener(
