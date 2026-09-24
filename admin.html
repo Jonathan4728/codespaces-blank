@@ -694,10 +694,10 @@
     }
 
     .invoice-print {
-      width: 800px;
-
+      width: 100%;
+      max-width: 800px;
       margin: auto;
-      padding: 40px;
+      padding: 32px;
 
       background: white;
       color: #111;
@@ -734,7 +734,10 @@
     }
 
     .invoice-print table {
-      margin-top: 25px;
+      margin-top: 20px;
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
     }
 
     .invoice-print th {
@@ -745,6 +748,60 @@
     .invoice-print td,
     .invoice-print th {
       border: 1px solid #ddd;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .invoice-print .invoice-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 20px 0 4px;
+    }
+
+    .invoice-print .invoice-meta-label {
+      display: block;
+      margin-bottom: 7px;
+      color: #a91419;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .invoice-print .invoice-meta p,
+    .invoice-print .invoice-print-title p {
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+
+    .invoice-print .invoice-summary {
+      width: min(100%, 290px);
+      margin: 20px 0 0 auto;
+    }
+
+    .invoice-print .invoice-summary > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 5px 0;
+    }
+
+    .invoice-print .invoice-summary .invoice-balance {
+      margin-top: 6px;
+      padding: 12px;
+      border-top: 2px solid #df1f26;
+      background: #f7f7f7;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .invoice-print .invoice-notes {
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
     }
 
     .print-total {
@@ -790,31 +847,64 @@
     }
 
     @media print {
+      @page { size: letter; margin: 0.48in; }
 
-      body * {
-        visibility: hidden !important;
+      html, body {
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
       }
 
-      #printArea,
-      #printArea * {
-        visibility: visible !important;
-      }
-
+      body > :not(#printArea) { display: none !important; }
       #printArea {
         display: block !important;
-
-        position: absolute;
-        left: 0;
-        top: 0;
-
-        width: 100%;
+        position: static !important;
+        width: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
 
       .invoice-print {
-        width: 100%;
-        padding: 20px;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 10px;
       }
 
+      .invoice-print-header { padding-bottom: 12px; }
+      .invoice-print-header img { max-width: 88px; max-height: 65px; object-fit: contain; }
+      .invoice-print-title h1 { font-size: 25px; }
+      .invoice-print table { min-width: 0 !important; margin-top: 13px; }
+      .invoice-print td, .invoice-print th {
+        padding: 6px 5px !important;
+        font-size: 9px !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+      }
+      .invoice-print thead { display: table-header-group; }
+      .invoice-print tr { break-inside: avoid; page-break-inside: avoid; }
+      .invoice-print .invoice-meta { margin-top: 12px; }
+      .invoice-print .invoice-summary { margin-top: 10px; }
+      .invoice-print .invoice-notes { margin-top: 12px; }
+      .invoice-print .document-terms {
+        margin-top: 12px;
+        padding: 9px 11px;
+        background: #fff !important;
+        color: #222 !important;
+        border: 1px solid #ddd;
+        font-size: 9px;
+        line-height: 1.25;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .invoice-print .document-terms strong { color: #111 !important; }
+      .invoice-print .document-terms li { margin: 2px 0; }
     }
 
 
@@ -15829,306 +15919,93 @@ function textInvoice(id) {
 =================================================== */
 
 async function printInvoice(id) {
+  const invoice = invoices.find(x => Number(x.id) === Number(id));
+  if (!invoice) {
+    alert("Invoice could not be found.");
+    return;
+  }
 
-  const invoice =
-    invoices.find(
-      x =>
-        x.id === id
-    );
+  const { data: items, error } = await db
+    .from("invoice_items")
+    .select("*")
+    .eq("invoice_id", id);
+  if (error) {
+    alert("Could not load invoice items: " + error.message);
+    return;
+  }
 
+  const customer = invoice.customers || {};
+  const customerLocation = [customer.city, customer.state, customer.zip]
+    .filter(Boolean).join(" ");
+  const customerLines = [customer.address, customerLocation, customer.phone, customer.email]
+    .filter(Boolean).map(value => `<p>${escapeHtml(value)}</p>`).join("");
+  const itemRows = (items || []).map(item => `
+    <tr>
+      <td>${escapeHtml(item.item_name)}</td>
+      <td>${escapeHtml(item.item_desc)}</td>
+      <td>${escapeHtml(item.quantity)}</td>
+      <td>${money(item.unit_price)}</td>
+      <td>${money(item.line_total)}</td>
+    </tr>
+  `).join("");
 
-  const {
-    data: items
-  } =
-    await db
-      .from("invoice_items")
-      .select("*")
-      .eq(
-        "invoice_id",
-        id
-      );
-
-
-  let itemRows = "";
-
-
-  (items || [])
-    .forEach(item => {
-
-      itemRows += `
-
-        <tr>
-
-          <td>
-            ${escapeHtml(
-              item.item_name
-            )}
-          </td>
-
-          <td>
-            ${escapeHtml(
-              item.item_desc
-            )}
-          </td>
-
-          <td>
-            ${item.quantity}
-          </td>
-
-          <td>
-            ${money(
-              item.unit_price
-            )}
-          </td>
-
-          <td>
-            ${money(
-              item.line_total
-            )}
-          </td>
-
-        </tr>
-      `;
-
-    });
-
-
-  const customer =
-    invoice.customers || {};
-
-
-  $("printArea")
-    .innerHTML = `
-
-      <div class="invoice-print">
-
-        <div class="invoice-print-header">
-
-          <div>
-
-            <img
-              src="logo.png"
-              alt="Flores Small Engine Repair"
-            >
-
-            <p>
-              <strong>
-                Flores Small Engine Repair
-              </strong>
-              <br>
-              Abbeville, Louisiana
-              <br>
-              (337) 326-8324
-              <br>
-              floressenginerepair@gmail.com
-            </p>
-
-          </div>
-
-
-          <div class="invoice-print-title">
-
-            <h1>INVOICE</h1>
-
-            <p>
-              <strong>
-                ${
-                  invoice.invoice_number
-                }
-              </strong>
-            </p>
-
-            <p>
-              Date:
-              ${
-                dateDisplay(
-                  invoice.invoice_date
-                )
-              }
-            </p>
-
-            <p>
-              Due:
-              ${
-                dateDisplay(
-                  invoice.due_date
-                )
-              }
-            </p>
-
-          </div>
-
+  $("printArea").innerHTML = `
+    <div class="invoice-print">
+      <div class="invoice-print-header">
+        <div>
+          <img src="logo.png" alt="Flores Small Engine Repair">
+          <p><strong>Flores Small Engine Repair</strong><br>
+            Abbeville, Louisiana<br>(337) 326-8324<br>
+            floressenginerepair@gmail.com</p>
         </div>
-
-
-        <h3>Bill To</h3>
-
-        <p>
-
-          <strong>
-            ${
-              escapeHtml(
-                customerName(customer)
-              )
-            }
-          </strong>
-
-          <br>
-
-          ${
-            escapeHtml(
-              customer.address
-            )
-          }
-
-          <br>
-
-          ${
-            escapeHtml(
-              customer.city
-            )
-          }
-          ${
-            escapeHtml(
-              customer.state
-            )
-          }
-          ${
-            escapeHtml(
-              customer.zip
-            )
-          }
-
-          <br>
-
-          ${
-            escapeHtml(
-              customer.phone
-            )
-          }
-
-          <br>
-
-          ${
-            escapeHtml(
-              customer.email
-            )
-          }
-
-        </p>
-
-
-        <table>
-
-          <thead>
-
-            <tr>
-              <th>Item</th>
-              <th>Description</th>
-              <th>Qty</th>
-              <th>Price</th>
-              <th>Total</th>
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            ${itemRows}
-
-          </tbody>
-
-        </table>
-
-
-        <div class="print-total">
-
-          <p>
-            Subtotal:
-            <strong>
-              ${
-                money(
-                  invoice.subtotal
-                )
-              }
-            </strong>
-          </p>
-
-          <p>
-            Tax:
-            <strong>
-              ${
-                money(
-                  invoice.tax
-                )
-              }
-            </strong>
-          </p>
-
-          <p>
-            Total:
-            <strong>
-              ${
-                money(
-                  invoice.total
-                )
-              }
-            </strong>
-          </p>
-
-          <p>
-            Amount Paid:
-            <strong>
-              ${
-                money(
-                  invoice.amount_paid
-                )
-              }
-            </strong>
-          </p>
-
-          <h2>
-            Balance Due:
-            ${
-              money(
-                invoice.balance_due
-              )
-            }
-          </h2>
-
+        <div class="invoice-print-title">
+          <h1>INVOICE</h1>
+          <p><strong>${escapeHtml(invoice.invoice_number)}</strong></p>
+          <p>Date: ${escapeHtml(dateDisplay(invoice.invoice_date))}</p>
+          ${invoice.due_date ? `<p>Due: ${escapeHtml(dateDisplay(invoice.due_date))}</p>` : ""}
         </div>
+      </div>
 
+      <div class="invoice-meta">
+        <div>
+          <span class="invoice-meta-label">Bill to</span>
+          <p><strong>${escapeHtml(customerName(customer))}</strong></p>
+          ${customerLines}
+        </div>
+        <div>
+          <span class="invoice-meta-label">Payment</span>
+          <p>${Number(invoice.balance_due || 0) <= 0 ? "Paid in full" : "Payment due on completion"}</p>
+          <p>Checks are not accepted.</p>
+        </div>
+      </div>
 
-        <hr>
+      <table>
+        <colgroup>
+          <col style="width:23%"><col style="width:39%"><col style="width:8%">
+          <col style="width:15%"><col style="width:15%">
+        </colgroup>
+        <thead><tr>
+          <th>Item</th><th>Description</th><th>Qty</th>
+          <th>Price</th><th>Total</th>
+        </tr></thead>
+        <tbody>${itemRows}</tbody>
+      </table>
 
+      <div class="invoice-summary">
+        <div><span>Subtotal</span><strong>${money(invoice.subtotal)}</strong></div>
+        <div><span>Tax</span><strong>${money(invoice.tax)}</strong></div>
+        <div><span>Total</span><strong>${money(invoice.total)}</strong></div>
+        <div><span>Amount paid</span><strong>${money(invoice.amount_paid)}</strong></div>
+        <div class="invoice-balance"><span>Balance due</span><strong>${money(invoice.balance_due)}</strong></div>
+      </div>
 
-        <p>
-          ${
-            escapeHtml(
-              invoice.notes ||
-              "Thank you for your business."
-            )
-          }
-        </p>
-
-        <p style="font-size:12px; color:#555;">
-          Manufacturer warranties apply to
-          parts when available. Labor is
-          guaranteed for 30 days.
-        </p>
-
-      
-
-        ${documentTermsHtml()}
-
-</div>
-    `;
-
+      <div class="invoice-notes">${escapeHtml(invoice.notes || "Thank you for your business.")}</div>
+      ${documentTermsHtml()}
+    </div>
+  `;
 
   window.print();
-
 }
-
 
 
 /* ==================================================
