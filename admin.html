@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -2130,6 +2130,8 @@
       Items
     </button>
 
+    <button class="nav-tab" data-view="rotaryView">Rotary</button>
+
     <button
       class="nav-tab"
       data-view="inventoryView"
@@ -2611,16 +2613,8 @@
          ITEMS
     =================================================== -->
 
-    <section
-      id="itemsView"
-      class="view"
-    >
-
-      <h1 class="page-title">
-        Items
-      </h1>
-
-
+    <section id="rotaryView" class="view">
+      <h1 class="page-title">Rotary Orders &amp; Pricing</h1>
       <div class="panel" id="rotaryCalculator">
         <h2>Rotary Parts Pricing</h2>
         <p>Enter every part in the order. Orders below $150 in parts receive one $20 shipping fee, split between parts by cost.</p>
@@ -2641,12 +2635,26 @@
         <div id="rotaryResults" class="table-wrap"></div>
         <div class="button-row"><button type="button" class="action-button" id="rotarySaveOrder">Save PO / Order</button></div>
         <p id="rotarySaveMessage" class="message" role="status"></p>
-        <h3>Saved Rotary Orders</h3>
+      </div>
+      <div class="panel" id="rotaryOrderLog">
+        <h2>Rotary PO / Order Logs</h2>
         <p>Saved on this browser/device. Export a backup to keep a copy or import on another device.</p>
         <input id="rotaryOrderSearch" class="search-box" placeholder="Search PO, part number, or part name...">
         <div class="button-row"><button type="button" class="secondary-button" id="rotaryExport">Export Orders</button><button type="button" class="secondary-button" id="rotaryImport">Import Orders</button><input id="rotaryImportFile" type="file" accept="application/json,.json" hidden></div>
         <div id="rotarySavedOrders" class="table-wrap"></div>
       </div>
+
+    </section>
+
+    <section
+      id="itemsView"
+      class="view"
+    >
+
+      <h1 class="page-title">
+        Items
+      </h1>
+
 
       <div class="panel">
 
@@ -4940,6 +4948,10 @@ async function loadViewData(viewId) {
 
   }
 
+
+  if (viewId === "rotaryView") {
+    renderSavedRotaryOrders();
+  }
 
   if (viewId === "itemsView") {
 
@@ -18846,6 +18858,7 @@ function renderRotaryPricing() {
     if (get('itemId').value && !confirm('Replace the name and rate of the item currently being edited?')) return;
     get('itemName').value=part.name; get('itemRate').value=(part.unitPrice/100).toFixed(2);
     get('itemProductType').value='goods'; get('itemUnit').value='each';
+    document.querySelector('[data-view="itemsView"]').click();
     get('itemForm').scrollIntoView({behavior:'smooth',block:'start'});
     get('itemMessage').textContent='Rotary price filled in. Click Save Item to save it.';
   }));
