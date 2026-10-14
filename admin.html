@@ -2619,11 +2619,12 @@
         <h2>Rotary Parts Pricing</h2>
         <p>Enter every part in the order. Orders below $150 in parts receive one $20 shipping fee, split between parts by cost.</p>
         <div class="form-grid">
-          <label>Tax rate (%)<input id="rotaryTaxRate" type="number" min="0" max="100" step="0.001" placeholder="Enter your applicable rate"></label>
+          <label>Rotary purchase tax (%)<input value="0" id="rotaryTaxRate" type="number" min="0" max="100" step="0.001" placeholder="Enter your applicable rate"></label>
+          <label>Customer sales tax (%)<input id="rotarySalesTaxRate" type="number" min="0" max="100" step="0.001" value="11"></label>
           <label>Profit markup (%)<input id="rotaryMarkup" type="number" min="0" max="1000" step="1" value="30"></label>
-          <label>Include shipping in tax calculation<select id="rotaryTaxShipping"><option value="no">No — parts only</option><option value="yes">Yes — parts + shipping</option></select></label>
+          <label>Include shipping in purchase tax<select id="rotaryTaxShipping"><option value="no">No — parts only</option><option value="yes">Yes — parts + shipping</option></select></label>
         </div>
-        <p>Markup adds a percentage to your total cost. Tax is an estimate using the rate and shipping treatment you enter. Suggested prices exclude any sales tax charged separately to the customer.</p>
+        <p>Rotary purchases default to 0% tax. Customer sales tax defaults to the published Abbeville rate of 11% (5% state + 6% local); adjust for the applicable sale location. Markup is added to your cost including shipping. Customer tax is added after markup and is not profit. PO tax figures are projections, not taxes actually collected or a filing log.</p>
         <div class="form-grid">
           <label>PO number<input id="rotaryPO" placeholder="FSER-2026-001" maxlength="100"></label>
           <label>Order date<input id="rotaryOrderDate" type="date"></label>
@@ -18807,7 +18808,7 @@ startAdmin();
 
 
 /* Rotary order calculator: no customer records change until Save Item is used. */
-function rotaryPricing(lines, rate, markup, taxShipping) {
+function rotaryPricing(lines, rate, markup, taxShipping, salesRate = 0) {
   const cents = n => Math.round((n + Number.EPSILON) * 100);
   const subtotal = lines.reduce((sum, line) => sum + cents(line.cost) * line.quantity, 0);
   const shipping = subtotal > 0 && subtotal < 15000 ? 2000 : 0;
@@ -18821,7 +18822,8 @@ function rotaryPricing(lines, rate, markup, taxShipping) {
     usedShipping += shareShipping; usedTax += shareTax;
     const totalCost = base + shareShipping + shareTax;
     const unitPrice = Math.ceil(totalCost / line.quantity * (1 + markup / 100));
-    return {...line, base, shipping:shareShipping, tax:shareTax, totalCost, unitPrice,
+    const salesTax = Math.round(unitPrice * salesRate / 100);
+    return {...line, base, shipping:shareShipping, tax:shareTax, totalCost, unitPrice, salesTax, customerTotal:unitPrice+salesTax,
       profit:unitPrice * line.quantity - totalCost};
   });
   return {subtotal, shipping, tax, totalCost:subtotal + shipping + tax, results};
@@ -18843,16 +18845,17 @@ function renderRotaryPricing() {
   const rows = [...get('rotaryRows').children];
   const lines = rows.map((row,index) => ({partNumber:row.querySelector('.rotary-number').value.trim(), name:row.querySelector('.rotary-name').value.trim() || `Part ${index+1}`,
     cost:Number(row.querySelector('.rotary-cost').value), quantity:Number(row.querySelector('.rotary-qty').value)}));
-  const rate = Number(get('rotaryTaxRate').value), markup = Number(get('rotaryMarkup').value);
+  const rate = Number(get('rotaryTaxRate').value), markup = Number(get('rotaryMarkup').value), salesRate = Number(get('rotarySalesTaxRate').value);
   const valid = lines.length && lines.every(x => Number.isFinite(x.cost) && x.cost > 0 && Number.isInteger(x.quantity) && x.quantity > 0)
+    && get('rotarySalesTaxRate').value !== '' && Number.isFinite(salesRate) && salesRate >= 0 && salesRate <= 100
     && get('rotaryTaxRate').value !== '' && rate >= 0 && rate <= 100 && get('rotaryMarkup').value !== '' && markup >= 0 && markup <= 1000;
   get('rotarySummary').innerHTML = ''; get('rotaryResults').innerHTML = '';
   get('rotaryMessage').textContent = valid ? '' : 'Enter a tax rate (use 0 if none applies), a markup, and a cost and whole-number quantity for every part.';
   if (!valid) return;
-  const order = rotaryPricing(lines,rate,markup,get('rotaryTaxShipping').value === 'yes');
+  const order = rotaryPricing(lines,rate,markup,get('rotaryTaxShipping').value === 'yes', salesRate);
   const dollars = n => money(n/100);
-  get('rotarySummary').innerHTML = [['Parts subtotal',order.subtotal],['Order shipping',order.shipping],['Estimated tax cost',order.tax],['Total order cost',order.totalCost],['Suggested sales total',order.results.reduce((s,r)=>s+r.unitPrice*r.quantity,0)],['Estimated profit',order.results.reduce((s,r)=>s+r.profit,0)]].map(([label,value])=>`<div class="detail-box"><span>${label}</span><strong>${dollars(value)}</strong></div>`).join('');
-  get('rotaryResults').innerHTML = `<table><thead><tr><th>Part</th><th>Qty</th><th>Parts cost</th><th>Shipping share</th><th>Tax share</th><th>Total cost</th><th>Charge each</th><th>Profit (all units)</th><th>Action</th></tr></thead><tbody>${order.results.map((r,index)=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.quantity}</td><td>${dollars(r.base)}</td><td>${dollars(r.shipping)}</td><td>${dollars(r.tax)}</td><td>${dollars(r.totalCost)}</td><td><strong>${dollars(r.unitPrice)}</strong></td><td>${dollars(r.profit)}</td><td><button type="button" class="small-button" data-rotary-use="${index}">Use Price in Item</button></td></tr>`).join('')}</tbody></table>`;
+  get('rotarySummary').innerHTML = [['Parts subtotal',order.subtotal],['Order shipping',order.shipping],['Rotary purchase tax',order.tax],['Total order cost',order.totalCost],['Suggested sales total',order.results.reduce((s,r)=>s+r.unitPrice*r.quantity,0)],['Projected customer tax',order.results.reduce((s,r)=>s+r.salesTax*r.quantity,0)],['Customer total with tax',order.results.reduce((s,r)=>s+r.customerTotal*r.quantity,0)],['Estimated profit (excludes tax)',order.results.reduce((s,r)=>s+r.profit,0)]].map(([label,value])=>`<div class="detail-box"><span>${label}</span><strong>${dollars(value)}</strong></div>`).join('');
+  get('rotaryResults').innerHTML = `<table><thead><tr><th>Part</th><th>Qty</th><th>Parts cost</th><th>Shipping share</th><th>Purchase tax share</th><th>Total cost</th><th>Price each before tax</th><th>Customer tax each</th><th>Total each with tax</th><th>Profit (all units)</th><th>Action</th></tr></thead><tbody>${order.results.map((r,index)=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.quantity}</td><td>${dollars(r.base)}</td><td>${dollars(r.shipping)}</td><td>${dollars(r.tax)}</td><td>${dollars(r.totalCost)}</td><td><strong>${dollars(r.unitPrice)}</strong></td><td>${dollars(r.salesTax)}</td><td>${dollars(r.customerTotal)}</td><td>${dollars(r.profit)}</td><td><button type="button" class="small-button" data-rotary-use="${index}">Use Price in Item</button></td></tr>`).join('')}</tbody></table>`;
   get('rotaryResults').querySelectorAll('[data-rotary-use]').forEach(button=>button.addEventListener('click',()=>{
     const part=order.results[Number(button.dataset.rotaryUse)];
     if (get('itemId').value && !confirm('Replace the name and rate of the item currently being edited?')) return;
@@ -18867,7 +18870,7 @@ document.getElementById('rotaryAdd').addEventListener('click',addRotaryRow);
 document.getElementById('rotaryReset').addEventListener('click',()=>{
   document.getElementById('rotaryRows').replaceChildren(); document.getElementById('rotaryPO').value=''; document.getElementById('rotarySaveMessage').textContent=''; addRotaryRow();
 });
-['rotaryTaxRate','rotaryMarkup','rotaryTaxShipping'].forEach(id=>document.getElementById(id).addEventListener('input',renderRotaryPricing));
+['rotaryTaxRate','rotarySalesTaxRate','rotaryMarkup','rotaryTaxShipping'].forEach(id=>document.getElementById(id).addEventListener('input',renderRotaryPricing));
 addRotaryRow();
 
 const rotaryOrderStore = 'fserRotaryOrdersV1';
@@ -18880,6 +18883,7 @@ function readRotaryOrders() {
 function validRotaryOrder(o) {
   return o && typeof o.po === 'string' && o.po.trim() && o.po.length <= 100
     && /^\d{4}-\d{2}-\d{2}$/.test(o.date) && Number.isFinite(o.rate) && o.rate >= 0 && o.rate <= 100
+    && (o.salesRate === undefined || (Number.isFinite(o.salesRate) && o.salesRate >= 0 && o.salesRate <= 100))
     && Number.isFinite(o.markup) && o.markup >= 0 && o.markup <= 1000 && typeof o.taxShipping === 'boolean'
     && Array.isArray(o.lines) && o.lines.length > 0 && o.lines.length <= 1000
     && o.lines.every(l=>typeof l.partNumber==='string' && l.partNumber.trim() && l.partNumber.length<=100
@@ -18892,17 +18896,17 @@ function renderSavedRotaryOrders() {
     const query=document.getElementById('rotaryOrderSearch').value.trim().toLowerCase();
     const orders=readRotaryOrders().filter(o=>validRotaryOrder(o) && [o.po,...o.lines.flatMap(l=>[l.partNumber,l.name])].join(' ').toLowerCase().includes(query));
     target.innerHTML=orders.length ? orders.map(o=>{
-      const price=rotaryPricing(o.lines,o.rate,o.markup,o.taxShipping);
+      const price=rotaryPricing(o.lines,o.rate,o.markup,o.taxShipping,o.salesRate ?? 0);
       return `<details style="margin:12px 0"><summary><strong>${escapeHtml(o.po)}</strong> — ${escapeHtml(o.date)} — ${o.lines.length} part lines — ${money(price.totalCost/100)} cost</summary>
-        <table><thead><tr><th>Part number</th><th>Part</th><th>Qty</th><th>Unit purchase cost</th><th>Suggested price each</th></tr></thead><tbody>${price.results.map(l=>`<tr><td>${escapeHtml(l.partNumber)}</td><td>${escapeHtml(l.name)}</td><td>${l.quantity}</td><td>${money(l.cost)}</td><td>${money(l.unitPrice/100)}</td></tr>`).join('')}</tbody></table>
-        <p>Shipping: ${money(price.shipping/100)} · Estimated tax: ${money(price.tax/100)} · Markup: ${o.markup}%</p>
+        <table><thead><tr><th>Part number</th><th>Part</th><th>Qty</th><th>Unit purchase cost</th><th>Price each before tax</th><th>Customer tax each</th><th>Total each with tax</th><th>Profit (all units)</th></tr></thead><tbody>${price.results.map(l=>`<tr><td>${escapeHtml(l.partNumber)}</td><td>${escapeHtml(l.name)}</td><td>${l.quantity}</td><td>${money(l.cost)}</td><td>${money(l.unitPrice/100)}</td><td>${money(l.salesTax/100)}</td><td>${money(l.customerTotal/100)}</td><td>${money(l.profit/100)}</td></tr>`).join('')}</tbody></table>
+        <p>Shipping: ${money(price.shipping/100)} · Purchase tax: ${money(price.tax/100)} · Projected customer tax: ${money(price.results.reduce((s,r)=>s+r.salesTax*r.quantity,0)/100)} (${o.salesRate ?? 0}%) · Markup: ${o.markup}%</p>
         <button type="button" class="small-button" data-po-load="${escapeHtml(o.po)}">Open / Edit PO</button></details>`;
     }).join('') : '<p class="empty">No matching Rotary orders saved.</p>';
     target.querySelectorAll('[data-po-load]').forEach(b=>b.addEventListener('click',()=>{
       const o=readRotaryOrders().find(x=>x.po===b.dataset.poLoad);if(!o)return;
       if(!confirm('Load this saved PO? This replaces the current calculator entries.'))return;
       document.getElementById('rotaryPO').value=o.po;document.getElementById('rotaryOrderDate').value=o.date;
-      document.getElementById('rotaryTaxRate').value=o.rate;document.getElementById('rotaryMarkup').value=o.markup;
+      document.getElementById('rotarySalesTaxRate').value=o.salesRate ?? 11;document.getElementById('rotaryTaxRate').value=o.rate;document.getElementById('rotaryMarkup').value=o.markup;
       document.getElementById('rotaryTaxShipping').value=o.taxShipping?'yes':'no';
       document.getElementById('rotaryRows').replaceChildren();
       o.lines.forEach(l=>{addRotaryRow();const row=document.getElementById('rotaryRows').lastElementChild;
@@ -18916,10 +18920,10 @@ document.getElementById('rotarySaveOrder').addEventListener('click',()=>{
   const message=document.getElementById('rotarySaveMessage');
   try{
     const order={po:document.getElementById('rotaryPO').value.trim(),date:document.getElementById('rotaryOrderDate').value,
-      rate:Number(document.getElementById('rotaryTaxRate').value),markup:Number(document.getElementById('rotaryMarkup').value),
+      salesRate:Number(document.getElementById('rotarySalesTaxRate').value),rate:Number(document.getElementById('rotaryTaxRate').value),markup:Number(document.getElementById('rotaryMarkup').value),
       taxShipping:document.getElementById('rotaryTaxShipping').value==='yes',
       lines:[...document.getElementById('rotaryRows').children].map(row=>({partNumber:row.querySelector('.rotary-number').value.trim(),name:row.querySelector('.rotary-name').value.trim(),cost:Number(row.querySelector('.rotary-cost').value),quantity:Number(row.querySelector('.rotary-qty').value)}))};
-    if(!validRotaryOrder(order) || document.getElementById('rotaryTaxRate').value==='' || document.getElementById('rotaryMarkup').value==='')throw new Error('Enter a PO, date, tax rate, markup, and part number, cost and quantity for every line.');
+    if(!validRotaryOrder(order) || document.getElementById('rotarySalesTaxRate').value==='' || document.getElementById('rotaryTaxRate').value==='' || document.getElementById('rotaryMarkup').value==='')throw new Error('Enter a PO, date, tax rate, markup, and part number, cost and quantity for every line.');
     const orders=readRotaryOrders();const index=orders.findIndex(o=>o.po.toLowerCase()===order.po.toLowerCase());
     if(index>=0){if(!confirm('Update the existing order for '+orders[index].po+'?'))return;orders[index]=order;}else orders.unshift(order);
     localStorage.setItem(rotaryOrderStore,JSON.stringify(orders));renderSavedRotaryOrders();message.textContent='PO '+order.po+' saved on this browser. Export Orders for a backup.';
