@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -2619,6 +2619,34 @@
       <h1 class="page-title">
         Items
       </h1>
+
+
+      <div class="panel" id="rotaryCalculator">
+        <h2>Rotary Parts Pricing</h2>
+        <p>Enter every part in the order. Orders below $150 in parts receive one $20 shipping fee, split between parts by cost.</p>
+        <div class="form-grid">
+          <label>Tax rate (%)<input id="rotaryTaxRate" type="number" min="0" max="100" step="0.001" placeholder="Enter your applicable rate"></label>
+          <label>Profit markup (%)<input id="rotaryMarkup" type="number" min="0" max="1000" step="1" value="30"></label>
+          <label>Include shipping in tax calculation<select id="rotaryTaxShipping"><option value="no">No — parts only</option><option value="yes">Yes — parts + shipping</option></select></label>
+        </div>
+        <p>Markup adds a percentage to your total cost. Tax is an estimate using the rate and shipping treatment you enter. Suggested prices exclude any sales tax charged separately to the customer.</p>
+        <div class="form-grid">
+          <label>PO number<input id="rotaryPO" placeholder="FSER-2026-001" maxlength="100"></label>
+          <label>Order date<input id="rotaryOrderDate" type="date"></label>
+        </div>
+        <div id="rotaryRows"></div>
+        <div class="button-row"><button type="button" class="secondary-button" id="rotaryAdd">Add Part</button><button type="button" class="secondary-button" id="rotaryReset">Clear Order</button></div>
+        <p class="message" id="rotaryMessage" role="status"></p>
+        <div id="rotarySummary" class="detail-grid" aria-live="polite"></div>
+        <div id="rotaryResults" class="table-wrap"></div>
+        <div class="button-row"><button type="button" class="action-button" id="rotarySaveOrder">Save PO / Order</button></div>
+        <p id="rotarySaveMessage" class="message" role="status"></p>
+        <h3>Saved Rotary Orders</h3>
+        <p>Saved on this browser/device. Export a backup to keep a copy or import on another device.</p>
+        <input id="rotaryOrderSearch" class="search-box" placeholder="Search PO, part number, or part name...">
+        <div class="button-row"><button type="button" class="secondary-button" id="rotaryExport">Export Orders</button><button type="button" class="secondary-button" id="rotaryImport">Import Orders</button><input id="rotaryImportFile" type="file" accept="application/json,.json" hidden></div>
+        <div id="rotarySavedOrders" class="table-wrap"></div>
+      </div>
 
       <div class="panel">
 
@@ -18765,6 +18793,142 @@ async function startAdmin() {
 
 startAdmin();
 
+
+/* Rotary order calculator: no customer records change until Save Item is used. */
+function rotaryPricing(lines, rate, markup, taxShipping) {
+  const cents = n => Math.round((n + Number.EPSILON) * 100);
+  const subtotal = lines.reduce((sum, line) => sum + cents(line.cost) * line.quantity, 0);
+  const shipping = subtotal > 0 && subtotal < 15000 ? 2000 : 0;
+  const tax = Math.round((subtotal + (taxShipping ? shipping : 0)) * rate / 100);
+  let usedShipping = 0, usedTax = 0;
+  const results = lines.map((line, index) => {
+    const base = cents(line.cost) * line.quantity;
+    const last = index === lines.length - 1;
+    const shareShipping = last ? shipping - usedShipping : Math.round(shipping * base / subtotal);
+    const shareTax = last ? tax - usedTax : Math.round(tax * base / subtotal);
+    usedShipping += shareShipping; usedTax += shareTax;
+    const totalCost = base + shareShipping + shareTax;
+    const unitPrice = Math.ceil(totalCost / line.quantity * (1 + markup / 100));
+    return {...line, base, shipping:shareShipping, tax:shareTax, totalCost, unitPrice,
+      profit:unitPrice * line.quantity - totalCost};
+  });
+  return {subtotal, shipping, tax, totalCost:subtotal + shipping + tax, results};
+}
+function addRotaryRow() {
+  const row = document.createElement('div');
+  row.className = 'form-grid'; row.style.marginBottom = '16px';
+  row.innerHTML = `<label>Part number<input class="rotary-number" placeholder="Rotary part number" maxlength="100"></label><label>Part name<input class="rotary-name" placeholder="Part description" maxlength="200"></label>
+    <label>Your cost per part ($)<input class="rotary-cost" type="number" min="0.01" step="0.01" placeholder="0.00"></label>
+    <label>Quantity<input class="rotary-qty" type="number" min="1" step="1" value="1"></label>
+    <button type="button" class="secondary-button rotary-remove">Remove Part</button>`;
+  row.addEventListener('input', renderRotaryPricing);
+  row.querySelector('.rotary-remove').addEventListener('click', () => { row.remove(); renderRotaryPricing(); });
+  document.getElementById('rotaryRows').appendChild(row);
+  renderRotaryPricing();
+}
+function renderRotaryPricing() {
+  const get = id => document.getElementById(id);
+  const rows = [...get('rotaryRows').children];
+  const lines = rows.map((row,index) => ({partNumber:row.querySelector('.rotary-number').value.trim(), name:row.querySelector('.rotary-name').value.trim() || `Part ${index+1}`,
+    cost:Number(row.querySelector('.rotary-cost').value), quantity:Number(row.querySelector('.rotary-qty').value)}));
+  const rate = Number(get('rotaryTaxRate').value), markup = Number(get('rotaryMarkup').value);
+  const valid = lines.length && lines.every(x => Number.isFinite(x.cost) && x.cost > 0 && Number.isInteger(x.quantity) && x.quantity > 0)
+    && get('rotaryTaxRate').value !== '' && rate >= 0 && rate <= 100 && get('rotaryMarkup').value !== '' && markup >= 0 && markup <= 1000;
+  get('rotarySummary').innerHTML = ''; get('rotaryResults').innerHTML = '';
+  get('rotaryMessage').textContent = valid ? '' : 'Enter a tax rate (use 0 if none applies), a markup, and a cost and whole-number quantity for every part.';
+  if (!valid) return;
+  const order = rotaryPricing(lines,rate,markup,get('rotaryTaxShipping').value === 'yes');
+  const dollars = n => money(n/100);
+  get('rotarySummary').innerHTML = [['Parts subtotal',order.subtotal],['Order shipping',order.shipping],['Estimated tax cost',order.tax],['Total order cost',order.totalCost],['Suggested sales total',order.results.reduce((s,r)=>s+r.unitPrice*r.quantity,0)],['Estimated profit',order.results.reduce((s,r)=>s+r.profit,0)]].map(([label,value])=>`<div class="detail-box"><span>${label}</span><strong>${dollars(value)}</strong></div>`).join('');
+  get('rotaryResults').innerHTML = `<table><thead><tr><th>Part</th><th>Qty</th><th>Parts cost</th><th>Shipping share</th><th>Tax share</th><th>Total cost</th><th>Charge each</th><th>Profit (all units)</th><th>Action</th></tr></thead><tbody>${order.results.map((r,index)=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.quantity}</td><td>${dollars(r.base)}</td><td>${dollars(r.shipping)}</td><td>${dollars(r.tax)}</td><td>${dollars(r.totalCost)}</td><td><strong>${dollars(r.unitPrice)}</strong></td><td>${dollars(r.profit)}</td><td><button type="button" class="small-button" data-rotary-use="${index}">Use Price in Item</button></td></tr>`).join('')}</tbody></table>`;
+  get('rotaryResults').querySelectorAll('[data-rotary-use]').forEach(button=>button.addEventListener('click',()=>{
+    const part=order.results[Number(button.dataset.rotaryUse)];
+    if (get('itemId').value && !confirm('Replace the name and rate of the item currently being edited?')) return;
+    get('itemName').value=part.name; get('itemRate').value=(part.unitPrice/100).toFixed(2);
+    get('itemProductType').value='goods'; get('itemUnit').value='each';
+    get('itemForm').scrollIntoView({behavior:'smooth',block:'start'});
+    get('itemMessage').textContent='Rotary price filled in. Click Save Item to save it.';
+  }));
+}
+document.getElementById('rotaryAdd').addEventListener('click',addRotaryRow);
+document.getElementById('rotaryReset').addEventListener('click',()=>{
+  document.getElementById('rotaryRows').replaceChildren(); document.getElementById('rotaryPO').value=''; document.getElementById('rotarySaveMessage').textContent=''; addRotaryRow();
+});
+['rotaryTaxRate','rotaryMarkup','rotaryTaxShipping'].forEach(id=>document.getElementById(id).addEventListener('input',renderRotaryPricing));
+addRotaryRow();
+
+const rotaryOrderStore = 'fserRotaryOrdersV1';
+function readRotaryOrders() {
+  const raw = localStorage.getItem(rotaryOrderStore);
+  const orders = raw ? JSON.parse(raw) : [];
+  if (!Array.isArray(orders)) throw new Error('Saved order data is invalid.');
+  return orders;
+}
+function validRotaryOrder(o) {
+  return o && typeof o.po === 'string' && o.po.trim() && o.po.length <= 100
+    && /^\d{4}-\d{2}-\d{2}$/.test(o.date) && Number.isFinite(o.rate) && o.rate >= 0 && o.rate <= 100
+    && Number.isFinite(o.markup) && o.markup >= 0 && o.markup <= 1000 && typeof o.taxShipping === 'boolean'
+    && Array.isArray(o.lines) && o.lines.length > 0 && o.lines.length <= 1000
+    && o.lines.every(l=>typeof l.partNumber==='string' && l.partNumber.trim() && l.partNumber.length<=100
+      && typeof l.name==='string' && l.name.length<=200 && Number.isFinite(l.cost) && l.cost>0
+      && Number.isInteger(l.quantity) && l.quantity>0);
+}
+function renderSavedRotaryOrders() {
+  const target=document.getElementById('rotarySavedOrders');
+  try {
+    const query=document.getElementById('rotaryOrderSearch').value.trim().toLowerCase();
+    const orders=readRotaryOrders().filter(o=>validRotaryOrder(o) && [o.po,...o.lines.flatMap(l=>[l.partNumber,l.name])].join(' ').toLowerCase().includes(query));
+    target.innerHTML=orders.length ? orders.map(o=>{
+      const price=rotaryPricing(o.lines,o.rate,o.markup,o.taxShipping);
+      return `<details style="margin:12px 0"><summary><strong>${escapeHtml(o.po)}</strong> — ${escapeHtml(o.date)} — ${o.lines.length} part lines — ${money(price.totalCost/100)} cost</summary>
+        <table><thead><tr><th>Part number</th><th>Part</th><th>Qty</th><th>Unit purchase cost</th><th>Suggested price each</th></tr></thead><tbody>${price.results.map(l=>`<tr><td>${escapeHtml(l.partNumber)}</td><td>${escapeHtml(l.name)}</td><td>${l.quantity}</td><td>${money(l.cost)}</td><td>${money(l.unitPrice/100)}</td></tr>`).join('')}</tbody></table>
+        <p>Shipping: ${money(price.shipping/100)} · Estimated tax: ${money(price.tax/100)} · Markup: ${o.markup}%</p>
+        <button type="button" class="small-button" data-po-load="${escapeHtml(o.po)}">Open / Edit PO</button></details>`;
+    }).join('') : '<p class="empty">No matching Rotary orders saved.</p>';
+    target.querySelectorAll('[data-po-load]').forEach(b=>b.addEventListener('click',()=>{
+      const o=readRotaryOrders().find(x=>x.po===b.dataset.poLoad);if(!o)return;
+      if(!confirm('Load this saved PO? This replaces the current calculator entries.'))return;
+      document.getElementById('rotaryPO').value=o.po;document.getElementById('rotaryOrderDate').value=o.date;
+      document.getElementById('rotaryTaxRate').value=o.rate;document.getElementById('rotaryMarkup').value=o.markup;
+      document.getElementById('rotaryTaxShipping').value=o.taxShipping?'yes':'no';
+      document.getElementById('rotaryRows').replaceChildren();
+      o.lines.forEach(l=>{addRotaryRow();const row=document.getElementById('rotaryRows').lastElementChild;
+        row.querySelector('.rotary-number').value=l.partNumber;row.querySelector('.rotary-name').value=l.name;
+        row.querySelector('.rotary-cost').value=l.cost;row.querySelector('.rotary-qty').value=l.quantity;});
+      renderRotaryPricing();document.getElementById('rotaryCalculator').scrollIntoView({behavior:'smooth'});
+    }));
+  }catch(e){target.textContent='Could not load orders: '+e.message;}
+}
+document.getElementById('rotarySaveOrder').addEventListener('click',()=>{
+  const message=document.getElementById('rotarySaveMessage');
+  try{
+    const order={po:document.getElementById('rotaryPO').value.trim(),date:document.getElementById('rotaryOrderDate').value,
+      rate:Number(document.getElementById('rotaryTaxRate').value),markup:Number(document.getElementById('rotaryMarkup').value),
+      taxShipping:document.getElementById('rotaryTaxShipping').value==='yes',
+      lines:[...document.getElementById('rotaryRows').children].map(row=>({partNumber:row.querySelector('.rotary-number').value.trim(),name:row.querySelector('.rotary-name').value.trim(),cost:Number(row.querySelector('.rotary-cost').value),quantity:Number(row.querySelector('.rotary-qty').value)}))};
+    if(!validRotaryOrder(order) || document.getElementById('rotaryTaxRate').value==='' || document.getElementById('rotaryMarkup').value==='')throw new Error('Enter a PO, date, tax rate, markup, and part number, cost and quantity for every line.');
+    const orders=readRotaryOrders();const index=orders.findIndex(o=>o.po.toLowerCase()===order.po.toLowerCase());
+    if(index>=0){if(!confirm('Update the existing order for '+orders[index].po+'?'))return;orders[index]=order;}else orders.unshift(order);
+    localStorage.setItem(rotaryOrderStore,JSON.stringify(orders));renderSavedRotaryOrders();message.textContent='PO '+order.po+' saved on this browser. Export Orders for a backup.';
+  }catch(e){message.textContent='Order was not saved: '+e.message;}
+});
+document.getElementById('rotaryOrderSearch').addEventListener('input',renderSavedRotaryOrders);
+document.getElementById('rotaryExport').addEventListener('click',()=>{
+  try{const blob=new Blob([JSON.stringify({format:'fser-rotary-orders-v1',orders:readRotaryOrders()},null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='FSER-Rotary-Orders.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){document.getElementById('rotarySaveMessage').textContent=e.message;}
+});
+document.getElementById('rotaryImport').addEventListener('click',()=>document.getElementById('rotaryImportFile').click());
+document.getElementById('rotaryImportFile').addEventListener('change',async e=>{
+  try{const file=e.target.files[0];if(!file)return;if(file.size>5000000)throw new Error('Backup exceeds 5 MB.');
+    const data=JSON.parse(await file.text());if(data.format!=='fser-rotary-orders-v1'||!Array.isArray(data.orders)||!data.orders.every(validRotaryOrder))throw new Error('Invalid Rotary order backup.');
+    const orders=readRotaryOrders();let count=0;
+    data.orders.forEach(o=>{if(!orders.some(x=>x.po.toLowerCase()===o.po.toLowerCase())){orders.push(o);count++;}});
+    localStorage.setItem(rotaryOrderStore,JSON.stringify(orders));renderSavedRotaryOrders();document.getElementById('rotarySaveMessage').textContent=count+' orders imported. Existing POs were kept.';
+  }catch(err){document.getElementById('rotarySaveMessage').textContent='Import failed: '+err.message;}finally{e.target.value='';}
+});
+document.getElementById('rotaryOrderDate').value=today();
+renderSavedRotaryOrders();
 </script>
 
 
