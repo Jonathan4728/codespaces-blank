@@ -2482,11 +2482,11 @@
 
       <div class="panel">
 
-        <h2>Add Customer</h2>
+        <h2 id="customerFormTitle">Add Customer</h2>
 
         <form id="customerForm">
 
-          <div class="form-grid">
+          <fieldset id="customerFields" class="form-grid" style="border:0;margin:0;padding:0;min-width:0;">
 
             <label>
               Customer Type
@@ -2558,20 +2558,25 @@
               <textarea id="customerNotes"></textarea>
             </label>
 
-          </div>
+          </fieldset>
 
 
           <button
+            id="customerSaveButton"
             class="action-button"
             type="submit"
           >
             Save Customer
+          </button>
+          <button id="customerCancelEdit" class="small-button" type="button" hidden>
+            Cancel
           </button>
 
 
           <p
             id="customerMessage"
             class="message"
+            role="status"
           ></p>
 
         </form>
@@ -6660,6 +6665,7 @@ function renderCustomers(list) {
         </td>
 
         <td>
+          <button class="small-button" type="button" onclick="editCustomer(${customer.id})">Edit</button>
           <button class="small-button" onclick="event.stopPropagation(); openCustomerHistory(${customer.id})">History</button>
 
           <button
@@ -6861,133 +6867,138 @@ async function editCustomerBusinessName(customerId) {
 }
 
 
-$("customerType")
-  ?.addEventListener(
-    "change",
-    event => {
+const customerFormFields = {
+  first_name: "customerFirstName",
+  last_name: "customerLastName",
+  phone: "customerPhone",
+  email: "customerEmail",
+  address: "customerAddress",
+  city: "customerCity",
+  state: "customerState",
+  zip: "customerZip",
+  customer_type: "customerType",
+  company_name: "customerCompanyName",
+  notes: "customerNotes"
+};
 
-      const isCommercial =
-        event.target.value === "commercial";
+let customerEdit = null;
 
-      $("customerCompanyLabel").style.display =
-        isCommercial
-          ? "block"
-          : "none";
-
-      if (!isCommercial) {
-        $("customerCompanyName").value = "";
-      }
-
-    }
+function readCustomerForm() {
+  return Object.fromEntries(
+    Object.entries(customerFormFields).map(([field, id]) => [field, $(id).value.trim()])
   );
+}
 
+function showCustomerMessage(message, status = "") {
+  $("customerMessage").textContent = message;
+  $("customerMessage").className = status ? `message ${status}` : "message";
+}
 
-$("customerForm")
-  .addEventListener(
-    "submit",
-    async event => {
+function updateCustomerCompanyVisibility() {
+  $("customerCompanyLabel").style.display =
+    customerEdit || $("customerType").value === "commercial" ? "block" : "none";
+}
 
-      event.preventDefault();
+function editCustomer(customerId) {
+  if ($("customerSaveButton").disabled) return;
 
+  const customer = customers.find(item => String(item.id) === String(customerId));
+  if (!customer) return;
 
-      const {
-        error
-      } =
-        await db
-          .from("customers")
-          .insert({
+  Object.entries(customerFormFields).forEach(([field, id]) => {
+    $(id).value = customer[field] ?? "";
+  });
+  $("customerType").value =
+    customer.customer_type === "commercial" ? "commercial" : "residential";
+  customerEdit = { id: customer.id, original: readCustomerForm() };
 
-            portal_number:
-              makeNumber("FSER"),
+  $("customerFormTitle").textContent = customer.portal_number
+    ? `Edit Customer (${customer.portal_number})`
+    : "Edit Customer";
+  $("customerSaveButton").textContent = "Save Changes";
+  $("customerCancelEdit").hidden = false;
+  updateCustomerCompanyVisibility();
+  showCustomerMessage("");
+  $("customerFormTitle").scrollIntoView({ block: "start" });
+  $("customerFirstName").focus({ preventScroll: true });
+}
 
-            first_name:
-              $("customerFirstName")
-                .value.trim(),
+function resetCustomerForm() {
+  customerEdit = null;
+  $("customerForm").reset();
+  $("customerFormTitle").textContent = "Add Customer";
+  $("customerSaveButton").textContent = "Save Customer";
+  $("customerCancelEdit").hidden = true;
+  updateCustomerCompanyVisibility();
+}
 
-            last_name:
-              $("customerLastName")
-                .value.trim(),
+$("customerCancelEdit").addEventListener("click", () => {
+  resetCustomerForm();
+  showCustomerMessage("");
+});
 
-            phone:
-              $("customerPhone")
-                .value.trim(),
+$("customerType").addEventListener("change", () => {
+  updateCustomerCompanyVisibility();
+  if (!customerEdit && $("customerType").value !== "commercial") {
+    $("customerCompanyName").value = "";
+  }
+});
 
-            email:
-              $("customerEmail")
-                .value.trim(),
+$("customerForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const saveButton = $("customerSaveButton");
+  if (saveButton.disabled) return;
 
-            address:
-              $("customerAddress")
-                .value.trim(),
+  const edit = customerEdit;
+  const details = readCustomerForm();
+  if (!details.first_name) {
+    showCustomerMessage("Enter a first name.", "error");
+    $("customerFirstName").focus();
+    return;
+  }
 
-            city:
-              $("customerCity")
-                .value.trim(),
-
-            state:
-              $("customerState")
-                .value.trim(),
-
-            zip:
-              $("customerZip")
-                .value.trim(),
-
-            customer_type:
-              $("customerType")
-                .value,
-
-            company_name:
-              $("customerType").value === "commercial"
-                ? $("customerCompanyName").value.trim()
-                : "",
-
-            notes:
-              $("customerNotes")
-                .value.trim()
-
-          });
-
-
-      if (error) {
-
-        $("customerMessage")
-          .textContent =
-            error.message;
-
-        $("customerMessage")
-          .className =
-            "message error";
-
-        return;
-
-      }
-
-
-      $("customerMessage")
-        .textContent =
-          "Customer saved.";
-
-      $("customerMessage")
-        .className =
-          "message success";
-
-
-      event.target.reset();
-
-      $("customerState").value =
-        "LA";
-
-      $("customerType").value =
-        "residential";
-
-      $("customerCompanyLabel").style.display =
-        "none";
-
-
-      await loadCustomers();
-
-    }
+  const changes = edit && Object.fromEntries(
+    Object.entries(details).filter(([field, value]) => value !== edit.original[field])
   );
+  if (edit && !Object.keys(changes).length) {
+    showCustomerMessage("No changes to save.");
+    return;
+  }
+
+  saveButton.disabled = true;
+  $("customerCancelEdit").disabled = true;
+  $("customerFields").disabled = true;
+  showCustomerMessage("Saving customer…");
+
+  try {
+    if (edit) {
+      const { data, error } = await db.from("customers")
+        .update(changes)
+        .eq("id", edit.id)
+        .select("id")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("The customer could not be updated. Check that the record still exists and you have permission to edit it.");
+    } else {
+      const { error } = await db.from("customers").insert({
+        ...details,
+        company_name: details.customer_type === "commercial" ? details.company_name : "",
+        portal_number: makeNumber("FSER")
+      });
+      if (error) throw error;
+    }
+
+    resetCustomerForm();
+    showCustomerMessage(edit ? "Customer updated." : "Customer saved.", "success");
+    await loadCustomers();
+  } catch (error) {
+    showCustomerMessage(error.message || "Unable to save customer.", "error");
+  } finally {
+    $("customerFields").disabled = false;
+    $("customerCancelEdit").disabled = false;
+    saveButton.disabled = false;
+  }
+});
 
 
 /* ==================================================
