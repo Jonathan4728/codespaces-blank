@@ -2131,6 +2131,7 @@
     </button>
 
     <button class="nav-tab" data-view="rotaryView">Rotary</button>
+    <button class="nav-tab" data-view="pricingReferenceView">Pricing Reference</button>
 
     <button
       class="nav-tab"
@@ -2617,6 +2618,21 @@
     <!-- ==================================================
          ITEMS
     =================================================== -->
+
+    <section id="pricingReferenceView" class="view">
+      <h1 class="page-title">Pricing Reference</h1>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Past Invoice Prices</h2>
+          <input id="pricingReferenceSearch" class="search-box" type="search"
+            aria-label="Search past invoice prices" placeholder="Search repair, equipment, or invoice…">
+        </div>
+        <p>Prices are per unit, before invoice tax and discounts. Drafts are excluded.
+          Expand an item to see its most recent matching invoice charges.</p>
+        <div id="pricingReferenceResults" class="table-wrap"></div>
+      </div>
+    </section>
 
     <section id="rotaryView" class="view">
       <h1 class="page-title">Rotary Orders &amp; Pricing</h1>
@@ -4929,6 +4945,11 @@ const loadedViews =
 
 
 async function loadViewData(viewId) {
+
+  if (viewId === "pricingReferenceView") {
+    await loadPricingReference();
+    return;
+  }
 
   if (loadedViews.has(viewId)) {
     return;
@@ -12540,6 +12561,132 @@ async function saveEstimateStatus(id) {
 /* ==================================================
    INVOICES
 =================================================== */
+
+let pricingReferenceCharges = [];
+let pricingReferenceLoading = false;
+let pricingReferenceError = false;
+
+async function loadPricingReference() {
+  if (pricingReferenceLoading) return;
+
+  pricingReferenceLoading = true;
+  pricingReferenceError = false;
+  renderPricingReference();
+
+  try {
+    const charges = [];
+    const pageSize = 200;
+    let lastId = null;
+
+    while (true) {
+      let query = db.from("invoices")
+        .select("id, invoice_number, invoice_date, created_at, invoice_items(item_name, item_desc, quantity, unit_price, line_total)")
+        .in("status", ["Sent", "Partially Paid", "Paid"])
+        .order("id")
+        .limit(pageSize);
+      if (lastId !== null) query = query.gt("id", lastId);
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      for (const invoice of data) {
+        for (const item of invoice.invoice_items) {
+          const name = String(item.item_name || "").trim().replace(/\s+/g, " ");
+          const unitPrice = Number(item.unit_price);
+          if (!name || name.toLowerCase() === "discount" || !Number.isFinite(unitPrice) || unitPrice <= 0) continue;
+
+          charges.push({
+            name,
+            description: item.item_desc || "",
+            unitPrice,
+            quantity: item.quantity,
+            lineTotal: item.line_total,
+            invoiceNumber: invoice.invoice_number || "",
+            date: invoice.invoice_date || String(invoice.created_at || "").slice(0, 10)
+          });
+        }
+      }
+
+      if (data.length < pageSize) break;
+      lastId = data.at(-1).id;
+    }
+
+    pricingReferenceCharges = charges.reverse().sort((a, b) => b.date.localeCompare(a.date));
+  } catch (error) {
+    pricingReferenceError = true;
+    console.error("Pricing reference could not load:", error);
+  } finally {
+    pricingReferenceLoading = false;
+    renderPricingReference();
+  }
+}
+
+function renderPricingReference() {
+  const results = $("pricingReferenceResults");
+  if (pricingReferenceLoading || pricingReferenceError) {
+    results.innerHTML = pricingReferenceLoading
+      ? '<p class="empty" role="status">Loading invoice prices…</p>'
+      : '<p class="message error" role="alert">Could not load invoice prices. Reopen Pricing Reference to try again.</p>';
+    return;
+  }
+
+  const terms = $("pricingReferenceSearch").value.trim().toLowerCase().split(/\s+/);
+  const byName = new Map();
+
+  for (const charge of pricingReferenceCharges) {
+    const text = `${charge.name} ${charge.description} ${charge.invoiceNumber}`.toLowerCase();
+    if (!terms.every(term => text.includes(term))) continue;
+
+    const key = charge.name.toLowerCase();
+    if (!byName.has(key)) {
+      byName.set(key, { latest: charge, low: charge.unitPrice, high: charge.unitPrice, count: 0, examples: [] });
+    }
+    const group = byName.get(key);
+    group.low = Math.min(group.low, charge.unitPrice);
+    group.high = Math.max(group.high, charge.unitPrice);
+    group.count++;
+    if (group.examples.length < 10) group.examples.push(charge);
+  }
+
+  if (!byName.size) {
+    results.innerHTML = pricingReferenceCharges.length
+      ? '<p class="empty">No matching invoice prices.</p>'
+      : '<p class="empty">No priced items on sent or paid invoices yet.</p>';
+    return;
+  }
+
+  const groups = [...byName.values()].sort((a, b) =>
+    b.count - a.count || a.latest.name.localeCompare(b.latest.name)
+  );
+
+  results.innerHTML = `
+    <table>
+      <thead><tr><th>Repair / Item</th><th>Last Price</th><th>Price Range</th><th>Times Charged</th></tr></thead>
+      <tbody>${groups.map(group => `
+        <tr>
+          <td>
+            <details>
+              <summary>${escapeHtml(group.latest.name)}</summary>
+              <ul>
+                ${group.examples.map(charge => `
+                  <li>
+                    ${escapeHtml(dateDisplay(charge.date))} ${escapeHtml(charge.invoiceNumber)}
+                    · ${money(charge.unitPrice)} × ${escapeHtml(charge.quantity)} = ${money(charge.lineTotal)}
+                    ${charge.description ? `<br>${escapeHtml(charge.description)}` : ""}
+                  </li>
+                `).join("")}
+              </ul>
+            </details>
+          </td>
+          <td>${money(group.latest.unitPrice)}</td>
+          <td>${group.low === group.high ? money(group.low) : `${money(group.low)}–${money(group.high)}`}</td>
+          <td>${group.count}</td>
+        </tr>
+      `).join("")}</tbody>
+    </table>`;
+}
+
+$("pricingReferenceSearch").addEventListener("input", renderPricingReference);
 
 async function loadInvoices() {
 
