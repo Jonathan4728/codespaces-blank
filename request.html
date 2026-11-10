@@ -39,8 +39,8 @@
     .commercial-note{padding:14px 16px;margin:0 0 20px;border-left:3px solid #df1f26;background:#101010;color:#bbb;line-height:1.55}
     .attach-note{display:flex;flex-direction:column;gap:5px;padding:14px 16px;background:#101010;border:1px solid #333;border-radius:10px;margin:4px 0 20px}
     .attach-note span{color:#aaa;line-height:1.5;font-size:14px}
-    .repair-send-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .repair-send-options .button{width:100%;border:0;cursor:pointer}
+    .repair-send-options{display:grid;grid-template-columns:1fr;gap:12px}
+    .repair-send-options .button{width:100%;box-sizing:border-box;border:0;cursor:pointer;text-align:center}
     #formMessage{min-height:24px;margin:14px 0 0;color:#ddd;text-align:center}
     [hidden]{display:none!important}
     @media(max-width:700px){
@@ -80,7 +80,7 @@
     <div class="request-intro">
       <p class="red-label">REQUEST SERVICE</p>
       <h1>Tell Us About Your Equipment</h1>
-      <p>Choose the type of customer first. Homeowner requests will keep the regular form, while commercial customers will see fields made for business equipment and fleet service.</p>
+      <p>Fill out your repair details, then send us a text so we know to look for your request.</p>
     </div>
 
     <form id="quoteForm" class="request-card">
@@ -213,18 +213,26 @@
         </label>
       </div>
 
+      <div class="repair-send-options">
+        <button type="submit" id="saveRequest" class="button button-red full">Save &amp; Continue to Text</button>
+      </div>
+
+      <p id="formMessage" role="status"></p>
+    </form>
+
+    <section id="requestTextStep" class="request-card" aria-labelledby="requestTextTitle" hidden>
+      <h2 id="requestTextTitle" tabindex="-1">One more step: send us a text</h2>
+      <p>Your repair details are saved. Tap <strong>Open Text Message</strong>, then tap
+        <strong>Send</strong> in your messaging app so we know you submitted a request.</p>
       <div class="attach-note">
         <strong>Have pictures?</strong>
-        <span>Photos are welcome. After you tap Text or Email, attach equipment pictures, model tags, or problem areas before sending the message.</span>
+        <span>Attach equipment photos or a picture of the model tag before sending your text.</span>
       </div>
-
       <div class="repair-send-options">
-        <button type="button" id="textRequest" class="button button-red full">Text Repair Request</button>
-        <button type="button" id="emailRequest" class="button button-dark full">Email Repair Request</button>
+        <a id="textRequest" class="button button-red full">Open Text Message</a>
       </div>
-
-      <p id="formMessage"></p>
-    </form>
+      <p>If your messaging app doesn't open, text <strong>(337) 326-8324</strong> and include your name and equipment.</p>
+    </section>
   </div>
 </main>
 
@@ -245,8 +253,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const SUPABASE_KEY = "sb_publishable_CmCfIvZJJwMNV0QzQwrEsw_W0X8XOvj";
   const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
   const businessPhone = "13373268324";
-  const businessEmail = "floressenginerepair@gmail.com";
-  const WEB3FORMS_ACCESS_KEY = "b73caad4-d07d-4823-9c29-9aa93cd5476b";
 
   const menuButton = document.querySelector(".menu-toggle");
   const navLinks = document.querySelector(".nav-links");
@@ -270,8 +276,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const typeSelect = document.getElementById("customerType");
   const residentialFields = document.getElementById("residentialFields");
   const commercialFields = document.getElementById("commercialFields");
+  const saveButton = document.getElementById("saveRequest");
   const textButton = document.getElementById("textRequest");
-  const emailButton = document.getElementById("emailRequest");
   const formMessage = document.getElementById("formMessage");
 
   function setSectionState(section, active) {
@@ -406,72 +412,28 @@ Photos are welcome. Please attach any equipment pictures before sending this mes
     return error ? { ok:false, error:error.message } : { ok:true };
   }
 
-  async function sendOwnerNotification(request) {
-    try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type":"application/json", "Accept":"application/json" },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_ACCESS_KEY,
-          subject: `${request.customerType === "commercial" ? "New Commercial Request" : "New Repair Request"} - ${request.equipment || "Equipment"}`,
-          from_name: "Flores Small Engine Repair Website",
-          customer_type: request.customerType === "commercial" ? "Commercial" : "Homeowner / Residential",
-          business_name: request.companyName || "Not applicable",
-          contact_name: request.name,
-          phone: request.phone,
-          email: request.email || "Not provided",
-          equipment: request.equipment,
-          model: request.model || "Not provided",
-          number_of_units: request.unitCount || "Not provided",
-          service_type: request.serviceType || "Not provided",
-          location: request.location || "Not provided",
-          message: request.problem
-        })
-      });
-      const result = await response.json();
-      return response.ok && result.success;
-    } catch (error) {
-      console.error("Owner notification error:", error);
-      return false;
-    }
-  }
-
-  async function handleSend(method) {
-    if (!form.reportValidity()) return;
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (saveButton.disabled || !form.reportValidity()) return;
 
     const request = getRepairRequest();
-    const button = method === "text" ? textButton : emailButton;
-    button.disabled = true;
-    formMessage.textContent = "Saving your request...";
+    saveButton.disabled = true;
+    formMessage.textContent = "Saving your repair details…";
 
-    const saved = await saveWebsiteRequest(request);
-    if (saved.ok) {
-      await sendOwnerNotification(request);
-      formMessage.textContent = method === "text"
-        ? "Request saved. Opening your text message..."
-        : "Request saved. Opening your email app...";
-    } else {
-      console.error(saved.error);
-      formMessage.textContent = method === "text"
-        ? "We couldn't save the request online, but you can still send the text."
-        : "We couldn't save the request online, but you can still send the email.";
+    try {
+      const saved = await saveWebsiteRequest(request);
+      if (!saved.ok) throw new Error(saved.error);
+
+      textButton.href = `sms:+${businessPhone}?body=${encodeURIComponent(buildMessage(request))}`;
+      form.hidden = true;
+      document.getElementById("requestTextStep").hidden = false;
+      document.getElementById("requestTextTitle").focus();
+    } catch (error) {
+      console.error("Request save failed:", error);
+      formMessage.textContent = "We couldn’t save your repair details. Try again, or text us directly at (337) 326-8324.";
+      saveButton.disabled = false;
     }
-
-    const message = buildMessage(request);
-    button.disabled = false;
-
-    if (method === "text") {
-      window.location.href = `sms:${businessPhone}?body=${encodeURIComponent(message)}`;
-    } else {
-      const subject = request.customerType === "commercial"
-        ? `Commercial Service Request - ${request.companyName}`
-        : `Repair Request - ${request.equipment}`;
-      window.location.href = `mailto:${businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
-    }
-  }
-
-  textButton.addEventListener("click", () => handleSend("text"));
-  emailButton.addEventListener("click", () => handleSend("email"));
+  });
 });
 </script>
 </body>
